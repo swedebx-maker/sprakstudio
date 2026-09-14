@@ -1,10 +1,12 @@
-const { kv } = require('@vercel/kv');
+const { Redis } = require('@upstash/redis');
+
+const redis = Redis.fromEnv();
 
 module.exports = async (req, res) => {
   if (req.method === 'GET') {
     const code = (req.query.code || '').toUpperCase();
     if (!code) return res.status(400).json({ error: 'missing code' });
-    const data = await kv.get('room:' + code);
+    const data = await redis.get('room:' + code);
     return res.status(200).json({ value: data || null });
   }
 
@@ -14,7 +16,7 @@ module.exports = async (req, res) => {
     const { code, state } = body || {};
     if (!code || !state) return res.status(400).json({ error: 'missing fields' });
     // rooms expire after 6 hours so old lessons don't pile up
-    await kv.set('room:' + code.toUpperCase(), state, { ex: 60 * 60 * 6 });
+    await redis.set('room:' + code.toUpperCase(), state, { ex: 60 * 60 * 6 });
     return res.status(200).json({ ok: true });
   }
 
