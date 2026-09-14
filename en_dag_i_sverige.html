@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>En dag i Sverige</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-deep: #0B4F8A;
+    --blue: #1A6DB0;
+    --gold: #FFC72C;
+    --gold-soft: #FFE79A;
+    --cream: #FFF8EA;
+    --ink: #12314F;
+    --green: #3AA65B;
+    --red: #E05252;
+    --purple: #6E5CA6;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; min-height: 100%;
+    font-family: 'Nunito', sans-serif;
+    background: radial-gradient(circle at 15% 10%, #1a76c4 0%, var(--blue-deep) 55%, #082f52 100%);
+    color: var(--ink);
+    -webkit-user-select: none; user-select: none;
+  }
+  #app { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4vh 4vw; }
+  .card {
+    background: var(--cream);
+    border-radius: 30px;
+    box-shadow: 0 16px 0 rgba(11,79,138,0.2), 0 24px 50px rgba(0,0,0,0.25);
+    padding: 4vh 4vw;
+    width: min(560px, 92vw);
+    text-align: center;
+  }
+  h1 { font-family: 'Fredoka', sans-serif; color: var(--cream); font-size: clamp(1.8rem,4vw,3rem); margin: 0 0 0.2em; }
+  h2 { font-family: 'Fredoka', sans-serif; color: var(--blue-deep); font-size: clamp(1.4rem,2.6vw,2rem); margin: 0.2em 0; }
+  p.sub { color: var(--gold-soft); font-weight: 600; margin-top: 0; }
+  .role-row { display: flex; gap: 1.5rem; margin-top: 2rem; justify-content: center; flex-wrap: wrap; }
+  .role-btn {
+    font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1.3rem;
+    background: var(--cream); color: var(--blue-deep);
+    border: none; border-radius: 22px; padding: 2rem 2.4rem;
+    cursor: pointer; box-shadow: 0 10px 0 rgba(11,79,138,0.25);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  }
+  .role-btn:active { transform: translateY(6px); box-shadow: 0 4px 0 rgba(11,79,138,0.25); }
+  .role-btn .emoji { font-size: 3rem; }
+  input {
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 1.3rem;
+    padding: 0.9rem 1.2rem; border-radius: 16px; border: 3px solid #d8ceb3;
+    width: 100%; margin-top: 0.8rem; text-align: center;
+    background: white; color: var(--ink);
+  }
+  input:focus { outline: none; border-color: var(--blue); }
+  .primary-btn {
+    font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1.2rem;
+    background: var(--gold); color: var(--blue-deep);
+    border: none; border-radius: 18px; padding: 1rem 2rem;
+    cursor: pointer; margin-top: 1.4rem; box-shadow: 0 8px 0 rgba(0,0,0,0.12);
+  }
+  .primary-btn:active { transform: translateY(5px); box-shadow: 0 3px 0 rgba(0,0,0,0.12); }
+  .primary-btn:disabled { opacity: 0.5; }
+  .ghost-btn {
+    font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1rem;
+    background: transparent; color: #8a95a6; border: none; cursor: pointer;
+    margin-top: 1rem;
+  }
+  .code-display {
+    font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: clamp(2.6rem,7vw,4.5rem);
+    letter-spacing: 0.15em; color: var(--blue-deep); background: var(--gold-soft);
+    border-radius: 20px; padding: 0.4em 0.3em; margin: 1rem 0;
+  }
+  .hidden { display: none !important; }
+
+  /* wide host layout */
+  .board-wrap { width: min(1100px, 94vw); }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5vh; }
+  .room-pill { background: rgba(255,255,255,0.15); color: var(--cream); font-family:'Fredoka',sans-serif; font-weight:700; border-radius: 999px; padding: 0.6em 1.4em; font-size: 1.2rem; letter-spacing: 0.1em; }
+  .avatars { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+  .avatar-pill {
+    background: var(--cream); border-radius: 999px; padding: 0.5em 1em;
+    display: flex; align-items: center; gap: 0.4em;
+    font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 1.1rem;
+    box-shadow: 0 6px 0 rgba(11,79,138,0.15);
+  }
+  .avatar-pill.active-turn { background: var(--gold); }
+  .avatar-pill .score { color: var(--blue); font-weight: 800; }
+
+  .wheel-zone { display: flex; flex-direction: column; align-items: center; gap: 1.5vh; margin: 2vh 0; }
+  #wheel-canvas { border-radius: 50%; box-shadow: 0 0 0 10px var(--cream), 0 20px 40px rgba(0,0,0,0.3); }
+  .wheel-pointer { font-size: 2.5rem; margin-bottom: -1.2rem; z-index: 2; }
+
+  .scene-card {
+    background: var(--cream); border-radius: 30px; padding: 4vh 4vw;
+    box-shadow: 0 16px 0 rgba(11,79,138,0.2);
+    width: 100%; text-align: center;
+  }
+  .scene-emoji { font-size: clamp(2.4rem,5vw,4rem); }
+  .npc-line { font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: clamp(1.3rem,2.6vw,2rem); color: var(--blue-deep); margin: 0.6em 0; }
+  .choices { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1.4rem; }
+  .choice-btn {
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: clamp(1rem,1.6vw,1.3rem);
+    background: white; border: 3px solid var(--blue); color: var(--blue-deep);
+    border-radius: 18px; padding: 1rem 1.4rem; cursor: pointer;
+  }
+  .choice-btn:active { background: var(--blue); color: white; }
+  .reply-box { margin-top: 1.4rem; font-size: clamp(1.1rem,2vw,1.5rem); font-weight: 700; color: var(--green); }
+  .secret-note { font-family:'Fredoka',sans-serif; font-weight: 600; font-size: 1.3rem; color: var(--purple); margin-top: 1rem; }
+
+  .player-idle { text-align: center; }
+  .player-idle .big-emoji { font-size: 4rem; }
+  .player-name-tag { font-family:'Fredoka',sans-serif; font-weight:700; font-size: 1.4rem; color: var(--blue-deep); }
+
+  @keyframes pulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.05);} }
+  .pulse { animation: pulse 1.4s infinite ease-in-out; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ROLE SELECT -->
+  <div id="role-screen">
+    <h1>🇸🇪 En dag i Sverige</h1>
+    <p class="sub">Vem är du?</p>
+    <div class="role-row">
+      <button class="role-btn" id="host-role-btn"><span class="emoji">🖥️</span>Lärare<br>(smartboard)</button>
+      <button class="role-btn" id="player-role-btn"><span class="emoji">📱</span>Elev<br>(iPad)</button>
+    </div>
+  </div>
+
+  <!-- HOST: CREATE -->
+  <div id="host-create-screen" class="hidden">
+    <div class="card">
+      <h2>Skapa ett rum</h2>
+      <button class="primary-btn" id="create-room-btn">Skapa rum</button>
+    </div>
+  </div>
+
+  <!-- HOST: MAIN BOARD -->
+  <div id="host-board-screen" class="hidden board-wrap">
+    <div class="top-bar">
+      <div class="room-pill" id="host-room-code">KOD: ----</div>
+      <div class="avatars" id="host-avatars"></div>
+    </div>
+
+    <div id="host-lobby-view">
+      <div class="card" style="width:100%;">
+        <h2>Väntar på elever...</h2>
+        <p class="sub" style="color:#8a95a6;">Eleverna skriver in koden på sin iPad</p>
+        <button class="primary-btn" id="spin-btn" disabled>🎡 Snurra hjulet</button>
+      </div>
+    </div>
+
+    <div id="host-wheel-view" class="hidden wheel-zone">
+      <div class="wheel-pointer">🔻</div>
+      <canvas id="wheel-canvas" width="420" height="420"></canvas>
+    </div>
+
+    <div id="host-scene-view" class="hidden scene-card">
+      <div class="scene-emoji" id="scene-emoji">🛒</div>
+      <h2 id="scene-title">ICA</h2>
+      <div id="scene-body"></div>
+    </div>
+
+    <div id="host-turn-done" class="hidden card" style="width:100%;">
+      <h2 id="turn-done-text">🎉 Bra jobbat!</h2>
+      <button class="primary-btn" id="next-turn-btn">🎡 Nästa: Snurra igen</button>
+    </div>
+  </div>
+
+  <!-- PLAYER: JOIN -->
+  <div id="player-join-screen" class="hidden">
+    <div class="card">
+      <h2>Gå med i rummet</h2>
+      <input id="join-code" placeholder="KOD" maxlength="4" style="text-transform:uppercase;">
+      <input id="join-name" placeholder="Ditt namn" maxlength="16">
+      <button class="primary-btn" id="join-btn">Gå med ✅</button>
+      <div id="join-error" style="color:var(--red); font-weight:700; margin-top:0.6rem;"></div>
+    </div>
+  </div>
+
+  <!-- PLAYER: IN GAME -->
+  <div id="player-game-screen" class="hidden">
+    <div class="card">
+      <div id="player-idle-view" class="player-idle">
+        <div class="big-emoji">⏳</div>
+        <div class="player-name-tag" id="player-name-tag"></div>
+        <p class="sub" id="player-status-text" style="color:#8a95a6;">Väntar på läraren...</p>
+      </div>
+
+      <div id="player-board-call" class="hidden player-idle pulse">
+        <div class="big-emoji">🎯</div>
+        <h2>Din tur!</h2>
+        <p class="sub" style="color:#8a95a6;">Gå fram till tavlan!</p>
+      </div>
+
+      <div id="player-secret-view" class="hidden">
+        <div class="secret-note">🤫 Bara du ser detta!</div>
+        <div class="scene-emoji" id="secret-emoji">🛒</div>
+        <div class="npc-line" id="secret-npc"></div>
+        <div class="choices" id="secret-choices"></div>
+      </div>
+
+      <div id="player-waiting-secret" class="hidden player-idle">
+        <div class="big-emoji">✅</div>
+        <p class="sub" style="color:#8a95a6;">Bra! Vänta på tavlan...</p>
+      </div>
+
+      <div id="player-watching-view" class="hidden player-idle">
+        <div class="big-emoji">👀</div>
+        <div class="player-name-tag" id="watching-name"></div>
+        <p class="sub" style="color:#8a95a6;">svarar nu — titta på tavlan!</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const AVATARS = ["🦊","🐻","🐼","🐸","🦁","🐨","🐯","🐰","🐷","🐵"];
+
+const SCENARIOS = [
+  { id:"ica", title:"ICA", emoji:"🛒", steps:[
+    { type:"board", npc:"Hej! Kan jag hjälpa dig?", choices:["Var är mjölken?","Jag vill ha bröd","Bara tittar, tack"], replies:["Mjölken är i kylen, till vänster! 🥛","Brödet finns vid kassan. 🍞","Varsågod, ropa om du behöver något!"] },
+    { type:"solo", npc:"Vill du ha ett kvitto?", choices:["Ja tack","Nej tack","Vad kostar det?"], replies:["Varsågod! 🧾","Okej!","Det kostar 42 kronor."] },
+    { type:"board", npc:"Har du ICA-kort?", choices:["Nej, hur får jag ett?","Ja, här!","Vad är det?"], replies:["Du kan fråga i kassan! 💳","Toppen, du får rabatt!","Det är ett rabattkort."] }
+  ]},
+  { id:"vc", title:"Vårdcentralen", emoji:"🏥", steps:[
+    { type:"board", npc:"Hej, vad heter du?", choices:["Jag heter...","Vem är du?","Var är toaletten?"], replies:["Trevligt! Sätt dig, doktorn kommer snart.","Jag är sjuksköterska.","Den är till höger."] },
+    { type:"solo", npc:"Var gör det ont?", choices:["I magen","I huvudet","I foten"], replies:["Okej, jag kollar din mage.","Jag ger dig något mot huvudvärk.","Vi tittar på foten."] },
+    { type:"board", npc:"Kom tillbaka nästa vecka.", choices:["Okej, vilken dag?","Måste jag?","Tack!"], replies:["På tisdag klockan tio.","Ja, det är viktigt.","Ha det bra!"] }
+  ]},
+  { id:"buss", title:"Bussen", emoji:"🚌", steps:[
+    { type:"board", npc:"Hej! Vart ska du åka?", choices:["Till centrum","Till skolan","Jag vet inte"], replies:["Det blir 30 kronor.","Sätt dig, vi kör snart!","Jag kan hjälpa dig!"] },
+    { type:"solo", npc:"Har du busskort?", choices:["Ja","Nej","Vad är det?"], replies:["Toppen, checka in!","Du kan köpa en biljett i appen.","Det är ett kort för bussen."] },
+    { type:"board", npc:"Din hållplats är nästa!", choices:["Tack!","Var är dörren?","Redan?"], replies:["Varsågod!","Där bak, till vänster.","Ja, hoppa av här!"] }
+  ]},
+  { id:"granne", title:"Grannen", emoji:"🏡", steps:[
+    { type:"board", npc:"Hej! Är du ny här?", choices:["Ja, jag heter...","Nej","Vem är du?"], replies:["Välkommen! Jag heter Eva.","Okej!","Jag bor bredvid dig."] },
+    { type:"solo", npc:"Vill du komma på fika?", choices:["Ja gärna!","Nej tack","Vad är fika?"], replies:["Toppen, imorgon klockan tre!","Okej, en annan gång!","Det är kaffe och kaka!"] },
+    { type:"board", npc:"Har du barn?", choices:["Ja, två","Nej","Har du?"], replies:["Åh vad kul!","Okej!","Ja, en son."] }
+  ]},
+  { id:"skola", title:"Skolan", emoji:"🏫", steps:[
+    { type:"board", npc:"Hej! Vad heter ditt barn?", choices:["...","Jag vet inte vad jag ska svara","Kan du hjälpa mig?"], replies:["Bra, vi skriver upp det.","Ingen fara, vi tar det tillsammans.","Så klart!"] },
+    { type:"solo", npc:"Hur gammal är barnet?", choices:["Sex år","Åtta år","Tio år"], replies:["Då börjar hen i årskurs ett.","Då börjar hen i årskurs två.","Då börjar hen i årskurs fyra."] },
+    { type:"board", npc:"Skolan börjar klockan åtta.", choices:["Tack för hjälpen!","Var är skolan?","Måste jag följa med?"], replies:["Varsågod!","Den ligger vid torget.","Ja, första dagen är bra att följa med."] }
+  ]}
+];
+
+// ---------- shared state helpers ----------
+async function readRoom(code) {
+  try {
+    const res = await window.storage.get('room:' + code, true);
+    return res ? JSON.parse(res.value) : null;
+  } catch (e) { return null; }
+}
+async function writeRoom(code, state) {
+  try {
+    await window.storage.set('room:' + code, JSON.stringify(state), true);
+    return true;
+  } catch (e) { return false; }
+}
+async function updateRoom(code, mutateFn, retries = 4) {
+  for (let i = 0; i < retries; i++) {
+    const current = await readRoom(code);
+    if (!current) return false;
+    const next = mutateFn(JSON.parse(JSON.stringify(current)));
+    if (!next) return false;
+    const ok = await writeRoom(code, next);
+    if (ok) return true;
+  }
+  return false;
+}
+function randomCode() {
+  const letters = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  let c = "";
+  for (let i = 0; i < 4; i++) c += letters[Math.floor(Math.random() * letters.length)];
+  return c;
+}
+function newId() { return Math.random().toString(36).slice(2, 10); }
+
+// ---------- role select ----------
+document.getElementById('host-role-btn').addEventListener('click', () => {
+  show('host-create-screen');
+});
+document.getElementById('player-role-btn').addEventListener('click', () => {
+  show('player-join-screen');
+});
+function show(id) {
+  ['role-screen','host-create-screen','host-board-screen','player-join-screen','player-game-screen']
+    .forEach(s => document.getElementById(s).classList.toggle('hidden', s !== id));
+}
+
+// ================= HOST LOGIC =================
+let hostCode = null;
+let hostPollTimer = null;
+let usedScenarios = [];
+
+document.getElementById('create-room-btn').addEventListener('click', async () => {
+  hostCode = randomCode();
+  const initial = { code: hostCode, players: [], phase: 'lobby', currentPlayerId: null,
+    scenarioId: null, stepIndex: 0, secretAnswered: false, secretChoice: null };
+  await writeRoom(hostCode, initial);
+  document.getElementById('host-room-code').textContent = 'KOD: ' + hostCode;
+  show('host-board-screen');
+  hostPollTimer = setInterval(hostPoll, 1200);
+  hostPoll();
+});
+
+let lastRenderedPhase = null;
+async function hostPoll() {
+  const state = await readRoom(hostCode);
+  if (!state) return;
+  renderHostAvatars(state);
+  document.getElementById('spin-btn').disabled = state.players.length < 1;
+
+  if (state.phase === 'task') {
+    const scenario = SCENARIOS.find(s => s.id === state.scenarioId);
+    const step = scenario.steps[state.stepIndex];
+    if (step.type === 'solo' && !document.getElementById('host-scene-view').dataset.revealed) {
+      // waiting for player's secret answer
+      if (state.secretAnswered) {
+        revealHostStep(scenario, step, state.secretChoice, state);
+      } else if (lastRenderedPhase !== 'solo-wait-' + state.stepIndex) {
+        lastRenderedPhase = 'solo-wait-' + state.stepIndex;
+        showSecretWaiting(scenario, state);
+      }
+    }
+  }
+}
+
+function renderHostAvatars(state) {
+  const wrap = document.getElementById('host-avatars');
+  wrap.innerHTML = '';
+  state.players.forEach(p => {
+    const pill = document.createElement('div');
+    pill.className = 'avatar-pill' + (state.currentPlayerId === p.id ? ' active-turn' : '');
+    pill.innerHTML = `${p.avatar} ${p.name} <span class="score">${p.score}</span>`;
+    wrap.appendChild(pill);
+  });
+}
+
+document.getElementById('spin-btn').addEventListener('click', async () => {
+  const state = await readRoom(hostCode);
+  if (!state || state.players.length < 1) return;
+  document.getElementById('host-lobby-view').classList.add('hidden');
+  document.getElementById('host-wheel-view').classList.remove('hidden');
+  document.getElementById('host-scene-view').classList.add('hidden');
+  document.getElementById('host-turn-done').classList.add('hidden');
+  await updateRoom(hostCode, s => { s.phase = 'spinning'; return s; });
+  spinWheel(state.players);
+});
+
+function spinWheel(players) {
+  const canvas = document.getElementById('wheel-canvas');
+  const ctx = canvas.getContext('2d');
+  const n = players.length;
+  const colors = ["#1A6DB0","#FFC72C","#3AA65B","#E05252","#6E5CA6","#0B4F8A"];
+  const sliceAngle = (2 * Math.PI) / n;
+  const chosenIndex = Math.floor(Math.random() * n);
+  // target angle so chosen slice lands at top (pointer at top)
+  const targetSliceCenter = chosenIndex * sliceAngle + sliceAngle / 2;
+  const spins = 5;
+  const finalRotation = spins * 2 * Math.PI + (2 * Math.PI - targetSliceCenter);
+
+  let start = null;
+  const duration = 3200;
+  function draw(rotation) {
+    ctx.clearRect(0,0,420,420);
+    ctx.save();
+    ctx.translate(210,210);
+    ctx.rotate(rotation);
+    for (let i = 0; i < n; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.arc(0,0,200, i*sliceAngle, (i+1)*sliceAngle);
+      ctx.closePath();
+      ctx.fill();
+      ctx.save();
+      ctx.rotate(i*sliceAngle + sliceAngle/2);
+      ctx.fillStyle = "white";
+      ctx.font = "700 22px Fredoka, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(players[i].avatar + " " + players[i].name, 120, 8);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+  function frame(ts) {
+    if (!start) start = ts;
+    const elapsed = ts - start;
+    const t = Math.min(elapsed / duration, 1);
+    draw(finalRotation * easeOut(t));
+    if (t < 1) requestAnimationFrame(frame);
+    else onSpinComplete(players[chosenIndex]);
+  }
+  requestAnimationFrame(frame);
+}
+
+async function onSpinComplete(chosenPlayer) {
+  await new Promise(r => setTimeout(r, 500));
+  document.getElementById('host-wheel-view').classList.add('hidden');
+
+  const remaining = SCENARIOS.filter(s => !usedScenarios.includes(s.id));
+  const pool = remaining.length ? remaining : SCENARIOS;
+  if (!remaining.length) usedScenarios = [];
+  const scenario = pool[Math.floor(Math.random() * pool.length)];
+  usedScenarios.push(scenario.id);
+
+  await updateRoom(hostCode, s => {
+    s.phase = 'task';
+    s.currentPlayerId = chosenPlayer.id;
+    s.scenarioId = scenario.id;
+    s.stepIndex = 0;
+    s.secretAnswered = false;
+    s.secretChoice = null;
+    return s;
+  });
+  lastRenderedPhase = null;
+  showHostStep(scenario, 0);
+}
+
+function showHostStep(scenario, stepIndex) {
+  const step = scenario.steps[stepIndex];
+  document.getElementById('host-scene-view').classList.remove('hidden');
+  document.getElementById('host-scene-view').dataset.revealed = '';
+  document.getElementById('scene-emoji').textContent = scenario.emoji;
+  document.getElementById('scene-title').textContent = scenario.title;
+  const body = document.getElementById('scene-body');
+
+  if (step.type === 'board') {
+    body.innerHTML = `
+      <div class="npc-line">"${step.npc}"</div>
+      <div class="choices" id="board-choices"></div>
+      <div class="reply-box hidden" id="board-reply"></div>
+    `;
+    const choicesWrap = document.getElementById('board-choices');
+    step.choices.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn';
+      btn.textContent = c;
+      btn.addEventListener('click', () => {
+        choicesWrap.querySelectorAll('button').forEach(b => b.disabled = true);
+        const replyBox = document.getElementById('board-reply');
+        replyBox.textContent = step.replies[i];
+        replyBox.classList.remove('hidden');
+        setTimeout(() => advanceStep(scenario, stepIndex), 1400);
+      });
+      choicesWrap.appendChild(btn);
+    });
+  } else {
+    showSecretWaitingUI(scenario);
+  }
+}
+
+function showSecretWaiting(scenario, state) {
+  showSecretWaitingUI(scenario);
+}
+function showSecretWaitingUI(scenario) {
+  document.getElementById('host-scene-view').classList.remove('hidden');
+  document.getElementById('scene-emoji').textContent = scenario.emoji;
+  document.getElementById('scene-title').textContent = scenario.title;
+  document.getElementById('scene-body').innerHTML = `<div class="secret-note pulse">🤫 Svarar hemligt på sin iPad...</div>`;
+}
+
+function revealHostStep(scenario, step, choiceIndex, state) {
+  document.getElementById('host-scene-view').dataset.revealed = '1';
+  document.getElementById('scene-body').innerHTML = `<div class="reply-box">${step.replies[choiceIndex]}</div>`;
+  setTimeout(() => advanceStep(scenario, state.stepIndex), 1400);
+}
+
+async function advanceStep(scenario, stepIndex) {
+  const nextIndex = stepIndex + 1;
+  if (nextIndex >= scenario.steps.length) {
+    // turn complete
+    let finishedName = '';
+    await updateRoom(hostCode, s => {
+      const p = s.players.find(pl => pl.id === s.currentPlayerId);
+      if (p) { p.score += 1; finishedName = p.name; }
+      s.phase = 'lobby';
+      s.currentPlayerId = null;
+      return s;
+    });
+    document.getElementById('host-scene-view').classList.add('hidden');
+    document.getElementById('turn-done-text').textContent = `🎉 Bra jobbat, ${finishedName}!`;
+    document.getElementById('host-turn-done').classList.remove('hidden');
+  } else {
+    await updateRoom(hostCode, s => { s.stepIndex = nextIndex; s.secretAnswered = false; s.secretChoice = null; return s; });
+    document.getElementById('host-scene-view').dataset.revealed = '';
+    lastRenderedPhase = null;
+    showHostStep(scenario, nextIndex);
+  }
+}
+
+document.getElementById('next-turn-btn').addEventListener('click', () => {
+  document.getElementById('host-turn-done').classList.add('hidden');
+  document.getElementById('host-lobby-view').classList.remove('hidden');
+});
+
+// ================= PLAYER LOGIC =================
+let playerCode = null;
+let playerId = null;
+let playerPollTimer = null;
+let playerLastSeenStepKey = null;
+
+document.getElementById('join-btn').addEventListener('click', async () => {
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  const name = document.getElementById('join-name').value.trim();
+  const errEl = document.getElementById('join-error');
+  errEl.textContent = '';
+  if (!code || !name) { errEl.textContent = 'Fyll i kod och namn!'; return; }
+
+  const existing = await readRoom(code);
+  if (!existing) { errEl.textContent = 'Rummet finns inte.'; return; }
+
+  playerId = newId();
+  const avatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+  const ok = await updateRoom(code, s => {
+    s.players.push({ id: playerId, name, avatar, score: 0 });
+    return s;
+  });
+  if (!ok) { errEl.textContent = 'Något gick fel, försök igen.'; return; }
+
+  playerCode = code;
+  document.getElementById('player-name-tag').textContent = avatar + ' ' + name;
+  show('player-game-screen');
+  playerPollTimer = setInterval(playerPoll, 1200);
+  playerPoll();
+});
+
+async function playerPoll() {
+  const state = await readRoom(playerCode);
+  if (!state) return;
+  const isMyTurn = state.currentPlayerId === playerId;
+  const idleView = document.getElementById('player-idle-view');
+  const boardCall = document.getElementById('player-board-call');
+  const secretView = document.getElementById('player-secret-view');
+  const waitingSecret = document.getElementById('player-waiting-secret');
+  const watchingView = document.getElementById('player-watching-view');
+  [idleView, boardCall, secretView, waitingSecret, watchingView].forEach(v => v.classList.add('hidden'));
+
+  if (state.phase === 'lobby' || state.phase === 'spinning') {
+    idleView.classList.remove('hidden');
+    document.getElementById('player-status-text').textContent =
+      state.phase === 'spinning' ? 'Läraren snurrar hjulet... 🎡' : 'Väntar på läraren...';
+  } else if (state.phase === 'task') {
+    const scenario = SCENARIOS.find(s => s.id === state.scenarioId);
+    const step = scenario.steps[state.stepIndex];
+    if (isMyTurn) {
+      if (step.type === 'board') {
+        boardCall.classList.remove('hidden');
+      } else {
+        if (state.secretAnswered) {
+          waitingSecret.classList.remove('hidden');
+        } else {
+          renderSecretQuestion(scenario, step);
+          secretView.classList.remove('hidden');
+        }
+      }
+    } else {
+      const p = state.players.find(pl => pl.id === state.currentPlayerId);
+      watchingView.classList.remove('hidden');
+      document.getElementById('watching-name').textContent = p ? (p.avatar + ' ' + p.name) : '';
+    }
+  }
+}
+
+function renderSecretQuestion(scenario, step) {
+  document.getElementById('secret-emoji').textContent = scenario.emoji;
+  document.getElementById('secret-npc').textContent = '"' + step.npc + '"';
+  const wrap = document.getElementById('secret-choices');
+  wrap.innerHTML = '';
+  step.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = c;
+    btn.addEventListener('click', async () => {
+      wrap.querySelectorAll('button').forEach(b => b.disabled = true);
+      await updateRoom(playerCode, s => {
+        if (s.currentPlayerId === playerId) { s.secretAnswered = true; s.secretChoice = i; }
+        return s;
+      });
+    });
+    wrap.appendChild(btn);
+  });
+}
+</script>
+</body>
+</html>
