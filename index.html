@@ -6,6 +6,7 @@
 <title>En dag i Sverige</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
   :root {
     --blue-deep: #0B4F8A;
@@ -116,6 +117,13 @@
 
   @keyframes pulse { 0%,100% { transform: scale(1);} 50% { transform: scale(1.05);} }
   .pulse { animation: pulse 1.4s infinite ease-in-out; }
+
+  .msi {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal; font-style: normal;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 40;
+    vertical-align: middle; line-height: 1;
+  }
 </style>
 </head>
 <body>
@@ -126,8 +134,8 @@
     <h1>🇸🇪 En dag i Sverige</h1>
     <p class="sub">Vem är du?</p>
     <div class="role-row">
-      <button class="role-btn" id="host-role-btn"><span class="emoji">🖥️</span>Lärare<br>(smartboard)</button>
-      <button class="role-btn" id="player-role-btn"><span class="emoji">📱</span>Elev<br>(iPad)</button>
+      <button class="role-btn" id="host-role-btn"><span class="msi emoji">desktop_windows</span>Lärare<br>(smartboard)</button>
+      <button class="role-btn" id="player-role-btn"><span class="msi emoji">tablet_mac</span>Elev<br>(iPad)</button>
     </div>
   </div>
 
@@ -150,12 +158,12 @@
       <div class="card" style="width:100%;">
         <h2>Väntar på elever...</h2>
         <p class="sub" style="color:#8a95a6;">Eleverna skriver in koden på sin iPad</p>
-        <button class="primary-btn" id="spin-btn" disabled>🎡 Snurra hjulet</button>
+        <button class="primary-btn" id="spin-btn" disabled><span class="msi">casino</span> Snurra hjulet</button>
       </div>
     </div>
 
     <div id="host-wheel-view" class="hidden wheel-zone">
-      <div class="wheel-pointer">🔻</div>
+      <div class="wheel-pointer msi">arrow_drop_down</div>
       <canvas id="wheel-canvas" width="420" height="420"></canvas>
     </div>
 
@@ -167,7 +175,7 @@
 
     <div id="host-turn-done" class="hidden card" style="width:100%;">
       <h2 id="turn-done-text">🎉 Bra jobbat!</h2>
-      <button class="primary-btn" id="next-turn-btn">🎡 Nästa: Snurra igen</button>
+      <button class="primary-btn" id="next-turn-btn"><span class="msi">casino</span> Nästa: Snurra igen</button>
     </div>
   </div>
 
@@ -177,7 +185,7 @@
       <h2>Gå med i rummet</h2>
       <input id="join-code" placeholder="KOD" maxlength="4" style="text-transform:uppercase;">
       <input id="join-name" placeholder="Ditt namn" maxlength="16">
-      <button class="primary-btn" id="join-btn">Gå med ✅</button>
+      <button class="primary-btn" id="join-btn">Gå med <span class="msi">check_circle</span></button>
       <div id="join-error" style="color:var(--red); font-weight:700; margin-top:0.6rem;"></div>
     </div>
   </div>
@@ -186,31 +194,31 @@
   <div id="player-game-screen" class="hidden">
     <div class="card">
       <div id="player-idle-view" class="player-idle">
-        <div class="big-emoji">⏳</div>
+        <div class="big-emoji msi">hourglass_top</div>
         <div class="player-name-tag" id="player-name-tag"></div>
         <p class="sub" id="player-status-text" style="color:#8a95a6;">Väntar på läraren...</p>
       </div>
 
       <div id="player-board-call" class="hidden player-idle pulse">
-        <div class="big-emoji">🎯</div>
+        <div class="big-emoji msi">campaign</div>
         <h2>Din tur!</h2>
         <p class="sub" style="color:#8a95a6;">Gå fram till tavlan!</p>
       </div>
 
       <div id="player-secret-view" class="hidden">
-        <div class="secret-note">🤫 Bara du ser detta!</div>
+        <div class="secret-note"><span class="msi">lock</span> Bara du ser detta!</div>
         <div class="scene-emoji" id="secret-emoji">🛒</div>
         <div class="npc-line" id="secret-npc"></div>
         <div class="choices" id="secret-choices"></div>
       </div>
 
       <div id="player-waiting-secret" class="hidden player-idle">
-        <div class="big-emoji">✅</div>
+        <div class="big-emoji msi">check_circle</div>
         <p class="sub" style="color:#8a95a6;">Bra! Vänta på tavlan...</p>
       </div>
 
       <div id="player-watching-view" class="hidden player-idle">
-        <div class="big-emoji">👀</div>
+        <div class="big-emoji msi">visibility</div>
         <div class="player-name-tag" id="watching-name"></div>
         <p class="sub" style="color:#8a95a6;">svarar nu — titta på tavlan!</p>
       </div>
@@ -253,14 +261,20 @@ const SCENARIOS = [
 // ---------- shared state helpers ----------
 async function readRoom(code) {
   try {
-    const res = await window.storage.get('room:' + code, true);
-    return res ? JSON.parse(res.value) : null;
+    const res = await fetch('/api/room?code=' + encodeURIComponent(code));
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.value || null;
   } catch (e) { return null; }
 }
 async function writeRoom(code, state) {
   try {
-    await window.storage.set('room:' + code, JSON.stringify(state), true);
-    return true;
+    const res = await fetch('/api/room', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, state })
+    });
+    return res.ok;
   } catch (e) { return false; }
 }
 async function updateRoom(code, mutateFn, retries = 4) {
@@ -465,7 +479,7 @@ function showSecretWaitingUI(scenario) {
   document.getElementById('host-scene-view').classList.remove('hidden');
   document.getElementById('scene-emoji').textContent = scenario.emoji;
   document.getElementById('scene-title').textContent = scenario.title;
-  document.getElementById('scene-body').innerHTML = `<div class="secret-note pulse">🤫 Svarar hemligt på sin iPad...</div>`;
+  document.getElementById('scene-body').innerHTML = `<div class="secret-note pulse"><span class="msi">lock</span> Svarar hemligt på sin iPad...</div>`;
 }
 
 function revealHostStep(scenario, step, choiceIndex, state) {
@@ -547,7 +561,7 @@ async function playerPoll() {
   if (state.phase === 'lobby' || state.phase === 'spinning') {
     idleView.classList.remove('hidden');
     document.getElementById('player-status-text').textContent =
-      state.phase === 'spinning' ? 'Läraren snurrar hjulet... 🎡' : 'Väntar på läraren...';
+      state.phase === 'spinning' ? 'Läraren snurrar hjulet...' : 'Väntar på läraren...';
   } else if (state.phase === 'task') {
     const scenario = SCENARIOS.find(s => s.id === state.scenarioId);
     const step = scenario.steps[state.stepIndex];
