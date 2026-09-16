@@ -5,115 +5,127 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SpråkStudio Party</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
 :root{
-  --blue-deep:#0B4F8A; --blue:#1A6DB0; --gold:#FFC72C; --gold-soft:#FFE79A;
-  --cream:#FFF8EA; --ink:#12314F; --green:#3AA65B; --red:#E05252; --purple:#6E5CA6;
+  --accent:#2B7DE0; --accent-dark:#195CA8; --accent-light:#EAF2FC;
+  --bg:#F3F6FA; --card:#FFFFFF; --border:#DCE6F2;
+  --ink:#233246; --muted:#7C8CA0;
+  --green:#2E9E52; --red:#D9534F;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;min-height:100%;font-family:'Nunito',sans-serif;
-  background:radial-gradient(circle at 15% 10%,#1a76c4 0%,var(--blue-deep) 55%,#082f52 100%);
-  color:var(--ink); -webkit-user-select:none; user-select:none;}
+  background:var(--bg); color:var(--ink); -webkit-user-select:none; user-select:none;}
 #app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3vh 3vw;}
 .hidden{display:none !important;}
 .msi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;
-  font-variation-settings:'FILL' 1,'wght' 500,'GRAD' 0,'opsz' 40;vertical-align:middle;line-height:1;}
-h1{font-family:'Fredoka',sans-serif;color:var(--cream);font-size:clamp(1.8rem,4vw,3rem);margin:0 0 .2em;}
-h2{font-family:'Fredoka',sans-serif;color:var(--blue-deep);font-size:clamp(1.3rem,2.4vw,1.9rem);margin:.2em 0;}
-p.sub{color:var(--gold-soft);font-weight:600;margin-top:0;}
-.card{background:var(--cream);border-radius:28px;box-shadow:0 14px 0 rgba(11,79,138,.2),0 20px 40px rgba(0,0,0,.25);
-  padding:3.5vh 3.5vw;width:min(560px,92vw);text-align:center;}
-.role-row{display:flex;gap:1.4rem;margin-top:2rem;justify-content:center;flex-wrap:wrap;}
-.role-btn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.2rem;background:var(--cream);color:var(--blue-deep);
-  border:none;border-radius:22px;padding:1.8rem 2.2rem;cursor:pointer;box-shadow:0 9px 0 rgba(11,79,138,.25);
+  font-variation-settings:'FILL' 0,'wght' 500,'GRAD' 0,'opsz' 40;vertical-align:middle;line-height:1;}
+h1{font-family:'Fredoka',sans-serif;color:var(--accent-dark);font-size:clamp(1.6rem,3.4vw,2.4rem);margin:0 0 .2em;font-weight:600;}
+h2{font-family:'Fredoka',sans-serif;color:var(--ink);font-size:clamp(1.2rem,2.1vw,1.6rem);margin:.2em 0;font-weight:600;}
+p.sub{color:var(--muted);font-weight:600;margin-top:0;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 4px rgba(20,40,70,.06);
+  padding:3vh 3vw;width:min(560px,92vw);text-align:center;}
+.role-row{display:flex;gap:1.2rem;margin-top:1.8rem;justify-content:center;flex-wrap:wrap;}
+.role-btn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.1rem;background:var(--card);color:var(--ink);
+  border:1px solid var(--border);border-radius:16px;padding:1.6rem 2rem;cursor:pointer;box-shadow:0 1px 4px rgba(20,40,70,.06);
   display:flex;flex-direction:column;align-items:center;gap:.4rem;}
-.role-btn:active{transform:translateY(6px);box-shadow:0 3px 0 rgba(11,79,138,.25);}
-.role-btn .msi{font-size:2.8rem;}
-input{font-family:'Nunito',sans-serif;font-weight:700;font-size:1.2rem;padding:.8rem 1.1rem;border-radius:14px;
-  border:3px solid #d8ceb3;width:100%;margin-top:.7rem;text-align:center;background:#fff;color:var(--ink);}
-input:focus{outline:none;border-color:var(--blue);}
-.primary-btn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.15rem;background:var(--gold);color:var(--blue-deep);
-  border:none;border-radius:16px;padding:.9rem 1.8rem;cursor:pointer;margin-top:1.2rem;box-shadow:0 7px 0 rgba(0,0,0,.12);}
-.primary-btn:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.12);}
-.primary-btn:disabled{opacity:.5;}
-.code-display{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(2.4rem,6vw,4rem);letter-spacing:.15em;
-  color:var(--blue-deep);background:var(--gold-soft);border-radius:18px;padding:.3em .2em;margin:.8rem 0;}
+.role-btn:active{background:var(--accent-light);}
+.role-btn .msi{font-size:2.4rem;color:var(--accent);}
+input{font-family:'Nunito',sans-serif;font-weight:700;font-size:1.1rem;padding:.75rem 1rem;border-radius:10px;
+  border:2px solid var(--border);width:100%;margin-top:.6rem;text-align:center;background:#fff;color:var(--ink);}
+input:focus{outline:none;border-color:var(--accent);}
+.primary-btn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.05rem;background:var(--accent);color:#fff;
+  border:none;border-radius:10px;padding:.75rem 1.6rem;cursor:pointer;margin-top:1.1rem;}
+.primary-btn:active{background:var(--accent-dark);}
+.primary-btn:disabled{opacity:.4;}
+.ghost-btn{font-family:'Fredoka',sans-serif;font-weight:600;background:#fff;border:1px solid var(--border);color:var(--muted);
+  border-radius:10px;padding:.6em 1.2em;cursor:pointer;font-size:.95rem;}
+.cancel-btn{font-family:'Fredoka',sans-serif;font-weight:600;background:#fff;border:1px solid var(--red);color:var(--red);
+  border-radius:10px;padding:.5em 1em;cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:.3em;}
+.cancel-btn:active{background:#FBE7E6;}
 .board-wrap{width:min(1150px,95vw);}
-.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2vh;gap:1rem;flex-wrap:wrap;}
-.room-pill{background:rgba(255,255,255,.15);color:var(--cream);font-family:'Fredoka',sans-serif;font-weight:700;
-  border-radius:999px;padding:.5em 1.2em;font-size:1.1rem;letter-spacing:.08em;}
-.avatars{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;}
-.avatar-pill{background:var(--cream);border-radius:999px;padding:.4em .9em;display:flex;align-items:center;gap:.35em;
-  font-family:'Fredoka',sans-serif;font-weight:600;font-size:1rem;box-shadow:0 5px 0 rgba(11,79,138,.15);}
-.avatar-pill.is-drawer{background:var(--purple);color:#fff;}
-.score{color:var(--blue);font-weight:800;}
+.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2vh;gap:1rem;}
+.room-pill{background:var(--accent-light);color:var(--accent-dark);font-family:'Fredoka',sans-serif;font-weight:700;
+  border-radius:10px;padding:.4em 1em;font-size:1rem;letter-spacing:.06em;}
+.avatars{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:1vh;}
+.avatar-pill{background:#fff;border:1px solid var(--border);border-radius:999px;padding:.35em .8em;display:flex;
+  align-items:center;gap:.35em;font-family:'Fredoka',sans-serif;font-weight:600;font-size:.95rem;}
+.avatar-pill.is-drawer{background:var(--accent);color:#fff;border-color:var(--accent);}
+.score{color:var(--accent-dark);font-weight:800;}
 .avatar-pill.is-drawer .score{color:#fff;}
-.mini-leaderboard{position:absolute;top:1.5vh;right:1.5vw;background:rgba(18,49,79,.85);border-radius:16px;
-  padding:.7em 1em;color:var(--cream);font-family:'Fredoka',sans-serif;font-size:.95rem;z-index:5;}
-.mini-leaderboard div{display:flex;justify-content:space-between;gap:1em;padding:.15em 0;}
-.mini-leaderboard .lb-score{color:var(--gold);font-weight:700;}
-.round-card{background:var(--cream);border-radius:28px;padding:3vh 3vw;box-shadow:0 14px 0 rgba(11,79,138,.2);
-  width:100%;text-align:center;position:relative;}
-.timer-bar-wrap{width:100%;height:14px;background:#e6ddc4;border-radius:999px;overflow:hidden;margin-bottom:1.4vh;}
-.timer-bar{height:100%;background:var(--gold);border-radius:999px;transition:width .3s linear;}
-.round-type-label{font-family:'Fredoka',sans-serif;font-weight:700;color:var(--blue);font-size:1rem;
-  text-transform:none;margin-bottom:.3em;display:flex;align-items:center;justify-content:center;gap:.3em;}
-.word-hint{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(1.8rem,4vw,2.8rem);letter-spacing:.25em;
-  color:var(--blue-deep);}
-canvas.draw-canvas{background:#fff;border-radius:18px;box-shadow:inset 0 0 0 4px #e6ddc4;touch-action:none;
+.lobby-code-wrap{text-align:center;width:100%;}
+.code-display-big{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(4.5rem,15vw,10rem);letter-spacing:.1em;
+  color:var(--accent-dark);line-height:1;margin:1vh 0;}
+.mini-leaderboard{position:absolute;top:1.2vh;right:1.2vw;background:#fff;border:1px solid var(--border);border-radius:12px;
+  padding:.6em .9em;color:var(--ink);font-family:'Fredoka',sans-serif;font-size:.9rem;z-index:5;}
+.mini-leaderboard div{display:flex;justify-content:space-between;gap:1em;padding:.12em 0;}
+.mini-leaderboard .lb-score{color:var(--accent-dark);font-weight:700;}
+.round-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:3vh 3vw;width:100%;
+  text-align:center;position:relative;}
+.timer-bar-wrap{width:100%;height:10px;background:var(--accent-light);border-radius:999px;overflow:hidden;margin-bottom:1.4vh;}
+.timer-bar{height:100%;background:var(--accent);border-radius:999px;transition:width .3s linear;}
+.round-type-label{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--accent-dark);font-size:.95rem;
+  margin-bottom:.3em;display:flex;align-items:center;justify-content:center;gap:.3em;}
+.word-hint{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(1.6rem,3.6vw,2.4rem);letter-spacing:.22em;
+  color:var(--ink);}
+canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:12px;touch-action:none;
   width:100%;max-width:560px;height:min(340px,42vh);}
-.brush-row{display:flex;gap:.6rem;align-items:center;justify-content:center;margin-top:1rem;flex-wrap:wrap;}
-.swatch{width:34px;height:34px;border-radius:50%;border:3px solid transparent;cursor:pointer;}
-.swatch.active{border-color:var(--blue);}
-.tool-btn{font-family:'Fredoka',sans-serif;font-weight:600;background:#fff;border:2px solid var(--blue);color:var(--blue);
-  border-radius:12px;padding:.4em .8em;cursor:pointer;font-size:.95rem;}
-.statement-text{font-family:'Fredoka',sans-serif;font-weight:600;font-size:clamp(1.2rem,2.4vw,1.7rem);color:var(--blue-deep);
-  margin:1rem 0 1.4rem;}
-.tf-row{display:flex;gap:1.2rem;justify-content:center;}
-.tf-btn{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;border:none;border-radius:18px;
-  padding:1.1rem 2.2rem;cursor:pointer;box-shadow:0 7px 0 rgba(0,0,0,.15);color:#fff;}
+.brush-row{display:flex;gap:.5rem;align-items:center;justify-content:center;margin-top:1rem;flex-wrap:wrap;}
+.swatch{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer;}
+.swatch.active{border-color:var(--accent);}
+.tool-btn{font-family:'Fredoka',sans-serif;font-weight:600;background:#fff;border:1px solid var(--accent);color:var(--accent);
+  border-radius:10px;padding:.4em .8em;cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:.25em;}
+.tool-btn.active{background:var(--accent);color:#fff;}
+.statement-text{font-family:'Fredoka',sans-serif;font-weight:600;font-size:clamp(1.1rem,2.2vw,1.5rem);color:var(--ink);
+  margin:1rem 0 1.3rem;}
+.tf-row{display:flex;gap:1rem;justify-content:center;}
+.tf-btn{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.15rem;border:none;border-radius:12px;
+  padding:1em 2em;cursor:pointer;color:#fff;}
 .tf-btn.true{background:var(--green);}
 .tf-btn.false{background:var(--red);}
-.tf-btn:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(0,0,0,.15);}
-.chip-row{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;min-height:2.6em;}
-.chip{font-family:'Nunito',sans-serif;font-weight:700;background:#fff;border:2px solid var(--blue);color:var(--blue-deep);
-  border-radius:12px;padding:.5em 1em;cursor:pointer;font-size:1.05rem;}
-.chip.used{opacity:.3;pointer-events:none;}
-.build-row{min-height:2.6em;border:3px dashed #d8ceb3;border-radius:14px;padding:.6em;display:flex;gap:.4rem;
-  flex-wrap:wrap;justify-content:center;margin-bottom:.8rem;}
-.build-row .chip{border-color:var(--gold);background:var(--gold-soft);}
-.sign-box{background:#fff;border:3px solid var(--blue-deep);border-radius:14px;padding:1.2em 1.4em;margin:1rem auto;
+.tf-btn:disabled{opacity:.4;}
+.drag-row{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;min-height:3em;}
+.drag-chip{font-family:'Nunito',sans-serif;font-weight:700;background:#fff;border:2px solid var(--accent);color:var(--ink);
+  border-radius:10px;padding:.55em 1em;cursor:grab;font-size:1rem;}
+.drag-chip.dragging{opacity:.35;}
+.sign-box{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.1em 1.3em;margin:1rem auto;
   max-width:360px;text-align:left;font-family:'Nunito',sans-serif;}
-.sign-box .sign-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.1rem;color:var(--blue-deep);
+.sign-box .sign-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;color:var(--accent-dark);
   display:flex;align-items:center;gap:.4em;margin-bottom:.4em;}
-.sign-box .sign-line{font-size:1rem;color:var(--ink);padding:.15em 0;}
-.choice-col{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem;max-width:400px;margin-left:auto;margin-right:auto;}
-.choice-btn{font-family:'Nunito',sans-serif;font-weight:700;font-size:1.05rem;background:#fff;border:3px solid var(--blue);
-  color:var(--blue-deep);border-radius:16px;padding:.85em 1.2em;cursor:pointer;}
-.choice-btn:active{background:var(--blue);color:#fff;}
-.choice-btn:disabled{opacity:.5;}
-.status-line{font-family:'Fredoka',sans-serif;font-weight:600;color:#8a95a6;margin-top:.6rem;}
-.result-flash{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.4rem;margin-top:.8rem;}
+.sign-box .sign-line{font-size:.98rem;color:var(--ink);padding:.15em 0;}
+.choice-col{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem;max-width:400px;margin-left:auto;margin-right:auto;}
+.choice-btn{font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;background:#fff;border:2px solid var(--accent);
+  color:var(--ink);border-radius:12px;padding:.8em 1.1em;cursor:pointer;}
+.choice-btn:active{background:var(--accent);color:#fff;}
+.choice-btn:disabled{opacity:.4;}
+.match-columns{display:flex;gap:1.6rem;justify-content:center;margin:1rem 0;}
+.match-col{display:flex;flex-direction:column;gap:.5rem;}
+.match-tile{font-family:'Nunito',sans-serif;font-weight:700;background:#fff;border:2px solid var(--accent);color:var(--ink);
+  border-radius:10px;padding:.55em 1em;cursor:pointer;min-width:84px;text-align:center;font-size:1.05rem;}
+.match-tile.selected{background:var(--accent);color:#fff;}
+.match-tile.matched{background:#E7F5EA;border-color:var(--green);color:var(--green);opacity:.6;pointer-events:none;}
+.status-line{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--muted);margin-top:.5rem;font-size:.92rem;}
+.result-flash{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;margin-top:.7rem;}
 .result-flash.correct{color:var(--green);}
 .result-flash.wrong{color:var(--red);}
 .leaderboard-table{width:100%;border-collapse:collapse;margin-top:1rem;}
-.leaderboard-table td{padding:.5em .3em;font-family:'Nunito',sans-serif;font-weight:700;text-align:left;}
-.leaderboard-table .rank{font-family:'Fredoka',sans-serif;color:var(--blue);width:2em;}
+.leaderboard-table td{padding:.45em .3em;font-family:'Nunito',sans-serif;font-weight:700;text-align:left;border-bottom:1px solid var(--border);}
+.leaderboard-table .rank{font-family:'Fredoka',sans-serif;color:var(--accent);width:2em;}
 .leaderboard-table .delta-up{color:var(--green);}
 .leaderboard-table .delta-down{color:var(--red);}
-.leaderboard-table .gained{color:var(--gold);font-family:'Fredoka',sans-serif;}
+.leaderboard-table .gained{color:var(--accent-dark);font-family:'Fredoka',sans-serif;}
 .podium{display:flex;align-items:flex-end;justify-content:center;gap:1rem;margin:2vh 0;}
-.podium-slot{background:var(--cream);border-radius:16px 16px 0 0;padding:1rem;text-align:center;font-family:'Fredoka',sans-serif;font-weight:700;}
-.podium-slot.p1{height:180px;background:var(--gold);}
-.podium-slot.p2{height:140px;}
-.podium-slot.p3{height:110px;}
-@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+.podium-slot{background:var(--accent-light);border-radius:12px 12px 0 0;padding:1rem;text-align:center;
+  font-family:'Fredoka',sans-serif;font-weight:700;color:var(--ink);}
+.podium-slot.p1{height:170px;background:var(--accent);color:#fff;}
+.podium-slot.p2{height:130px;}
+.podium-slot.p3{height:100px;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
 .pulse{animation:pulse 1.3s infinite ease-in-out;}
 .player-idle{text-align:center;}
-.player-idle .big-emoji{font-size:3.6rem;}
-.player-name-tag{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;color:var(--blue-deep);}
+.player-idle .big-emoji{font-size:3.2rem;color:var(--accent);}
+.player-name-tag{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.2rem;color:var(--ink);}
 </style>
 </head>
 <body>
@@ -136,14 +148,18 @@ canvas.draw-canvas{background:#fff;border-radius:18px;box-shadow:inset 0 0 0 4px
 
 <div id="host-board-screen" class="hidden board-wrap" style="position:relative;">
   <div class="top-bar">
-    <div class="room-pill" id="host-room-code">KOD: ----</div>
-    <div class="avatars" id="host-avatars"></div>
+    <div class="room-pill hidden" id="host-room-code">KOD: ----</div>
+    <button class="cancel-btn" id="cancel-room-btn"><span class="msi">cancel</span> Avbryt rummet</button>
   </div>
-  <div id="host-lobby-view" class="card" style="width:100%;">
-    <h2>Väntar på elever...</h2>
-    <p class="sub" style="color:#8a95a6;">Eleverna skriver in koden på sin iPad</p>
+  <div class="avatars hidden" id="host-avatars"></div>
+
+  <div id="host-lobby-view" class="lobby-code-wrap">
+    <p class="sub">Rumskod</p>
+    <div class="code-display-big" id="lobby-code-big">----</div>
+    <div class="avatars" id="lobby-avatars-big"></div>
     <button class="primary-btn" id="start-game-btn" disabled>Starta spelet</button>
   </div>
+
   <div id="host-round-view" class="hidden" style="position:relative;width:100%;">
     <div class="mini-leaderboard" id="host-mini-lb"></div>
     <div class="round-card">
@@ -154,10 +170,10 @@ canvas.draw-canvas{background:#fff;border-radius:18px;box-shadow:inset 0 0 0 4px
   </div>
   <div id="host-roundend-view" class="hidden card" style="width:100%;">
     <h2 id="roundend-title">Rundan är slut!</h2>
-    <p class="sub" id="roundend-reveal" style="color:#8a95a6;"></p>
+    <p class="sub" id="roundend-reveal"></p>
     <table class="leaderboard-table" id="roundend-table"></table>
     <button class="primary-btn" id="next-round-btn">Nästa runda</button>
-    <button class="primary-btn" id="end-game-btn" style="background:#e6ddc4;">Avsluta spelet</button>
+    <button class="ghost-btn" id="end-game-btn" style="margin-top:.8rem;">Avsluta spelet</button>
   </div>
   <div id="host-finished-view" class="hidden card" style="width:100%;">
     <h2>🏆 Spelet är slut!</h2>
@@ -179,7 +195,7 @@ canvas.draw-canvas{background:#fff;border-radius:18px;box-shadow:inset 0 0 0 4px
     <div id="player-idle-view" class="player-idle">
       <div class="big-emoji msi">hourglass_top</div>
       <div class="player-name-tag" id="player-name-tag"></div>
-      <p class="sub" id="player-status-text" style="color:#8a95a6;">Väntar på läraren...</p>
+      <p class="sub" id="player-status-text">Väntar på läraren...</p>
     </div>
     <div id="player-round-view" class="hidden">
       <div class="mini-leaderboard" id="player-mini-lb" style="position:static;display:inline-block;margin-bottom:1rem;"></div>
@@ -188,7 +204,7 @@ canvas.draw-canvas{background:#fff;border-radius:18px;box-shadow:inset 0 0 0 4px
     <div id="player-roundend-view" class="hidden">
       <div class="big-emoji msi" id="roundend-player-icon">emoji_events</div>
       <div id="roundend-player-text" class="result-flash"></div>
-      <p class="sub" style="color:#8a95a6;">Väntar på läraren...</p>
+      <p class="sub">Väntar på läraren...</p>
     </div>
   </div>
 </div>
@@ -229,8 +245,14 @@ const SIGNS=[
   {icon:"local_pharmacy",title:"Apoteket",lines:["Öppet alla dagar","8–22"],
    question:"Kan man handla på apoteket en söndag kväll?",choices:["Ja","Nej","Vet inte"],correct:"Ja"}
 ];
-const ROUND_DURATIONS={draw:90,truefalse:15,wordorder:40,sign:20};
-const NON_DRAW_TYPES=["truefalse","wordorder","sign"];
+const MATCH_PAIRS_POOL=[
+  {word:"äpple",emoji:"🍎"},{word:"bröd",emoji:"🍞"},{word:"mjölk",emoji:"🥛"},
+  {word:"hund",emoji:"🐶"},{word:"katt",emoji:"🐱"},{word:"sol",emoji:"☀️"},
+  {word:"regn",emoji:"🌧️"},{word:"hand",emoji:"✋"},{word:"öga",emoji:"👁️"},
+  {word:"bok",emoji:"📖"},{word:"stol",emoji:"🪑"},{word:"hus",emoji:"🏠"}
+];
+const ROUND_DURATIONS={draw:90,truefalse:15,wordorder:40,sign:20,match:45};
+const NON_DRAW_TYPES=["truefalse","wordorder","sign","match"];
 
 async function readRoom(code){
   try{const r=await fetch('/api/room?code='+encodeURIComponent(code));if(!r.ok)return null;
@@ -265,10 +287,10 @@ document.getElementById('host-role-btn').addEventListener('click',()=>show('host
 document.getElementById('player-role-btn').addEventListener('click',()=>show('player-join-screen'));
 
 /* ================= ROUND BUILDERS ================= */
-function buildRound(type,drawerId,lastUsed){
+function buildRound(type,drawerId){
   if(type==='draw'){
     const catKeys=Object.keys(DRAW_CATEGORIES);
-    const catKey=pickRandom(catKeys); const cat=DRAW_CATEGORIES[catKey];
+    const cat=DRAW_CATEGORIES[pickRandom(catKeys)];
     const word=pickRandom(cat.words);
     return {type:'draw',drawerId,word,wordLength:word.length,emoji:cat.emoji,strokes:[],correctPlayerIds:[]};
   }
@@ -283,6 +305,10 @@ function buildRound(type,drawerId,lastUsed){
   if(type==='sign'){
     const s=pickRandom(SIGNS);
     return {type:'sign',icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct};
+  }
+  if(type==='match'){
+    const pairs=shuffle(MATCH_PAIRS_POOL).slice(0,4);
+    return {type:'match',pairs};
   }
 }
 function buildPlan(players){
@@ -301,15 +327,27 @@ document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   hostCode=randomCode();
   const initial={code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null};
   await writeRoom(hostCode,initial);
+  document.getElementById('lobby-code-big').textContent=hostCode;
   document.getElementById('host-room-code').textContent='KOD: '+hostCode;
   show('host-board-screen');
   hostPollTimer=setInterval(hostPoll,1000);
   hostPoll();
 });
 
+document.getElementById('cancel-room-btn').addEventListener('click', async ()=>{
+  if(!confirm('Avbryta rummet? Alla elever kopplas bort.')) return;
+  await updateRoom(hostCode, s=>{ s.phase='cancelled'; return s; });
+  clearInterval(hostPollTimer);
+  show('role-screen');
+});
+
 async function hostPoll(){
   const state=await readRoom(hostCode); if(!state) return;
-  renderAvatars(document.getElementById('host-avatars'),state);
+  const isLobby = state.phase==='lobby';
+  document.getElementById('host-room-code').classList.toggle('hidden', isLobby);
+  document.getElementById('host-avatars').classList.toggle('hidden', isLobby);
+  if(!isLobby) renderAvatars(document.getElementById('host-avatars'),state);
+  renderAvatars(document.getElementById('lobby-avatars-big'),state);
   document.getElementById('start-game-btn').disabled = state.players.length<1;
   document.getElementById('host-lobby-view').classList.toggle('hidden', state.phase!=='lobby');
   document.getElementById('host-round-view').classList.toggle('hidden', state.phase!=='active');
@@ -322,7 +360,7 @@ async function hostPoll(){
     const elapsed=(Date.now()-state.round.startedAt)/1000;
     const timeLeft=Math.max(0,dur-elapsed);
     document.getElementById('host-timer-bar').style.width=(100*timeLeft/dur)+'%';
-    const key=state.round.type+':'+(state.round.word||state.round.statement||state.round.title||JSON.stringify(state.round.correctOrder))+':'+state.planIndex;
+    const key=state.round.type+':'+(state.round.word||state.round.statement||state.round.title||JSON.stringify(state.round.correctOrder||state.round.pairs))+':'+state.planIndex;
     if(hostRenderedRoundKey!==key){ hostRenderedRoundKey=key; renderHostRound(state); }
     else if(state.round.type==='draw'){ redrawCanvas(document.getElementById('host-canvas'),state.round.strokes); }
 
@@ -364,11 +402,15 @@ function renderHostRound(state){
     label.innerHTML=`<span class="msi">quiz</span> Rätt eller fel`;
     body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
   } else if(r.type==='wordorder'){
-    label.innerHTML=`<span class="msi">sort</span> Bygg meningen`;
-    body.innerHTML=`<div class="chip-row">${r.scrambled.map(w=>`<span class="chip">${w}</span>`).join('')}</div>`;
+    label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`;
+    body.innerHTML=`<div class="drag-row">${r.scrambled.map(w=>`<span class="drag-chip" style="cursor:default;">${w}</span>`).join('')}</div>`;
   } else if(r.type==='sign'){
     label.innerHTML=`<span class="msi">signpost</span> Vad säger skylten?`;
-    body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.2rem;">${r.question}</div>`;
+    body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div>`;
+  } else if(r.type==='match'){
+    label.innerHTML=`<span class="msi">join_inner</span> Para ihop`;
+    body.innerHTML=`<div style="font-size:2.2rem;">${r.pairs.map(p=>p.emoji).join('   ')}</div>
+      <p class="status-line">Para ordet med bilden på din iPad</p>`;
   }
 }
 function renderSignHTML(r){
@@ -383,12 +425,14 @@ function redrawCanvas(canvas,strokes){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   (strokes||[]).forEach(s=>{
     if(!s.points||s.points.length<1) return;
+    ctx.globalCompositeOperation = s.mode==='eraser' ? 'destination-out' : 'source-over';
     ctx.beginPath();
     ctx.strokeStyle=s.color; ctx.lineWidth=s.size; ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.moveTo(s.points[0].x*canvas.width,s.points[0].y*canvas.height);
     for(let i=1;i<s.points.length;i++) ctx.lineTo(s.points[i].x*canvas.width,s.points[i].y*canvas.height);
     ctx.stroke();
   });
+  ctx.globalCompositeOperation='source-over';
 }
 
 async function finalizeRound(state){
@@ -428,6 +472,7 @@ function revealText(r){
   if(r.type==='truefalse') return r.isTrue ? 'Sant!' : 'Falskt!';
   if(r.type==='wordorder') return 'Rätt mening: '+r.correctOrder.join(' ');
   if(r.type==='sign') return 'Rätt svar: '+r.correct;
+  if(r.type==='match') return 'Paren: '+r.pairs.map(p=>p.word+' '+p.emoji).join(', ');
 }
 
 function renderRoundEnd(state){
@@ -453,7 +498,7 @@ function renderPodium(state){
   const slots=[[1,'p1'],[0,'p2'],[2,'p3']];
   el.innerHTML = slots.filter(([idx])=>sorted[idx]).map(([idx,cls])=>{
     const p=sorted[idx];
-    return `<div class="podium-slot ${cls}"><div style="font-size:2rem;">${p.avatar}</div>${p.name}<br>${p.score}p</div>`;
+    return `<div class="podium-slot ${cls}"><div style="font-size:1.8rem;">${p.avatar}</div>${p.name}<br>${p.score}p</div>`;
   }).join('');
 }
 
@@ -487,7 +532,8 @@ async function advanceRound(){
 /* ================= PLAYER LOGIC ================= */
 let playerCode=null, playerId=null, playerPollTimer=null, playerRenderedRoundKey=null;
 let wordOrderLocal=[];
-let drawState={color:'#12314F',size:4,strokes:[],currentStroke:null,lastSync:0};
+let matchState=null;
+let drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
 
 document.getElementById('join-btn').addEventListener('click', async ()=>{
   const code=document.getElementById('join-code').value.trim().toUpperCase();
@@ -512,6 +558,15 @@ async function playerPoll(){
   const idle=document.getElementById('player-idle-view');
   const roundView=document.getElementById('player-round-view');
   const endView=document.getElementById('player-roundend-view');
+
+  if(state.phase==='cancelled'){
+    [roundView,endView].forEach(v=>v.classList.add('hidden'));
+    idle.classList.remove('hidden');
+    document.getElementById('player-status-text').textContent='Läraren avslutade rummet.';
+    clearInterval(playerPollTimer);
+    return;
+  }
+
   [idle,roundView,endView].forEach(v=>v.classList.add('hidden'));
 
   if(state.phase==='lobby'){
@@ -520,12 +575,12 @@ async function playerPoll(){
   } else if(state.phase==='active' && state.round){
     roundView.classList.remove('hidden');
     renderMiniLB(document.getElementById('player-mini-lb'),state);
-    const key=state.round.type+':'+(state.round.word||state.round.statement||state.round.title||JSON.stringify(state.round.correctOrder))+':'+state.planIndex;
+    const key=state.round.type+':'+(state.round.word||state.round.statement||state.round.title||JSON.stringify(state.round.correctOrder||state.round.pairs))+':'+state.planIndex;
     if(playerRenderedRoundKey!==key){ playerRenderedRoundKey=key; renderPlayerRound(state); }
     else if(state.round.type==='draw' && state.round.drawerId!==playerId){
       redrawCanvas(document.getElementById('player-canvas'),state.round.strokes);
-      document.getElementById('player-guess-status').textContent =
-        (state.round.correctPlayerIds||[]).includes(playerId) ? 'Rätt! Väntar...' : '';
+      const gs=document.getElementById('player-guess-status');
+      if(gs) gs.textContent = (state.round.correctPlayerIds||[]).includes(playerId) ? 'Rätt! Väntar...' : '';
     }
   } else if(state.phase==='round-end'){
     endView.classList.remove('hidden');
@@ -548,16 +603,17 @@ function renderPlayerRound(state){
 
   if(r.type==='draw'){
     if(isDrawer){
-      drawState={color:'#12314F',size:4,strokes:[],currentStroke:null,lastSync:0};
+      drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
       body.innerHTML=`<div class="round-type-label"><span class="msi">brush</span> Du ritar: ${r.word}</div>
         <canvas class="draw-canvas" id="player-canvas" width="560" height="340"></canvas>
         <div class="brush-row">
-          <div class="swatch active" style="background:#12314F" data-color="#12314F"></div>
-          <div class="swatch" style="background:#E05252" data-color="#E05252"></div>
-          <div class="swatch" style="background:#1A6DB0" data-color="#1A6DB0"></div>
-          <div class="swatch" style="background:#3AA65B" data-color="#3AA65B"></div>
-          <button class="tool-btn" id="thin-btn">Tunn</button>
+          <div class="swatch active" style="background:#233246" data-color="#233246"></div>
+          <div class="swatch" style="background:#D9534F" data-color="#D9534F"></div>
+          <div class="swatch" style="background:#2B7DE0" data-color="#2B7DE0"></div>
+          <div class="swatch" style="background:#2E9E52" data-color="#2E9E52"></div>
+          <button class="tool-btn active" id="thin-btn">Tunn</button>
           <button class="tool-btn" id="thick-btn">Tjock</button>
+          <button class="tool-btn" id="eraser-btn"><span class="msi">ink_eraser</span>Sudda</button>
           <button class="tool-btn" id="clear-btn">Rensa</button>
         </div>
         <div class="status-line" id="drawer-status">0 har gissat rätt</div>`;
@@ -582,19 +638,16 @@ function renderPlayerRound(state){
     document.getElementById('tf-true-btn').addEventListener('click', ()=>submitAnswer(true));
     document.getElementById('tf-false-btn').addEventListener('click', ()=>submitAnswer(false));
   } else if(r.type==='wordorder'){
-    wordOrderLocal=[];
-    body.innerHTML=`<h2 style="font-size:1.1rem;">Bygg meningen</h2>
-      <div class="build-row" id="build-row"></div>
-      <div class="chip-row" id="chip-row"></div>
+    wordOrderLocal = r.scrambled.slice();
+    body.innerHTML=`<h2 style="font-size:1.05rem;">Dra orden i rätt ordning</h2>
+      <div class="drag-row" id="drag-row"></div>
       <button class="primary-btn" id="wo-submit-btn">Skicka</button>
-      <button class="tool-btn" id="wo-clear-btn" style="margin-top:.6rem;">Rensa</button>
       <div class="status-line" id="wo-status"></div>`;
-    renderChips(r.scrambled);
+    renderDragChips(document.getElementById('drag-row'), wordOrderLocal);
     document.getElementById('wo-submit-btn').addEventListener('click', ()=>submitAnswer(wordOrderLocal.slice()));
-    document.getElementById('wo-clear-btn').addEventListener('click', ()=>{ wordOrderLocal=[]; renderChips(r.scrambled); });
   } else if(r.type==='sign'){
     body.innerHTML = renderSignHTML(r) +
-      `<div class="statement-text" style="font-size:1.1rem;">${r.question}</div>
+      `<div class="statement-text" style="font-size:1.05rem;">${r.question}</div>
       <div class="choice-col" id="sign-choices"></div>
       <div class="status-line" id="sign-status"></div>`;
     const wrap=document.getElementById('sign-choices');
@@ -604,33 +657,97 @@ function renderPlayerRound(state){
       btn.addEventListener('click', ()=>submitAnswer(c));
       wrap.appendChild(btn);
     });
+  } else if(r.type==='match'){
+    matchState={pairs:r.pairs, matchedWords:[], selectedWord:null, selectedEmoji:null,
+      shuffledWords:shuffle(r.pairs.map(p=>p.word)), shuffledEmojis:shuffle(r.pairs.map(p=>p.emoji))};
+    body.innerHTML=`<h2 style="font-size:1.05rem;">Para ihop</h2>
+      <div class="match-columns">
+        <div class="match-col" id="match-words"></div>
+        <div class="match-col" id="match-emojis"></div>
+      </div>
+      <div class="status-line" id="match-status"></div>`;
+    renderMatchColumns();
   }
 }
-function renderChips(words){
-  const chipRow=document.getElementById('chip-row');
-  const buildRow=document.getElementById('build-row');
-  chipRow.innerHTML=''; buildRow.innerHTML='';
-  words.forEach((w,i)=>{
-    const chip=document.createElement('span');
-    chip.className='chip'+(wordOrderLocal.includes(w)&&countOcc(wordOrderLocal,w)>=countUpTo(words,w,i)?'':'');
-    chip.textContent=w;
-    chip.dataset.idx=i;
-    chip.addEventListener('click', ()=>{
-      if(chip.classList.contains('used')) return;
-      chip.classList.add('used');
-      wordOrderLocal.push(w);
-      const b=document.createElement('span'); b.className='chip'; b.textContent=w;
-      buildRow.appendChild(b);
+
+function renderDragChips(container, order){
+  container.innerHTML='';
+  order.forEach((w,i)=>{
+    const el=document.createElement('div');
+    el.className='drag-chip';
+    el.textContent=w;
+    el.draggable=true;
+    el.dataset.index=i;
+    el.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', i); el.classList.add('dragging'); });
+    el.addEventListener('dragend', ()=> el.classList.remove('dragging'));
+    el.addEventListener('dragover', e=> e.preventDefault());
+    el.addEventListener('drop', e=>{
+      e.preventDefault();
+      const fromIdx = +e.dataTransfer.getData('text/plain');
+      const toIdx = +el.dataset.index;
+      if(fromIdx===toIdx) return;
+      const [item]=order.splice(fromIdx,1);
+      order.splice(toIdx,0,item);
+      renderDragChips(container, order);
     });
-    chipRow.appendChild(chip);
+    container.appendChild(el);
   });
 }
-function countOcc(arr,w){return arr.filter(x=>x===w).length;}
-function countUpTo(arr,w,idx){let c=0;for(let i=0;i<=idx;i++) if(arr[i]===w) c++; return c;}
+
+function renderMatchColumns(){
+  const wordsWrap=document.getElementById('match-words');
+  const emojisWrap=document.getElementById('match-emojis');
+  wordsWrap.innerHTML=''; emojisWrap.innerHTML='';
+  matchState.shuffledWords.forEach(w=>{
+    const el=document.createElement('div');
+    el.className='match-tile'+(matchState.matchedWords.includes(w)?' matched':'');
+    el.textContent=w;
+    el.addEventListener('click', ()=>onMatchWordClick(w,el));
+    wordsWrap.appendChild(el);
+  });
+  matchState.shuffledEmojis.forEach(em=>{
+    const el=document.createElement('div');
+    const pair=matchState.pairs.find(p=>p.emoji===em);
+    el.className='match-tile'+(matchState.matchedWords.includes(pair.word)?' matched':'');
+    el.textContent=em;
+    el.addEventListener('click', ()=>onMatchEmojiClick(em,el));
+    emojisWrap.appendChild(el);
+  });
+}
+function onMatchWordClick(w,el){
+  if(el.classList.contains('matched')) return;
+  document.querySelectorAll('#match-words .match-tile').forEach(t=>t.classList.remove('selected'));
+  matchState.selectedWord=w; el.classList.add('selected');
+  tryMatch();
+}
+function onMatchEmojiClick(em,el){
+  if(el.classList.contains('matched')) return;
+  document.querySelectorAll('#match-emojis .match-tile').forEach(t=>t.classList.remove('selected'));
+  matchState.selectedEmoji=em; el.classList.add('selected');
+  tryMatch();
+}
+function tryMatch(){
+  if(!matchState.selectedWord || !matchState.selectedEmoji) return;
+  const pair=matchState.pairs.find(p=>p.word===matchState.selectedWord);
+  if(pair.emoji===matchState.selectedEmoji){
+    matchState.matchedWords.push(matchState.selectedWord);
+    matchState.selectedWord=null; matchState.selectedEmoji=null;
+    renderMatchColumns();
+    if(matchState.matchedWords.length===matchState.pairs.length){
+      document.getElementById('match-status').textContent='Klart!';
+      submitAnswer(true);
+    }
+  } else {
+    document.getElementById('match-status').textContent='Fel par, försök igen';
+    setTimeout(()=>{
+      matchState.selectedWord=null; matchState.selectedEmoji=null;
+      document.querySelectorAll('.match-tile.selected').forEach(t=>t.classList.remove('selected'));
+    },450);
+  }
+}
 
 function setupCanvasDrawing(){
   const canvas=document.getElementById('player-canvas');
-  const ctx=canvas.getContext('2d');
   let drawing=false;
   function getPos(e){
     const rect=canvas.getBoundingClientRect();
@@ -639,7 +756,8 @@ function setupCanvasDrawing(){
     return {x:(clientX-rect.left)/rect.width, y:(clientY-rect.top)/rect.height};
   }
   function start(e){ e.preventDefault(); drawing=true;
-    drawState.currentStroke={points:[getPos(e)],color:drawState.color,size:drawState.size};
+    const size = drawState.tool==='eraser' ? 22 : drawState.size;
+    drawState.currentStroke={points:[getPos(e)],color:drawState.color,size,mode:drawState.tool};
     drawState.strokes.push(drawState.currentStroke); redrawCanvas(canvas,drawState.strokes);
   }
   function move(e){ if(!drawing) return; e.preventDefault();
@@ -653,14 +771,20 @@ function setupCanvasDrawing(){
   canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false});
   canvas.addEventListener('touchend',end,{passive:false});
 
+  function setActiveTool(btn){
+    document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
   document.querySelectorAll('.swatch').forEach(sw=>{
     sw.addEventListener('click', ()=>{
       document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
-      sw.classList.add('active'); drawState.color=sw.dataset.color;
+      sw.classList.add('active'); drawState.color=sw.dataset.color; drawState.tool='pen';
+      document.getElementById('eraser-btn').classList.remove('active');
     });
   });
-  document.getElementById('thin-btn').addEventListener('click', ()=>drawState.size=4);
-  document.getElementById('thick-btn').addEventListener('click', ()=>drawState.size=10);
+  document.getElementById('thin-btn').addEventListener('click', (e)=>{ drawState.size=4; drawState.tool='pen'; setActiveTool(e.target); document.getElementById('eraser-btn').classList.remove('active'); });
+  document.getElementById('thick-btn').addEventListener('click', (e)=>{ drawState.size=10; drawState.tool='pen'; setActiveTool(e.target); document.getElementById('eraser-btn').classList.remove('active'); });
+  document.getElementById('eraser-btn').addEventListener('click', (e)=>{ drawState.tool='eraser'; setActiveTool(e.currentTarget); });
   document.getElementById('clear-btn').addEventListener('click', ()=>{
     drawState.strokes=[]; redrawCanvas(canvas,[]); syncStrokes();
   });
@@ -719,6 +843,7 @@ async function submitAnswer(value){
     if(r.type==='truefalse') correct = value===r.isTrue;
     else if(r.type==='wordorder') correct = JSON.stringify(value)===JSON.stringify(r.correctOrder);
     else if(r.type==='sign') correct = value===r.correct;
+    else if(r.type==='match') correct = value===true;
     const player=s.players.find(p=>p.id===playerId);
     const dur=ROUND_DURATIONS[r.type];
     const timeLeft=Math.max(0,dur-(Date.now()-r.startedAt)/1000);
@@ -731,7 +856,7 @@ async function submitAnswer(value){
     }
     return s;
   });
-  const st=document.getElementById('tf-status')||document.getElementById('wo-status')||document.getElementById('sign-status');
+  const st=document.getElementById('tf-status')||document.getElementById('wo-status')||document.getElementById('sign-status')||document.getElementById('match-status');
   if(st) st.textContent='Skickat! Väntar på övriga...';
 }
 </script>
