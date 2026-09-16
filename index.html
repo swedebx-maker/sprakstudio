@@ -198,26 +198,26 @@ canvas.draw-canvas{background:#fff;border-radius:18px;box-shadow:inset 0 0 0 4px
 <script>
 const AVATARS=["🦊","🐻","🐼","🐸","🦁","🐨","🐯","🐰","🐷","🐵"];
 const DRAW_CATEGORIES={
-  mat:{name:"Mat",emoji:"🍎",words:["äpple","bröd","mjölk","ägg","fisk","kyckling","kaffe","kaka","banan","ost"]},
-  djur:{name:"Djur",emoji:"🐶",words:["hund","katt","häst","fågel","ko","get","gris","kanin","björn","groda"]},
-  hem:{name:"Hem",emoji:"🏠",words:["stol","bord","säng","fönster","dörr","lampa","kudde","soffa","nyckel","tv"]},
-  kropp:{name:"Kropp",emoji:"🧍",words:["huvud","hand","fot","öga","öra","näsa","mun","arm","ben","hår"]},
-  vader:{name:"Väder",emoji:"☀️",words:["sol","regn","snö","moln","vind","åska","dimma","regnbåge"]}
+  mat:{name:"Mat",emoji:"🍎",words:["äpple","bröd","mjölk","ägg","fisk","kaffe","banan","ost"]},
+  djur:{name:"Djur",emoji:"🐶",words:["hund","katt","häst","ko","gris","fågel"]},
+  hem:{name:"Hem",emoji:"🏠",words:["stol","bord","säng","dörr","lampa","soffa"]},
+  kropp:{name:"Kropp",emoji:"🧍",words:["hand","fot","öga","öra","mun","hår"]},
+  vader:{name:"Väder",emoji:"☀️",words:["sol","regn","snö","moln"]}
 };
 const SENTENCES=[
-  ["Jag","heter","Ali"],["Hon","bor","i","Sverige"],["Vi","äter","äpple"],
-  ["Han","dricker","kaffe"],["Barnet","leker","hemma"],["Jag","mår","bra"],
-  ["Katten","sover","på","soffan"],["Vi","går","till","skolan"]
+  ["Jag","heter","Ali"],["Hon","bor","här"],["Vi","äter","mat"],
+  ["Han","dricker","kaffe"],["Barnet","sover"],["Jag","mår","bra"],
+  ["Katten","sover"],["Vi","går","hem"]
 ];
 const STATEMENTS=[
-  {text:"Sverige ligger i Europa.",isTrue:true},
-  {text:"Katt heter 'hund' på svenska.",isTrue:false},
-  {text:"'Jag har en bil' är rätt svenska.",isTrue:true},
-  {text:"'Jag är har hungrig' är rätt svenska.",isTrue:false},
-  {text:"Man säger 'hej då' när man möts första gången.",isTrue:false},
-  {text:"ICA är en svensk matbutik.",isTrue:true},
-  {text:"Man behöver körkort för att cykla.",isTrue:false},
-  {text:"'Tack så mycket' betyder 'tack'.",isTrue:true}
+  {text:"Solen är gul.",isTrue:true},
+  {text:"En hund är ett fordon.",isTrue:false},
+  {text:"Mjölk är vit.",isTrue:true},
+  {text:"En banan är blå.",isTrue:false},
+  {text:"Vintern är kall.",isTrue:true},
+  {text:"Bröd är mat.",isTrue:true},
+  {text:"En katt kan flyga.",isTrue:false},
+  {text:"ICA är en matbutik.",isTrue:true}
 ];
 const SIGNS=[
   {icon:"storefront",title:"ICA Affär",lines:["Öppet: Mån–Fre 9–18","Lördag 10–15","Söndag Stängt"],
