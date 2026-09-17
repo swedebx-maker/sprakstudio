@@ -898,9 +898,14 @@ async function hostPoll(){
   if(state.phase==='active' && state.round && state.round.type==='bokstav'){
     const r=state.round;
     if(r.theft && r.theft.at !== hostLastTheftAt){ hostLastTheftAt=r.theft.at; showTheftOverlay(state); }
+    if(r.subPhase==='SPIN' && hostLastStateHash===stateHash){
+      const anySpace = state.players.some(p=>bokstavEmptyCells(r, p.id).length > 0);
+      if(!anySpace){ await finalizeRound(state); return; }
+    }
     if(r.subPhase==='SPIN' && r.spins >= r.maxSpins && hostAutoSpinAt !== r.spins){
       const anyBonus = state.players.some(p=>((r.bonusLeft||{})[p.id]||0) > 0);
-      if(anyBonus){ hostAutoSpinAt = r.spins; setTimeout(()=>window.hostSpinAllWheels(), 700); }
+      const anySpace = state.players.some(p=>((r.bonusLeft||{})[p.id]||0) > 0 && bokstavEmptyCells(r, p.id).length > 0);
+      if(anyBonus && anySpace){ hostAutoSpinAt = r.spins; setTimeout(()=>window.hostSpinAllWheels(), 700); }
     }
     if(r.subPhase==='PLACE' && hostLastStateHash===stateHash){
       const allReady = state.players.every(p=>(r.readyPlayers||[]).indexOf(p.id)!==-1)
@@ -1017,7 +1022,7 @@ function renderHostRound(state){
 
     if(r.subPhase === 'SPIN'){
       const isBonus = r.spins >= r.maxSpins;
-      const who = isBonus ? bonusPlayers : state.players;
+      const who = (isBonus ? bonusPlayers : state.players).filter(p=>bokstavEmptyCells(r, p.id).length > 0);
       const label2 = isBonus
         ? `🎁 Bonussnurr: ${who.map(p=>p.avatar+' '+p.name).join(', ')}`
         : `${r.spins}/${r.maxSpins}`;
@@ -1068,7 +1073,7 @@ function renderWheelGrid(state, who, r){
     let stateTxt = '';
     if(!spinning && drawn !== undefined){
       if(isThief) stateTxt = '🦹 TJUV!';
-      else if(ready) stateTxt = '✓ klar';
+      else if(ready) stateTxt = '✓klar';
       else stateTxt = 'placerar ' + drawn;
     }
     const nameSize = k>=1.7 ? '1.5rem' : k>=1.2 ? '1.15rem' : '.95rem';
@@ -1108,9 +1113,10 @@ window.hostSpinAllWheels = async function(){
   if(!state || !state.round || state.round.type!=='bokstav') return;
   const r = state.round;
   const bonusMode = r.spins >= r.maxSpins;
-  const participants = bonusMode
+  const hasSpace = p => bokstavEmptyCells(r, p.id).length > 0;
+  const participants = (bonusMode
     ? state.players.filter(p => (r.bonusLeft||{})[p.id] > 0)
-    : state.players.slice();
+    : state.players.slice()).filter(hasSpace);
   if(!participants.length) return;
 
   let thiefPid = null;
@@ -1269,9 +1275,9 @@ function renderPlayerAnswerSummary(r, playerId){
   }
   if(r.type==='truefalse') return a.value ? 'Rätt' : 'Fel';
   if(r.type==='sign') return a.value;
-  if(r.type==='match') return a.correct ? 'Klar ✓' : '–';
+  if(r.type==='match') return a.correct ? 'Klar✓' : '–';
   if(r.type==='draw') return a.value ? `"${a.value}"` : '–';
-  if(r.type==='bokstav') return a.grid ? 'Klar ✓' : '–';
+  if(r.type==='bokstav') return a.grid ? 'Klar✓' : '–';
   return '–';
 }
 
@@ -1302,7 +1308,7 @@ async function finalizeRound(state){
     let reveal='Ordet var: '+r.word;
     if(r.type==='truefalse') reveal = r.isTrue ? 'Sant!' : 'Falskt!';
     if(r.type==='wordorder') reveal = r.correctOrder.join(' ');
-    if(r.type==='sign') reveal = 'Rätt svar: '+r.correct;
+    if(r.type==='sign') reveal = 'Rätt svar : '+r.correct;
     if(r.type==='match') reveal = 'Paren: '+r.pairs.map(p=>p.word+' '+p.emoji).join(', ');
     if(r.type==='bokstav') reveal = '';
 
@@ -1404,10 +1410,10 @@ document.getElementById('tp-approve-word').addEventListener('click', async ()=>{
     }
     return s;
   });
-  if(!ok) return tpMsg('Gick inte att spara, försök igen.', 'var(--red)');
+  if(!ok) return tpMsg('Gick inte att spara,försök igen', 'var(--red)');
   AudioEngine.playCorrect();
   document.getElementById('tp-word').value='';
-  tpMsg('"'+clean+'" godkänt: +'+pts+' p. Ordet finns nu i ordlistan.');
+  tpMsg('"'+clean+'" godkänt: +'+pts+' p. Ordet finns nu i ordlistan');
   const fresh=await readRoom(hostCode,false); if(fresh) renderRoundEnd(fresh);
 });
 
@@ -1421,8 +1427,8 @@ document.getElementById('tp-approve-answer').addEventListener('click', async ()=
     if(s.lastRoundResult){ s.lastRoundResult.pointsThisRound[pid]=(s.lastRoundResult.pointsThisRound[pid]||0)+300; }
     return s;
   });
-  if(!ok) return tpMsg('Gick inte att spara, försök igen.', 'var(--red)');
-  AudioEngine.playCorrect(); tpMsg('Svaret godkänt: +300 p.');
+  if(!ok) return tpMsg('Gick inte att spara, försök igen', 'var(--red)');
+  AudioEngine.playCorrect(); tpMsg('Svaret godkänt, kul !');
   const fresh=await readRoom(hostCode,false); if(fresh) renderRoundEnd(fresh);
 });
 
@@ -1469,10 +1475,10 @@ document.getElementById('join-btn').addEventListener('click', async ()=>{
   AudioEngine.ensureCtx(); const code=document.getElementById('join-code').value.trim().toUpperCase(); const name=document.getElementById('join-name').value.trim();
   const err=document.getElementById('join-error'); err.textContent=''; if(!code||!name){ err.textContent='Fyll i kod och namn!'; return; }
   document.getElementById('join-btn').disabled = true;
-  const existing=await readRoom(code); if(!existing){ err.textContent='Rummet finns inte.'; document.getElementById('join-btn').disabled = false; return; }
+  const existing=await readRoom(code); if(!existing){ err.textContent='rummet finns inte eller fel kod'; document.getElementById('join-btn').disabled = false; return; }
   playerId=newId(); const avatar=pickRandom(AVATARS);
   const ok=await updateRoom(code, s=>{ s.players.push({id:playerId,name,avatar,score:0,combo:0}); return s; });
-  if(!ok){ err.textContent='Gick inte, försök igen.'; document.getElementById('join-btn').disabled = false; return; }
+  if(!ok){ err.textContent='Gick inte, försök igen'; document.getElementById('join-btn').disabled = false; return; }
   AudioEngine.playJoin(); playerCode=code; document.getElementById('player-name-tag').textContent=avatar+' '+name;
   saveSession({role:'player', code, playerId, name, avatar});
   show('player-game-screen'); startPlayerPolling();
@@ -1598,7 +1604,7 @@ function renderBokstavPlayer(state) {
 
   if(r.subPhase==='SPIN'){
     const bonus=(r.bonusLeft||{})[playerId]||0;
-    body.innerHTML = `<h2 style="font-size:1.3rem;">Väntar på läraren... 🎲</h2>
+    body.innerHTML = `<h2 style="font-size:1.3rem;">Väntar på läraren..🎲</h2>
       ${bonus?`<div class="status-line" style="color:var(--green);">Du får ${bonus} bonussnurr (någon stal från dig)</div>`:''}
       ${bokstavGridHTML(myGrid,false)}`;
     return;
@@ -1617,11 +1623,11 @@ function renderBokstavPlayer(state) {
     return;
   }
 
-  if(isThief && r.thiefStage && r.thiefStage!=='DONE'){
+  if(isThief && r.thiefStage && r.thiefStage!=='DONE' && !myGrid.every(c=>c!=='')){
     if(r.thiefStage==='PICK_VICTIM'){
       const victims = state.players.filter(p=>p.id!==playerId && bokstavHasLetters(r,p.id));
       if(!victims.length){
-        body.innerHTML = `<h2>Ingen att stjäla från - du får en vanlig bokstav.</h2>`;
+        body.innerHTML = `<h2>Ingen att stjäla från -du får en vanlig bokstav</h2>`;
         setTimeout(()=>updateRoom(playerCode, st=>{
           const rr=st.round; if(rr.thiefStage!=='PICK_VICTIM') return st;
           rr.draws[playerId]=pickRandom(BOKSTAV_LETTERS.filter(l=>l!=='🦹‍♂️')); rr.thiefStage='PLACE'; return st;
@@ -1655,7 +1661,7 @@ function renderBokstavPlayer(state) {
     }
     if(r.thiefStage==='PLACE'){
       const letter = r.draws[playerId];
-      body.innerHTML = `<h2 style="font-size:1.15rem;">Placera din stulna bokstav: <span style="color:var(--accent);font-size:2.2rem;">${letter}</span> ${deadlinePill(playerLocalDeadline)}</h2>
+      body.innerHTML = `<h2 style="font-size:1.15rem;">Placera din stulna bokstav : <span style="color:var(--accent);font-size:2.2rem;">${letter}</span> ${deadlinePill(playerLocalDeadline)}</h2>
         ${bokstavGridHTML(myGrid, true, letter)}`;
       bindCellClicks(idx=>window.bokstavThiefPlace(idx), letter);
       return;
@@ -1664,15 +1670,16 @@ function renderBokstavPlayer(state) {
 
   if(isVictim && r.thiefStage && r.thiefStage!=='DONE'){
     const thief=state.players.find(p=>p.id===r.thiefId);
-    body.innerHTML = `<h2 style="color:var(--red);font-size:1.3rem;">Åh nej! 🦹‍♂️<br>${thief?thief.name:'Någon'} stjäl från dig!</h2>
-      <div class="status-line" style="color:var(--green);">Du får ett bonussnurr senare.</div>
+    body.innerHTML = `<h2 style="color:var(--red);font-size:1.3rem;">Åh nej! 🦹‍♂️<br>${thief?thief.name:'Någon'} stjäl från dig !</h2>
+      <div class="status-line" style="color:var(--green);">Du får ett bonussnurr senare</div>
       ${bokstavGridHTML(myGrid,false)}`;
     return;
   }
 
-  if(isReady || myDraw===undefined || myDraw==='🦹‍♂️'){
+  const gridFull = myGrid.every(c=>c!=='');
+  if(isReady || myDraw===undefined || myDraw==='🦹‍♂️' || gridFull){
     const waiting = state.players.filter(p=>(r.readyPlayers||[]).indexOf(p.id)===-1).length;
-    body.innerHTML = `<h2 style="font-size:1.3rem;color:var(--green);">Klar! ✓</h2>
+    body.innerHTML = `<h2 style="font-size:1.3rem;color:var(--green);">${gridFull ? 'Pappret är fullt lol 📝' : 'Klar! ✓'}</h2>
       <div class="status-line">${waiting?('Väntar på '+waiting+' elever'):'Väntar på läraren'}</div>
       ${bokstavGridHTML(myGrid,false)}`;
     return;
