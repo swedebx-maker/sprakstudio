@@ -169,6 +169,12 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 #grid-zoom .bokstav-paper { background: #fff; }
 #host-roundend-view.wheel-board { position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; margin: 0; border-radius: 0; z-index: 900; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: auto; padding: 3vh 2vw; }
 #host-roundend-view.wheel-board .leaderboard-table { max-width: 720px; }
+.rounds-pill{display:flex;align-items:center;justify-content:space-between;gap:.4rem;width:100%;background:#fff;border:2px solid var(--border);border-radius:12px;padding:.2rem .35rem;}
+.rounds-pill #rounds-count{flex:1;text-align:center;font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;color:var(--ink);}
+.rounds-pill button{width:32px;height:32px;border:none;border-radius:9px;background:var(--accent-light);color:var(--accent-dark);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.rounds-pill button:hover{background:#DCE9F9;}
+.rounds-pill button:disabled{opacity:.35;cursor:default;}
+.rounds-pill .msi{font-size:20px;}
 .thief-announce { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: clamp(2rem, 5vw, 4rem); color: var(--red); margin-top: 1rem; animation: popIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 #theft-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(20,24,34,.92); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Fredoka', sans-serif; font-weight: 700; gap: 1rem; animation: popIn .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 #theft-overlay .to-thief { font-size: 8rem; line-height: 1; }
@@ -250,9 +256,16 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 <div id="host-board-screen" class="hidden board-wrap" style="position:relative;">
   <div class="top-bar">
     <div class="room-pill hidden" id="host-room-code">KOD: ----</div>
-    <div style="display:flex;gap:.6rem;">
-      <button class="ghost-btn" id="mute-btn"><span class="msi">volume_up</span></button>
-      <button class="cancel-btn" id="cancel-room-btn"><span class="msi">cancel</span> Avbryt rummet</button>
+    <div style="display:flex;flex-direction:column;align-items:stretch;gap:.5rem;">
+      <div class="rounds-pill hidden" id="rounds-pill">
+        <button id="rounds-minus" aria-label="-"><span class="msi">remove</span></button>
+        <span id="rounds-count">30</span>
+        <button id="rounds-plus" aria-label="+"><span class="msi">add</span></button>
+      </div>
+      <div style="display:flex;gap:.6rem;">
+        <button class="ghost-btn" id="mute-btn"><span class="msi">volume_up</span></button>
+        <button class="cancel-btn" id="cancel-room-btn"><span class="msi">cancel</span> Avbryt rummet</button>
+      </div>
     </div>
   </div>
   <div class="avatars hidden" id="host-avatars"></div>
@@ -751,10 +764,11 @@ function buildRound(type,drawerId){
   if(type==='bokstav'){ return {type:'bokstav',spins:0,maxSpins:25,subPhase:'SPIN',wheels:{},draws:{},readyPlayers:[],stolen:{},bonusLeft:{},theft:null,thiefId:null,thiefStage:null,victimId:null,spinEndsAt:0,deadline:0,bonusMode:false}; }
 }
 function buildPlan(players, count=30){
-  const plan=[]; let i=0;
+  const plan=[]; let i=0; let pool=[];
+  const nextType=()=>{ if(!pool.length) pool=shuffle(NON_DRAW_TYPES); return pool.pop(); };
   while(plan.length<count){
     plan.push({type:'draw',drawerId:players[i%players.length].id});
-    if(plan.length<count) plan.push({type:pickRandom(NON_DRAW_TYPES)}); i++;
+    if(plan.length<count) plan.push({type:nextType()}); i++;
   }
   return plan.slice(0,count);
 }
@@ -817,6 +831,23 @@ document.addEventListener('visibilitychange', ()=>{
   if(!hostPollStop){ clearTimeout(hostPollTimer); hostLoop(); }
   if(!playerPollStop){ clearTimeout(playerPollTimer); playerLoop(); }
 });
+
+let plannedRounds=30;
+const ROUNDS_MIN=10, ROUNDS_MAX=100, ROUNDS_STEP=10;
+function renderRoundsPill(){
+  document.getElementById('rounds-count').textContent=plannedRounds+' rundor';
+  document.getElementById('rounds-minus').disabled = plannedRounds<=ROUNDS_MIN;
+  document.getElementById('rounds-plus').disabled = plannedRounds>=ROUNDS_MAX;
+  const more=document.getElementById('add-rounds-btn');
+  if(more) more.innerHTML=`<span class="msi">add_circle</span> Spela mer (${plannedRounds} rundor till)`;
+}
+document.getElementById('rounds-minus').addEventListener('click', ()=>{
+  plannedRounds=Math.max(ROUNDS_MIN, plannedRounds-ROUNDS_STEP); AudioEngine.playPop(); renderRoundsPill();
+});
+document.getElementById('rounds-plus').addEventListener('click', ()=>{
+  plannedRounds=Math.min(ROUNDS_MAX, plannedRounds+ROUNDS_STEP); AudioEngine.playPop(); renderRoundsPill();
+});
+renderRoundsPill();
 
 document.getElementById('mute-btn').addEventListener('click', (e)=>{
   const on=AudioEngine.toggleMusic(); e.currentTarget.querySelector('.msi').textContent = on ? 'volume_up' : 'volume_off';
@@ -892,6 +923,7 @@ async function hostPoll(){
 
   const isLobby = state.phase==='lobby';
   document.getElementById('host-room-code').classList.toggle('hidden', isLobby);
+  document.getElementById('rounds-pill').classList.toggle('hidden', !isLobby);
   document.getElementById('host-avatars').classList.toggle('hidden', isLobby);
   
   if(!isLobby) renderAvatars(document.getElementById('host-avatars'),state);
@@ -1407,11 +1439,11 @@ function renderPodium(state){
 
 document.getElementById('start-game-btn').addEventListener('click', async ()=>{
   document.getElementById('start-game-btn').disabled = true; const state=await readRoom(hostCode);
-  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,30); s.planIndex=-1; return s; }); await advanceRound();
+  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,plannedRounds); s.planIndex=-1; return s; }); await advanceRound();
 });
 document.getElementById('next-round-btn').addEventListener('click', advanceRound);
 document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
-  await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,30)); return s; }); await advanceRound();
+  await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,plannedRounds)); return s; }); await advanceRound();
   document.getElementById('host-finished-view').style.boxShadow = 'none'; document.getElementById('host-finished-view').classList.add('hidden'); document.getElementById('host-round-view').classList.remove('hidden');
   AudioEngine.stopMusic(); AudioEngine.startMusic(); AudioEngine.setMusicVolume(AudioEngine.VOL_MAIN, 1.0);
 });
