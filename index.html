@@ -16,10 +16,7 @@
   --green:#2E9E52; --red:#D9534F;
 }
 *{box-sizing:border-box;}
-
-/* УВЕЛИЧЕННЫЙ МАСШТАБ СТРАНИЦЫ (18px вместо стандартных 16px) */
-html{font-size: 18px;} 
-
+html { font-size: 19px; } 
 html,body{margin:0;padding:0;min-height:100%;font-family:'Nunito',sans-serif;
   background:var(--bg); color:var(--ink); -webkit-user-select:none; user-select:none; overflow-x:hidden;}
 #app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3vh 3vw;}
@@ -136,13 +133,13 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .leaderboard-table .delta-down{color:var(--red);}
 .leaderboard-table .gained{color:var(--accent-dark);font-family:'Fredoka',sans-serif;}
 
-/* EPIC FULLSCREEN PODIUM STYLES */
+/* EPIC FULLSCREEN PODIUM STYLES (WITH BEAT EFFECTS) */
 #host-finished-view {
-  position: fixed !important; /* Делаем на весь экран! */
+  position: fixed !important;
   top: 0; left: 0;
   width: 100vw !important;
   height: 100vh !important;
-  max-width: 100% !important; /* Сбрасываем ограничение .card */
+  max-width: 100% !important;
   border-radius: 0 !important;
   margin: 0 !important;
   background: linear-gradient(135deg, #ffffff, #f0f4f8);
@@ -152,29 +149,30 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  transition: box-shadow 0.1s ease-out; /* Для плавного радужного бита */
 }
 #host-finished-view::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background: url('jarven.png') center/cover no-repeat;
-  opacity: 0.12; /* Чуть виднее */
+  opacity: 0.15;
   z-index: 0;
   pointer-events: none;
 }
 #host-finished-view > * {
   position: relative;
-  z-index: 1; /* Контент поверх фона */
+  z-index: 1; 
 }
 
-/* Огромный пьедестал */
+/* Огромный пьедестал (сдвинут чуть ниже) */
 .podium{
   display:flex;
   align-items:flex-end;
   justify-content:center;
-  gap:2rem;
-  margin: 8vh 0 6vh;
-  transform: scale(1.35); /* Скейл вверх */
+  gap:2.5rem;
+  margin: 15vh 0 4vh; 
+  transform: scale(1.4); 
   transform-origin: center bottom;
 }
 .podium-slot{
@@ -182,17 +180,17 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
   font-family:'Fredoka',sans-serif;font-weight:700;color:var(--ink);
   box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
   position: relative;
-  width: 140px;
-  animation: podiumRise 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+  width: 150px;
+  animation: podiumRise 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; /* both держит скрытым до старта */
 }
 @keyframes podiumRise {
-  0% { transform: translateY(150px); opacity: 0; }
+  0% { transform: translateY(200px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
 
 .podium-slot .podium-avatar { 
   font-size: 3.8rem; 
-  margin-top: -60px; /* Вылезает за пределы пьедестала */
+  margin-top: -65px; 
   margin-bottom: 5px; 
   position:relative; 
   z-index:2; 
@@ -213,26 +211,25 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 }
 .podium-slot .podium-score { 
   color: rgba(255,255,255,1); 
-  font-size: 1.5rem; 
+  font-size: 1.6rem; 
   margin-top: 0.6rem;
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.podium-slot.p1{height:260px;background:linear-gradient(180deg, #FFD000, #FF7B00); color:#fff; animation-delay: 0.6s;}
-.podium-slot.p2{height:200px;background:linear-gradient(180deg, #00B4D8, #0077B6); animation-delay: 0.3s;}
-.podium-slot.p3{height:160px;background:linear-gradient(180deg, #52B788, #2D6A4F); animation-delay: 0s;}
+.podium-slot.p1{height:270px;background:linear-gradient(180deg, #FFD000, #FF7B00); color:#fff;}
+.podium-slot.p2{height:210px;background:linear-gradient(180deg, #00B4D8, #0077B6);}
+.podium-slot.p3{height:160px;background:linear-gradient(180deg, #52B788, #2D6A4F);}
 
 .crown { 
   position:absolute; 
-  top:-110px; /* Над аватаркой */
+  top:-95px; 
   left:50%; 
   transform:translateX(-50%); 
-  font-size:4.5rem; 
+  font-size:4.8rem; 
   filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); 
-  animation: crownDrop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards; 
-  animation-delay: 1.2s; 
+  animation: crownDrop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; 
 }
-@keyframes crownDrop { 0% { transform: translate(-50%, -80px) scale(0); opacity:0;} 100% { transform: translate(-50%, 0) scale(1); opacity:1;} }
+@keyframes crownDrop { 0% { transform: translate(-50%, -60px) scale(0); opacity:0;} 100% { transform: translate(-50%, 0) scale(1); opacity:1;} }
 
 .player-idle{text-align:center;}
 .player-idle .big-emoji{font-size:3.2rem;color:var(--accent); animation: pulse 1.3s infinite ease-in-out;}
@@ -301,10 +298,9 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
     <button class="primary-btn hidden" id="next-round-btn">Nästa runda</button>
   </div>
   
-  <!-- ФИНАЛЬНЫЙ ЭКРАН ХОСТА (ПОЛНОЭКРАННЫЙ) -->
   <div id="host-finished-view" class="hidden">
-    <h2 style="font-size: 4rem; margin-bottom: 0;">🏆 Spelet är slut!</h2>
-    <p class="sub" style="margin-bottom: 0.5rem; font-size: 1.8rem; color: #555;">Bra jobbat allihopa!</p>
+    <h2 style="font-size: 4rem; margin-bottom: 0; animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🏆 Spelet är slut!</h2>
+    <p class="sub" style="margin-bottom: 0.5rem; font-size: 1.8rem; color: #555; animation: popIn 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">Bra jobbat allihopa!</p>
     <div class="podium" id="podium"></div>
     <button class="primary-btn" id="add-rounds-btn" style="background:var(--yellow);color:var(--ink); margin-top:3rem; position:relative; z-index:2; font-size: 1.2rem; padding: 1rem 2rem;"><span class="msi">add_circle</span> Spela mer (20 rundor till)</button>
   </div>
@@ -354,9 +350,9 @@ const Confetti = (function(){
   }
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
   
-  function shoot() {
+  function shoot(amount = 150) {
     if(!canvas) init();
-    for(let i=0; i<150; i++) {
+    for(let i=0; i<amount; i++) {
       particles.push({
         x: canvas.width / 2, y: canvas.height + 10,
         vx: (Math.random() - 0.5) * (canvas.width / 40),
@@ -370,15 +366,20 @@ const Confetti = (function(){
     }
     if(!animating) { animating = true; render(); }
   }
+
+  function startPlayerLoop() {
+    shoot(100);
+    setInterval(() => shoot(20), 800); 
+  }
   
   function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     let active = false;
-    particles.forEach((p, index) => {
+    particles.forEach((p) => {
       p.tiltAngle += p.tiltAngleInc;
       p.y += (Math.cos(p.tiltAngle) + 1 + p.size / 2) / 2;
       p.x += Math.sin(p.tiltAngle) * 2 + p.vx;
-      p.vy += 0.2; // gravity
+      p.vy += 0.2; 
       p.y += p.vy;
       
       ctx.beginPath();
@@ -395,7 +396,7 @@ const Confetti = (function(){
     else { animating = false; particles = []; }
   }
   
-  return { shoot };
+  return { shoot, startPlayerLoop };
 })();
 
 const AVATARS=["🦊","🐻","🐼","🐸","🦁","🐨","🐯","🐰","🐷","🐵"];
@@ -414,33 +415,19 @@ const DRAW_CATEGORIES={
 const SENTENCES=[
   ["Jag","heter","Ali"],["Hon","bor","här"],["Vi","äter","mat"],
   ["Han","dricker","kaffe"],["Barnet","sover"],["Jag","mår","bra"],
-  ["Katten","sover"],["Vi","går","hem"],["Han","är","glad"],
-  ["Hon","har","en","bok"],["Jag","ser","dig"],["Hunden","springer"],
-  ["Han","läser","en","bok"],["Jag","vill","ha","vatten"],["Hon","lagar","mat"],
-  ["Barnen","leker"],["Jag","tycker","om","kaffe"],["Vi","pratar","svenska"],
-  ["Han","kör","bil"],["Solen","skiner"],["Det","regnar","idag"],
-  ["Jag","är","trött"],["Vi","ses","imorgon"]
+  ["Katten","sover"],["Vi","går","hem"],["Han","är","glad"]
 ];
 const STATEMENTS=[
   {text:"Solen är gul.",isTrue:true}, {text:"En hund är ett fordon.",isTrue:false},
-  {text:"Mjölk är vit.",isTrue:true}, {text:"En banan är blå.",isTrue:false},
-  {text:"Vintern är kall.",isTrue:true}, {text:"Bröd är mat.",isTrue:true},
-  {text:"En katt kan flyga.",isTrue:false}, {text:"ICA är en matbutik.",isTrue:true},
-  {text:"Gräset är rött.",isTrue:false}, {text:"En fisk kan simma.",isTrue:true}
+  {text:"Mjölk är vit.",isTrue:true}, {text:"En banan är blå.",isTrue:false}
 ];
 const SIGNS=[
-  {icon:"storefront",title:"ICA Affär",lines:["Öppet: Mån–Fre 9–18","Lördag 10–15","Söndag Stängt"],
-   question:"Är affären öppen på söndag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
-  {icon:"receipt_long",title:"Kvitto",lines:["Mjölk .......... 15 kr","Bröd .......... 25 kr","Totalt ......... 40 kr"],
-   question:"Vad kostar mjölken?",choices:["15 kr","25 kr","40 kr"],correct:"15 kr"},
-  {icon:"directions_bus",title:"Busshållplats",lines:["Buss 4 → Centrum","Avgång var 10:e minut"],
-   question:"Hur ofta kommer buss 4?",choices:["Var 10:e minut","Var timme","En gång om dagen"],correct:"Var 10:e minut"}
+  {icon:"storefront",title:"ICA Affär",lines:["Öppet: Mån–Fre 9–18","Lördag 10–15"],
+   question:"Är affären öppen på söndag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"}
 ];
 const MATCH_PAIRS_POOL=[
   {word:"äpple",emoji:"🍎"},{word:"bröd",emoji:"🍞"},{word:"mjölk",emoji:"🥛"},
-  {word:"hund",emoji:"🐶"},{word:"katt",emoji:"🐱"},{word:"sol",emoji:"☀️"},
-  {word:"regn",emoji:"🌧️"},{word:"hand",emoji:"✋"},{word:"öga",emoji:"👁️"},
-  {word:"bok",emoji:"📖"},{word:"hus",emoji:"🏠"},{word:"bil",emoji:"🚗"}
+  {word:"hund",emoji:"🐶"},{word:"katt",emoji:"🐱"},{word:"sol",emoji:"☀️"}
 ];
 const ROUND_DURATIONS={draw:90,truefalse:15,wordorder:40,sign:20,match:45};
 const NON_DRAW_TYPES=["truefalse","wordorder","sign","match"];
@@ -493,99 +480,221 @@ document.getElementById('player-role-btn').addEventListener('click',()=>show('pl
 const urlCode=new URLSearchParams(location.search).get('code');
 if(urlCode){ show('player-join-screen'); document.getElementById('join-code').value=urlCode.toUpperCase(); }
 
-/* ================= AUDIO ================= */
+/* ================= 16-BIT AUDIO ENGINE & DUCKING ================= */
 const AudioEngine=(function(){
-  let ctx=null, musicOn=true, musicTimer=null, masterGain=null, musicGain=null, sfxGain=null, musicStep=0, musicStartTime=0;
+  let ctx=null, musicOn=true, masterGain=null, musicGain=null, sfxGain=null, sfxFilter=null;
+  
+  let bgSource = null;
+  let bgBuffer = null;
+  
   let finaleBuffers = [];
   const FINALE_URLS = ['audio/sound1.mp3', 'audio/sound2.mp3', 'audio/sound3.mp3', 'audio/sound4.mp3'];
 
-  const SECTIONS=[
-    { bass:[130.81,130.81,164.81,146.83], arp:[261.63,329.63,392.00,329.63], lead:[523.25,0,659.25,587.33] },
-    { bass:[174.61,174.61,196.00,220.00], arp:[349.23,440.00,523.25,440.00], lead:[698.46,0,880.00,783.99] }
-  ];
+  // Для анализатора (Beat Detection)
+  let analyser = null;
+  let dataArray = null;
+  let finaleStartTime = 0;
+  let beatThreshold = 100;
+  let lastBeatTime = 0;
+  let hasDoneGrandBurst = false;
   
   function ensureCtx(){
     if(!ctx){
       ctx=new (window.AudioContext||window.webkitAudioContext)();
       masterGain=ctx.createGain(); masterGain.gain.value=0.9; masterGain.connect(ctx.destination);
-      musicGain=ctx.createGain(); musicGain.gain.value=0.16; musicGain.connect(masterGain);
-      sfxGain=ctx.createGain(); sfxGain.gain.value=0.55; sfxGain.connect(masterGain);
+      
+      musicGain=ctx.createGain(); musicGain.gain.value=0.35; musicGain.connect(masterGain); // Базовая громкость
+      
+      // Настраиваем SFX как в 16-бит консолях (Lowpass фильтр срезает резкость)
+      sfxFilter = ctx.createBiquadFilter();
+      sfxFilter.type = 'lowpass';
+      sfxFilter.frequency.value = 3500;
+      
+      sfxGain=ctx.createGain(); sfxGain.gain.value=0.6; 
+      sfxGain.connect(sfxFilter);
+      sfxFilter.connect(masterGain);
+      
+      // Анализатор
+      analyser = ctx.createAnalyser();
+      analyser.fftSize = 128;
+      masterGain.connect(analyser);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
     }
     if(ctx.state==='suspended') ctx.resume();
   }
 
-  async function preloadFinale() {
+  async function preloadAudio() {
     ensureCtx();
+    try {
+      const res = await fetch('audio/background.mp3');
+      bgBuffer = await ctx.decodeAudioData(await res.arrayBuffer());
+    } catch(e) { console.warn('Kunde inte ladda background.mp3'); }
+    
     for (const url of FINALE_URLS) {
       try {
         const res = await fetch(url);
-        const arrayBuf = await res.arrayBuffer();
-        const audioBuf = await ctx.decodeAudioData(arrayBuf);
+        const audioBuf = await ctx.decodeAudioData(await res.arrayBuffer());
         finaleBuffers.push(audioBuf);
       } catch(e) { console.warn('Kunde inte ladda ' + url); }
     }
   }
 
-  function tone(freq,start,dur,type,gainNode,vol){
-    const osc=ctx.createOscillator(); const g=ctx.createGain();
-    osc.type=type||'square'; osc.frequency.value=freq;
-    g.gain.setValueAtTime(0,start);
-    g.gain.linearRampToValueAtTime(vol||0.3,start+0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001,start+dur);
-    osc.connect(g); g.connect(gainNode);
-    osc.start(start); osc.stop(start+dur+0.02);
+  function startMusic(){ 
+    ensureCtx(); 
+    if(!musicOn) return;
+    if(bgSource) return; 
+    
+    if(bgBuffer) {
+      bgSource = ctx.createBufferSource();
+      bgSource.buffer = bgBuffer;
+      bgSource.loop = true;
+      bgSource.connect(musicGain);
+      bgSource.start(0);
+    } else {
+      preloadAudio().then(() => { if(musicOn && !bgSource) startMusic(); });
+    }
   }
 
-  function scheduleMusicStep(){
-    if(!musicOn||!ctx) return;
-    const sectionIdx = Math.floor(musicStep / 8) % SECTIONS.length;
-    const sec = SECTIONS[sectionIdx];
-    const t=ctx.currentTime+0.04; const stepDur=0.22;
-    tone(sec.bass[musicStep%sec.bass.length],t,stepDur*0.9,'triangle',musicGain,0.5);
-    tone(sec.arp[musicStep%sec.arp.length],t,stepDur*0.5,'square',musicGain,0.14);
-    musicStep++;
+  function stopMusic(){ 
+    if(bgSource){ bgSource.stop(); bgSource.disconnect(); bgSource=null; }
+  }
+
+  // УМНОЕ ЗАТУХАНИЕ (DUCKING)
+  function setMusicVolume(vol, duration = 1.0) {
+    if(!ctx || !musicGain) return;
+    const now = ctx.currentTime;
+    musicGain.gain.cancelScheduledValues(now);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, now);
+    musicGain.gain.linearRampToValueAtTime(vol, now + duration);
+  }
+
+  function renderBeatVisuals() {
+    if(hostLastPhase !== 'finished' || !analyser) return;
+    requestAnimationFrame(renderBeatVisuals);
+
+    const now = Date.now();
+    const elapsed = now - finaleStartTime;
+    if(elapsed < 3000) return; // Ждём 1-е место
+
+    if(!hasDoneGrandBurst) {
+      hasDoneGrandBurst = true;
+      Confetti.shoot(400); 
+    }
+
+    analyser.getByteFrequencyData(dataArray);
+    let sum = 0;
+    for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+    let avg = sum / dataArray.length;
+
+    const container = document.getElementById('host-finished-view');
+    if(container) {
+      const intensity = Math.max(0, avg - 30); 
+      container.style.boxShadow = `inset 0 0 ${intensity * 1.5}px ${intensity * 0.8}px hsla(${(now/15)%360}, 100%, 50%, 0.6)`;
+    }
+
+    if (avg > beatThreshold && now - lastBeatTime > 350) {
+      Confetti.shoot(30);
+      lastBeatTime = now;
+      beatThreshold = avg + 15;
+    }
+    beatThreshold = Math.max(70, beatThreshold - 0.5);
+  }
+
+  // 16-BIT SYNTHESIS HELPER (Два осциллятора, легкий расстрой для плотности)
+  function play16Bit(freq, startOffset, dur, type, vol) {
+     if(!ctx) return;
+     const t = ctx.currentTime + startOffset;
+     const osc1 = ctx.createOscillator();
+     const osc2 = ctx.createOscillator();
+     const g = ctx.createGain();
+     
+     osc1.type = type;
+     osc2.type = type;
+     osc1.frequency.value = freq;
+     osc2.frequency.value = freq * 1.006; // Detune для 16-bit хоруса
+     
+     g.gain.setValueAtTime(0, t);
+     g.gain.linearRampToValueAtTime(vol, t + 0.02);
+     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+     
+     osc1.connect(g);
+     osc2.connect(g);
+     g.connect(sfxGain);
+     
+     osc1.start(t); osc1.stop(t + dur + 0.1);
+     osc2.start(t); osc2.stop(t + dur + 0.1);
   }
 
   return {
-    ensureCtx, preloadFinale,
-    startMusic(){ ensureCtx(); if(!musicTimer){ musicGain.gain.value=0.16; musicStartTime=ctx.currentTime; musicTimer=setInterval(scheduleMusicStep,220); } },
-    stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } },
+    ensureCtx, preloadAudio, startMusic, stopMusic, setMusicVolume,
     toggleMusic(){ musicOn=!musicOn; if(musicOn) this.startMusic(); else this.stopMusic(); return musicOn; },
     
-    // Эту функцию теперь вызывает ТОЛЬКО хост (экран учителя)
     playHostFinaleSequence(){
       ensureCtx();
       if(!musicOn) return;
-      // Fade out 8-bit music
-      musicGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.5);
+      this.setMusicVolume(0, 2.5);
       setTimeout(()=>this.stopMusic(), 3000);
       
       if(finaleBuffers.length > 0) {
         const buf = pickRandom(finaleBuffers);
         const src = ctx.createBufferSource();
         src.buffer = buf;
-        
         const finalGain = ctx.createGain();
         finalGain.gain.setValueAtTime(0, ctx.currentTime);
-        finalGain.gain.linearRampToValueAtTime(1, ctx.currentTime + 2.5); // Smooth crossfade 2.5s
-        
+        finalGain.gain.linearRampToValueAtTime(1, ctx.currentTime + 2.5);
         src.connect(finalGain);
         finalGain.connect(masterGain);
         src.start(0);
-      } else {
-        // Fallback jingle if mp3s failed
-        const t=ctx.currentTime;
-        [523.25,659.25,783.99,1046.5,1318.5,1567.98].forEach((f,i)=>tone(f,t+i*0.13,0.5,'square',sfxGain,0.35));
+        
+        finaleStartTime = Date.now();
+        hasDoneGrandBurst = false;
+        requestAnimationFrame(renderBeatVisuals);
       }
     },
 
-    playVictory(){ ensureCtx(); const t=ctx.currentTime; [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,t+i*0.13,0.4,'square',sfxGain,0.35)); },
-    playCorrect(){ ensureCtx(); const t=ctx.currentTime; tone(523.25,t,0.12,'square',sfxGain,0.35); tone(659.25,t+0.1,0.12,'square',sfxGain,0.35); },
-    playWrong(){ ensureCtx(); const t=ctx.currentTime; tone(196,t,0.25,'sawtooth',sfxGain,0.28); tone(146.83,t+0.12,0.28,'sawtooth',sfxGain,0.28); },
-    playAlmost(){ ensureCtx(); const t=ctx.currentTime; tone(392,t,0.15,'triangle',sfxGain,0.3); tone(440,t+0.1,0.18,'triangle',sfxGain,0.3); },
-    playTick(){ ensureCtx(); tone(880,ctx.currentTime,0.06,'square',sfxGain,0.2); },
-    playReveal(){ ensureCtx(); const t=ctx.currentTime; [523.25,659.25,783.99].forEach((f,i)=>tone(f,t+i*0.09,0.3,'triangle',sfxGain,0.3)); },
-    playJoin(){ ensureCtx(); const t=ctx.currentTime; tone(440,t,0.08,'sine',sfxGain,0.25); tone(660,t+0.06,0.1,'sine',sfxGain,0.25); }
+    // СОЧНЫЕ 16-БИТНЫЕ ЗВУКИ
+    playVictory(){ 
+      ensureCtx(); 
+      [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f,i) => play16Bit(f, i*0.12, 0.5, 'square', 0.25)); 
+    },
+    playCorrect(){ 
+      ensureCtx(); 
+      play16Bit(523.25, 0.0, 0.2, 'square', 0.2); 
+      play16Bit(659.25, 0.1, 0.3, 'square', 0.2); 
+    },
+    playWrong(){ 
+      ensureCtx(); 
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, t);
+      osc.frequency.exponentialRampToValueAtTime(70, t + 0.4); // Классическое падение тона
+      g.gain.setValueAtTime(0.3, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      osc.connect(g); g.connect(sfxGain);
+      osc.start(t); osc.stop(t + 0.5);
+    },
+    playAlmost(){ 
+      ensureCtx(); 
+      play16Bit(392, 0.0, 0.2, 'triangle', 0.3); 
+      play16Bit(440, 0.12, 0.3, 'triangle', 0.3); 
+    },
+    playTick(){ 
+      ensureCtx(); 
+      // Короткий плотный тик
+      play16Bit(880, 0, 0.1, 'square', 0.15); 
+      play16Bit(1760, 0, 0.05, 'triangle', 0.1); 
+    },
+    playReveal(){ 
+      ensureCtx(); 
+      [523.25, 659.25, 783.99].forEach((f,i) => play16Bit(f, i*0.09, 0.4, 'triangle', 0.35)); 
+    },
+    playJoin(){ 
+      ensureCtx(); 
+      play16Bit(440, 0.0, 0.1, 'sine', 0.3); 
+      play16Bit(660, 0.08, 0.2, 'sine', 0.3); 
+    }
   };
 })();
 
@@ -616,7 +725,7 @@ let hostLastStateHash = "";
 
 document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   AudioEngine.startMusic();
-  AudioEngine.preloadFinale(); // Load MP3s in background
+  AudioEngine.preloadAudio(); 
   
   hostCode=randomCode();
   const initial={code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null};
@@ -626,7 +735,7 @@ document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+hostCode);
   
   show('host-board-screen');
-  hostPollTimer=setInterval(hostPoll, 600); // Faster polling
+  hostPollTimer=setInterval(hostPoll, 600); 
   hostPoll();
 });
 
@@ -645,7 +754,7 @@ async function hostPoll(){
   const state=await readRoom(hostCode); if(!state) return;
   const stateHash = JSON.stringify(state);
   
-  // Update timers immediately regardless of deep state changes
+  // DUCKING LOGIC & TIMERS (Всегда проверяем время)
   if(state.phase==='active' && state.round){
     const dur=ROUND_DURATIONS[state.round.type];
     const elapsed=(Date.now()-state.round.startedAt)/1000;
@@ -653,7 +762,16 @@ async function hostPoll(){
     document.getElementById('host-timer-bar').style.width=(100*timeLeft/dur)+'%';
     
     const ceilLeft=Math.ceil(timeLeft);
-    if(ceilLeft<=5 && ceilLeft>=1 && ceilLeft!==hostLastTickSecond){ hostLastTickSecond=ceilLeft; AudioEngine.playTick(); }
+    
+    // Музыка приглушается, когда время кончается (последние 5 сек)
+    if(ceilLeft === 5 && hostLastTickSecond !== 5) {
+      AudioEngine.setMusicVolume(0.12, 1.0); 
+    }
+    
+    if(ceilLeft<=5 && ceilLeft>=1 && ceilLeft!==hostLastTickSecond){ 
+      hostLastTickSecond=ceilLeft; 
+      AudioEngine.playTick(); 
+    }
     
     const doneEarly = state.round.type==='draw'
       ? (state.round.correctPlayerIds||[]).length >= (state.players.length-1) && state.players.length>1
@@ -665,7 +783,7 @@ async function hostPoll(){
     }
   }
 
-  // Skip Heavy DOM UI updates if state is identical
+  // DOM Updates Only when state changes
   if (stateHash === hostLastStateHash) return;
   hostLastStateHash = stateHash;
 
@@ -685,28 +803,33 @@ async function hostPoll(){
   if(state.players.length>hostLastPlayerCount) AudioEngine.playJoin();
   hostLastPlayerCount=state.players.length;
 
-  if(state.phase==='active' && state.round){
-    renderMiniLB(document.getElementById('host-mini-lb'),state);
-    document.getElementById('round-counter').textContent='Runda '+(state.planIndex+1)+' / '+state.plan.length;
+  if(state.phase==='active'){
+    // Возвращаем громкость, если раунд активен
+    if (hostLastPhase !== 'active') AudioEngine.setMusicVolume(0.35, 1.0);
     
-    const key=state.round.type+':'+state.planIndex;
-    if(hostRenderedRoundKey!==key){
-      hostRenderedRoundKey=key; hostLastTickSecond=null;
-      renderHostRound(state);
-    } else if(state.round.type==='draw'){ 
-      redrawCanvas(document.getElementById('host-canvas'),state.round.strokes); 
+    if(state.round) {
+      renderMiniLB(document.getElementById('host-mini-lb'),state);
+      document.getElementById('round-counter').textContent='Runda '+(state.planIndex+1)+' / '+state.plan.length;
+      
+      const key=state.round.type+':'+state.planIndex;
+      if(hostRenderedRoundKey!==key){
+        hostRenderedRoundKey=key; hostLastTickSecond=null;
+        renderHostRound(state);
+      } else if(state.round.type==='draw'){ 
+        redrawCanvas(document.getElementById('host-canvas'),state.round.strokes); 
+      }
     }
   }
 
   if(state.phase==='round-end' && hostLastPhase!=='round-end'){
+    // Приглушаем музыку для Топа
+    AudioEngine.setMusicVolume(0.1, 0.5);
     renderRoundEnd(state);
     AudioEngine.playReveal();
   }
   
   if(state.phase==='finished' && hostLastPhase!=='finished'){
     renderPodium(state);
-    Confetti.shoot();
-    // ТОЛЬКО ХОСТ ИГРАЕТ МУЗЫКУ ИЗ MP3 ФАЙЛОВ
     AudioEngine.playHostFinaleSequence(); 
   }
   
@@ -737,7 +860,7 @@ function renderHostRound(state){
     body.innerHTML=`<div class="word-hint">${'_ '.repeat(r.wordLength)}</div><canvas class="draw-canvas" id="host-canvas" width="560" height="340"></canvas>`;
     redrawCanvas(document.getElementById('host-canvas'),r.strokes);
   } else if(r.type==='truefalse'){
-    label.innerHTML=`<span class="msi">quiz</span> Rätt или fel`; body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
+    label.innerHTML=`<span class="msi">quiz</span> Rätt eller fel`; body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
   } else if(r.type==='wordorder'){
     label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`;
     body.innerHTML=`<div class="drag-row">${r.scrambled.map((w,i)=>`<span class="drag-chip jiggle-soft" style="animation-delay:${(i*0.07).toFixed(2)}s;">${w}</span>`).join('')}</div>`;
@@ -791,7 +914,6 @@ async function finalizeRound(state){
 
     s.lastRoundResult={type:r.type, reveal, rankBefore, rankAfter, pointsThisRound:pts};
     
-    // ПРОВЕРКА НА ПОСЛЕДНИЙ РАУНД - СРАЗУ В ФИНАЛ
     const isLastRound = s.planIndex >= s.plan.length - 1;
     s.phase = isLastRound ? 'finished' : 'round-end'; 
     return s;
@@ -819,14 +941,17 @@ function renderRoundEnd(state){
 function renderPodium(state){
   const sorted=[...state.players].sort((a,b)=>b.score-a.score);
   const el=document.getElementById('podium');
-  const slots=[[1,'p2'],[0,'p1'],[2,'p3']]; // Visual order: 2nd, 1st, 3rd
+  
+  const slots=[[1,'p2'],[0,'p1'],[2,'p3']]; 
   
   el.innerHTML = slots.filter(([idx])=>sorted[idx]).map(([idx,cls])=>{
     const p=sorted[idx];
     const isFirst = cls === 'p1';
+    let delay = cls==='p3' ? '0.5s' : (cls==='p2' ? '1.5s' : '3.0s'); 
+    
     return `
-      <div class="podium-slot ${cls}">
-        ${isFirst ? '<div class="crown">👑</div>' : ''}
+      <div class="podium-slot ${cls}" style="animation-delay: ${delay};">
+        ${isFirst ? `<div class="crown" style="animation-delay: 3.6s;">👑</div>` : ''}
         <div class="podium-avatar">${p.avatar}</div>
         <div class="podium-name">${p.name}</div>
         <div class="podium-score">${p.score}</div>
@@ -845,10 +970,13 @@ document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
   await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,20)); return s; });
   await advanceRound();
   
-  // Возвращаем хоста из экрана финала обратно в режим игры
+  document.getElementById('host-finished-view').style.boxShadow = 'none';
   document.getElementById('host-finished-view').classList.add('hidden');
   document.getElementById('host-round-view').classList.remove('hidden');
+  
+  // Возвращаем BGM на место
   AudioEngine.startMusic();
+  AudioEngine.setMusicVolume(0.35, 1.0);
 });
 
 async function advanceRound(){
@@ -889,7 +1017,7 @@ document.getElementById('join-btn').addEventListener('click', async ()=>{
   AudioEngine.playJoin();
   playerCode=code; document.getElementById('player-name-tag').textContent=avatar+' '+name;
   show('player-game-screen');
-  playerPollTimer=setInterval(playerPoll, 600); // Snappy polling
+  playerPollTimer=setInterval(playerPoll, 600);
   playerPoll();
 });
 
@@ -907,7 +1035,6 @@ async function playerPoll(){
     clearInterval(playerPollTimer); return;
   }
 
-  // Live stroke rendering (bypasses hash check)
   if(state.phase==='active' && state.round && state.round.type==='draw' && state.round.drawerId!==playerId){
     redrawCanvas(document.getElementById('player-canvas'),state.round.strokes);
   }
@@ -927,7 +1054,6 @@ async function playerPoll(){
     const key=state.round.type+':'+state.planIndex;
     if(playerRenderedRoundKey!==key){ playerRenderedRoundKey=key; renderPlayerRound(state); }
     
-    // Check if player has already answered
     if(state.round.type==='draw' && state.round.drawerId!==playerId){
       const gs=document.getElementById('player-guess-status');
       if(gs && (state.round.correctPlayerIds||[]).includes(playerId)){
@@ -949,13 +1075,12 @@ async function playerPoll(){
     endView.classList.remove('hidden');
     document.getElementById('roundend-player-text').className='result-flash correct';
     document.getElementById('roundend-player-text').textContent='Spelet är slut! 🏆';
-    document.getElementById('roundend-player-sub').textContent = 'Bra jobbat!';
+    document.getElementById('roundend-player-sub').textContent = 'Kolla på tavlan!';
     document.getElementById('roundend-player-icon').textContent = 'emoji_events';
     
     if (playerLastPhase !== 'finished') {
-        Confetti.shoot(); // Client side celebration
-        // ПЛЕЕР ИГРАЕТ ПРОСТО КОРОТКИЙ ПОБЕДНЫЙ ЗВУК, ЧТОБЫ НЕ ПЕРЕБИВАТЬ МУЗЫКУ УЧИТЕЛЯ
-        AudioEngine.playVictory(); 
+        Confetti.startPlayerLoop(); 
+        AudioEngine.playVictory();  
     }
   }
 
