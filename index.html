@@ -133,25 +133,24 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .leaderboard-table .delta-down{color:var(--red);}
 .leaderboard-table .gained{color:var(--accent-dark);font-family:'Fredoka',sans-serif;}
 
-/* SPINGO (Bokstavs-jakt) STYLES */
-.wheel-container { position:relative; width: 280px; height: 280px; margin: 1rem auto; border-radius: 50%; overflow: hidden; border: 8px solid var(--ink); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
-.wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; transition: transform 3.5s cubic-bezier(0.2, 0.9, 0.3, 1); background: conic-gradient(from 0deg, #FFC72C 0deg 60deg, #2B7DE0 60deg 120deg, #2E9E52 120deg 180deg, #D9534F 180deg 240deg, #8A2387 240deg 300deg, #FF8C42 300deg 360deg); }
-.wheel-segment { position: absolute; width: 50%; height: 50%; transform-origin: 100% 100%; display: flex; align-items: flex-end; justify-content: flex-end; padding-right: 25px; padding-bottom: 25px; font-family: 'Fredoka', sans-serif; font-size: 2.5rem; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+/* BOKSTAVS-JAKT CSS (PERFECT WHEEL & 5x5 GRID) */
+.wheel-container { position:relative; width: 300px; height: 300px; margin: 1rem auto; border-radius: 50%; overflow: hidden; border: 8px solid var(--ink); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+.wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; transition: transform 4s cubic-bezier(0.2, 0.9, 0.3, 1); }
+.wheel-slice { position: absolute; top: 0; left: 50%; transform-origin: 50% 150px; width: 100px; margin-left: -50px; height: 150px; display: flex; justify-content: center; align-items: flex-start; padding-top: 15px; font-family: 'Fredoka', sans-serif; font-size: 2.2rem; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 .wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 35px solid var(--ink); z-index: 5; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
 .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #fff; border: 6px solid var(--ink); border-radius: 50%; z-index: 2; }
-.spingo-paper { background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 1rem; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); display: inline-block; position:relative; }
-.spingo-paper::before { content: '📝'; position: absolute; top: -15px; right: -15px; font-size: 2rem; transform: rotate(15deg); }
-.spingo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(320px, 80vw); }
-.spingo-cell { background: #fff; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); cursor: pointer; text-transform: uppercase; transition: background 0.1s, transform 0.1s; }
-.spingo-cell:active { transform: scale(0.95); }
-.spingo-cell.empty { background: #fafafa; }
-.spingo-cell.empty:hover { background: #f0f0f0; }
-.spingo-cell.filled { background: #fff; cursor: default; }
-.spingo-cell.highlight { background: var(--accent-light); color: var(--accent-dark); }
-.spingo-target-player { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 0.8rem; display: flex; align-items: center; gap: 0.8rem; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.5rem; cursor: pointer; }
-.spingo-target-player:active { background: var(--accent-light); border-color: var(--accent); }
+.bokstav-paper { background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 0.8rem; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); display: inline-block; position:relative; }
+.bokstav-paper::before { content: '📝'; position: absolute; top: -15px; right: -15px; font-size: 2rem; transform: rotate(15deg); }
+.bokstav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(360px, 85vw); }
+.bokstav-cell { background: #fff; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); cursor: pointer; text-transform: uppercase; transition: background 0.1s, transform 0.1s; }
+.bokstav-cell:active { transform: scale(0.92); }
+.bokstav-cell.empty { background: #fafafa; }
+.bokstav-cell.empty:hover { background: #f0f0f0; }
+.bokstav-cell.filled { background: #fff; cursor: default; color: var(--accent-dark); }
+.bokstav-target-player { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 0.8rem; display: flex; align-items: center; gap: 0.8rem; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.5rem; cursor: pointer; transition: transform 0.1s; }
+.bokstav-target-player:active { background: var(--accent-light); border-color: var(--accent); transform: scale(0.96); }
 
-/* EPIC FULLSCREEN PODIUM STYLES (WITH BEAT EFFECTS) */
+/* EPIC FULLSCREEN PODIUM STYLES */
 #host-finished-view { position: fixed !important; top: 0; left: 0; width: 100vw !important; height: 100vh !important; max-width: 100% !important; border-radius: 0 !important; margin: 0 !important; background: linear-gradient(135deg, #ffffff, #f0f4f8); border: none; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: box-shadow 0.1s ease-out; }
 #host-finished-view::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('jarven.png') center/cover no-repeat; opacity: 0.15; z-index: 0; pointer-events: none; }
 #host-finished-view > * { position: relative; z-index: 1; }
@@ -271,6 +270,22 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 </div>
 
 <script>
+// --- GLOBAL WHEEL HELPER ---
+window.getConicGradient = function(num) {
+    const colors = ['#FFC72C', '#2B7DE0', '#2E9E52', '#D9534F', '#8A2387', '#FF8C42', '#195CA8', '#8A6200', '#DCE6F2'];
+    let grad = []; const step = 360 / num;
+    for(let i=0; i<num; i++) grad.push(`${colors[i%colors.length]} ${i*step}deg ${(i+1)*step}deg`);
+    return `conic-gradient(${grad.join(', ')})`;
+};
+window.buildWheelHTML = function(items, id, rotation) {
+    const num = items.length; const angle = 360 / num; const bgGrad = window.getConicGradient(num);
+    const slices = items.map((item, i) => {
+        const rot = i * angle + (angle/2);
+        return `<div class="wheel-slice" style="transform: rotate(${rot}deg);"><span style="transform: rotate(${-rot}deg); display:inline-block;">${item}</span></div>`;
+    }).join('');
+    return `<div class="wheel-container"><div class="wheel-pointer"></div><div class="wheel-center"></div><div class="wheel" id="${id}" style="background: ${bgGrad}; transform: rotate(${rotation}deg);">${slices}</div></div>`;
+};
+
 // --- CONFETTI SYSTEM ---
 const Confetti = (function(){
   let canvas, ctx, particles = [], animating = false;
@@ -392,20 +407,19 @@ const MATCH_PAIRS_POOL=[
   {word:"hus",emoji:"🏠"},{word:"bil",emoji:"🚗"},{word:"träd",emoji:"🌳"},{word:"blomma",emoji:"🌸"},{word:"cykel",emoji:"🚲"},
   {word:"tåg",emoji:"🚂"},{word:"skor",emoji:"👟"},{word:"klocka",emoji:"⏰"},{word:"nyckel",emoji:"🔑"},{word:"dator",emoji:"💻"}
 ];
-const SPINGO_LETTERS = ['S','T','A','R','N','E','L','D','K','M','B','F','G','H','O','P','Ö','Ä','Å','I','U','V','J','Y','C'];
+const BOKSTAV_LETTERS = ['S','T','A','R','N','E','L','D','K','M','B','F','G','H','O','P','Ö','Ä','Å','I','U','V','J','Y','C'];
 
-// Pre-build validation dictionary for Spingo
-const SPINGO_DICT = new Set(["EN","ETT","JAG","VI","DU","NI","DE","HAN","HON","DEN","DET","SE","GÅ","BO","ÄR","HAR","VAR","KAN",
+// Pre-build validation dictionary for Bokstavs-jakt
+const BOKSTAV_DICT = new Set(["EN","ETT","JAG","VI","DU","NI","DE","HAN","HON","DEN","DET","SE","GÅ","BO","ÄR","HAR","VAR","KAN",
   "VILL","FÅ","TA","GE","GÖR","SOL","KO","IS","TÅG","BOK","BIL","KATT","HUND","MAT","HEM","BRA","DAG","NATT","MÅNE","SKO",
   "BEN","ARM","FOT","TÅ","HÅR","ÖGA","ÖRA","MUN","BÅT","FLY","FISK","ÄGG","OST","RIS","GUL","RÖD","BLÅ","VIT","GRÅ","SUR",
   "SÖT","KALL","VARM","STOR","SMÅ","GÅR","STÅR","LEKER","SOVER","ÄTER","BORD","STOL","SÄNG","DÖRR","TAKA","GOLV","SAX","SUDD",
   "TRÄD","SKOG","BERG","STEN","SAND","SNÖ","REGN","MOLN","VIND","ÅSKA"]);
-// Dynamically add all words from categories and sentences
-Object.values(DRAW_CATEGORIES).forEach(cat => cat.words.forEach(w => SPINGO_DICT.add(w.toUpperCase())));
-SENTENCES.forEach(arr => arr.forEach(w => SPINGO_DICT.add(w.toUpperCase())));
+Object.values(DRAW_CATEGORIES).forEach(cat => cat.words.forEach(w => BOKSTAV_DICT.add(w.toUpperCase())));
+SENTENCES.forEach(arr => arr.forEach(w => BOKSTAV_DICT.add(w.toUpperCase())));
 
-const ROUND_DURATIONS={draw:90, truefalse:15, wordorder:40, sign:20, match:45, spingo:30};
-const NON_DRAW_TYPES=["truefalse","wordorder","sign","match","spingo"];
+const ROUND_DURATIONS={draw:90, truefalse:15, wordorder:40, sign:20, match:45, bokstav:30};
+const NON_DRAW_TYPES=["truefalse","wordorder","sign","match","bokstav"];
 
 async function readRoom(code){ try{const r=await fetch('/api/room?code='+encodeURIComponent(code));if(!r.ok)return null;const j=await r.json();return j.value||null;}catch(e){return null;} }
 async function writeRoom(code,state){ try{const r=await fetch('/api/room',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,state})});return r.ok;}catch(e){return false;} }
@@ -531,7 +545,7 @@ function buildRound(type,drawerId){
   if(type==='wordorder'){ const words=pickRandom(SENTENCES); return {type:'wordorder',correctOrder:words,scrambled:shuffleNotEqual(words)}; }
   if(type==='sign'){ const s=pickRandom(SIGNS); return {type:'sign',icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct}; }
   if(type==='match'){ return {type:'match',pairs:shuffle(MATCH_PAIRS_POOL).slice(0,6)}; }
-  if(type==='spingo'){ return {type:'spingo',spins:0,maxSpins:16,currentAction:null,wheelLetters:shuffle(SPINGO_LETTERS).slice(0,6)}; }
+  if(type==='bokstav'){ return {type:'bokstav',spins:0,maxSpins:25,wheelLetters:shuffle(BOKSTAV_LETTERS).slice(0,6),subPhase:'SPIN_LETTER',letterWheelRot:0,playerWheelRot:0}; }
 }
 function buildPlan(players, count=20){
   const plan=[]; let i=0;
@@ -544,7 +558,7 @@ function buildPlan(players, count=20){
 
 /* ================= HOST LOGIC ================= */
 let hostCode=null, hostPollTimer=null, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
-let hostLastStateHash = ""; let spingoHostState = { spinCount: 0 };
+let hostLastStateHash = "";
 
 document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   AudioEngine.startMusic(); AudioEngine.preloadAudio(); 
@@ -569,7 +583,7 @@ async function hostPoll(){
   const state=await readRoom(hostCode); if(!state) return;
   const stateHash = JSON.stringify(state);
   
-  if(state.phase==='active' && state.round && state.round.type!=='spingo'){
+  if(state.phase==='active' && state.round && state.round.type!=='bokstav'){
     const dur=ROUND_DURATIONS[state.round.type];
     const elapsed=(Date.now()-state.round.startedAt)/1000;
     const timeLeft=Math.max(0,dur-elapsed);
@@ -584,12 +598,21 @@ async function hostPoll(){
     if((timeLeft<=0 || doneEarly) && hostLastStateHash === stateHash){ await finalizeRound(state); return; }
   }
 
-  // Spingo host auto-finalize when everyone is ready
-  if(state.phase==='active' && state.round && state.round.type==='spingo' && state.round.currentAction){
-     const readyCount = state.round.readyPlayers ? state.round.readyPlayers.length : 0;
-     if(readyCount >= state.players.length && hostLastStateHash === stateHash) {
-         if(state.round.spins >= state.round.maxSpins) { await finalizeRound(state); return; }
-         else { document.getElementById('spingo-spin-btn').disabled = false; }
+  if(state.phase==='active' && state.round && state.round.type==='bokstav'){
+     if(state.round.subPhase === 'PLACE_LETTER') {
+         const readyCount = state.round.readyPlayers ? state.round.readyPlayers.length : 0;
+         if(readyCount >= state.players.length && hostLastStateHash === stateHash) {
+             if(state.round.spins >= state.round.maxSpins) { await finalizeRound(state); return; }
+             else {
+                 await updateRoom(hostCode, s => {
+                     s.round.subPhase = 'SPIN_LETTER'; s.round.readyPlayers = [];
+                     if(s.round.spins === 1 && !s.round.wheelLetters.includes('🦹‍♂️')) s.round.wheelLetters[0] = '🦹‍♂️';
+                     else { const newL = shuffle(BOKSTAV_LETTERS).filter(l => l !== '🦹‍♂️').slice(0,5); s.round.wheelLetters = ['🦹‍♂️', ...newL]; }
+                     return s;
+                 });
+                 return;
+             }
+         }
      }
   }
 
@@ -617,9 +640,11 @@ async function hostPoll(){
     if(state.round) {
       renderMiniLB(document.getElementById('host-mini-lb'),state);
       document.getElementById('round-counter').textContent='Runda '+(state.planIndex+1)+' / '+state.plan.length;
-      document.getElementById('host-timer-bar-wrap').classList.toggle('hidden', state.round.type==='spingo');
+      document.getElementById('host-timer-bar-wrap').classList.toggle('hidden', state.round.type==='bokstav');
 
-      const key=state.round.type+':'+state.planIndex+(state.round.type==='spingo'?':'+state.round.spins:'');
+      let key=state.round.type+':'+state.planIndex;
+      if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins;
+      
       if(hostRenderedRoundKey!==key){
         hostRenderedRoundKey=key; hostLastTickSecond=null;
         renderHostRound(state);
@@ -642,9 +667,9 @@ function renderAvatars(wrap,state){
   wrap.innerHTML='';
   state.players.forEach(p=>{
     const isDrawer = state.round && state.round.type==='draw' && state.round.drawerId===p.id && state.phase==='active';
-    const isSpingoReady = state.round && state.round.type==='spingo' && state.round.readyPlayers && state.round.readyPlayers.includes(p.id);
+    const isBokstavReady = state.round && state.round.type==='bokstav' && state.round.readyPlayers && state.round.readyPlayers.includes(p.id);
     const pill=document.createElement('div');
-    pill.className='avatar-pill'+(isDrawer?' is-drawer':'')+(isSpingoReady?' is-drawer':''); // re-use drawer class for green ready state
+    pill.className='avatar-pill'+(isDrawer?' is-drawer':'')+(isBokstavReady?' is-drawer':''); 
     pill.innerHTML=`${p.avatar} ${p.name} <span class="score">${p.score}</span>`;
     wrap.appendChild(pill);
   });
@@ -663,19 +688,21 @@ function renderHostRound(state){
     label.innerHTML=`<span class="msi">signpost</span> Vad säger skylten?`; body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div>`;
   } else if(r.type==='match'){
     label.innerHTML=`<span class="msi">join_inner</span> Para ihop`; body.innerHTML=`<div style="font-size:2.2rem;">${r.pairs.map(p=>p.emoji).join('   ')}</div>`;
-  } else if(r.type==='spingo'){
-    label.innerHTML=`<span class="msi">grid_on</span> Bokstavs-jakt (Spingo)`;
-    const segments = r.wheelLetters.map((l,i) => { const rot = i * 60; return `<div class="wheel-segment" style="transform: rotate(${rot}deg) skewY(-30deg);"><span style="transform: skewY(30deg) rotate(30deg);">${l}</span></div>`; }).join('');
-    
-    let wheelHTML = `<div class="wheel-container"><div class="wheel-pointer"></div><div class="wheel-center"></div><div class="wheel" id="host-wheel">${segments}</div></div>`;
-    let btnHTML = `<button class="primary-btn" id="spingo-spin-btn" style="font-size:1.3rem; padding: 1rem 2rem;">🎲 Snurra hjulet (${r.spins}/${r.maxSpins})</button>`;
-    
-    if(r.currentAction) {
-       let actionHTML = r.currentAction === 'STEAL' ? `<span style="font-size:3rem;">🦹‍♂️ Tjuv!</span>` : `<span style="font-size:4rem;">${r.currentAction}</span>`;
-       body.innerHTML = `${wheelHTML}<div style="margin: 1rem 0;">${actionHTML}</div><p class="sub">Eleverna placerar bokstaven...</p>`;
-    } else {
-       body.innerHTML = `${wheelHTML} ${btnHTML}`;
-       document.getElementById('spingo-spin-btn').addEventListener('click', () => hostSpinWheel(state));
+  } else if(r.type==='bokstav'){
+    label.innerHTML=`<span class="msi">grid_on</span> Bokstavs-jakt`;
+    if(r.subPhase === 'SPIN_LETTER') {
+        const wHTML = window.buildWheelHTML(r.wheelLetters, 'host-wheel-letter', r.letterWheelRot);
+        body.innerHTML = `${wHTML}<button class="primary-btn" onclick="hostSpinWheel('LETTER')" style="font-size:1.3rem; padding:1rem 2rem;">🎲 Snurra hjulet (${r.spins}/${r.maxSpins})</button>`;
+    } else if (r.subPhase === 'PLACE_LETTER') {
+        const wHTML = window.buildWheelHTML(r.wheelLetters, 'host-wheel-letter', r.letterWheelRot);
+        body.innerHTML = `${wHTML}<div style="margin-top:1.5rem; font-size:1.5rem; font-family:'Fredoka',sans-serif; font-weight:700;">Eleverna placerar: <span style="color:var(--accent); font-size:2.8rem; vertical-align:middle;">${r.drawnLetter}</span></div>`;
+    } else if (r.subPhase === 'SPIN_PLAYER') {
+        const pNames = state.players.map(p => p.avatar);
+        const wHTML = window.buildWheelHTML(pNames, 'host-wheel-player', r.playerWheelRot);
+        body.innerHTML = `<h2 style="color:var(--red);">🦹‍♂️ Tjuven är lös! Vem får stjäla?</h2>${wHTML}<button class="primary-btn" onclick="hostSpinWheel('PLAYER')" style="font-size:1.3rem; padding:1rem 2rem; background:var(--purple);">Välj Tjuv</button>`;
+    } else if (r.subPhase === 'THIEF_ACTION') {
+        const thief = state.players.find(p=>p.id===r.thiefId);
+        body.innerHTML = `<div style="font-size:6rem; margin:2rem 0; animation:jiggle-soft 1s infinite;">🦹‍♂️</div><h2 style="font-size:2rem;">${thief.avatar} ${thief.name} letar efter ett byte...</h2>`;
     }
   }
 }
@@ -686,60 +713,59 @@ function redrawCanvas(canvas,strokes){
   ctx.globalCompositeOperation='source-over';
 }
 
-async function hostSpinWheel(state) {
-  const btn = document.getElementById('spingo-spin-btn'); if(btn) btn.disabled = true;
-  const wheel = document.getElementById('host-wheel');
-  AudioEngine.playTick(); // Spin sound start
-  
-  // Decide what to land on
-  let wheelItems = [...state.round.wheelLetters];
-  if(state.round.spins > 0 && Math.random() < 0.15) wheelItems[0] = 'STEAL'; // 15% chance to replace slot 0 with STEAL
-  
-  const targetIndex = Math.floor(Math.random() * 6);
-  const selectedAction = targetIndex === 0 && wheelItems[0]==='STEAL' ? 'STEAL' : state.round.wheelLetters[targetIndex];
-  
-  // Visual spin
-  const extraSpins = 5;
-  const segmentDegree = 360 / 6;
-  const stopAngle = (extraSpins * 360) + (360 - (targetIndex * segmentDegree)) - (segmentDegree/2);
-  
-  if(wheel) { wheel.style.transform = `rotate(${stopAngle}deg)`; }
-  
-  setTimeout(async () => {
-    AudioEngine.playReveal();
-    await updateRoom(hostCode, s => {
-      s.round.spins += 1;
-      s.round.currentAction = selectedAction;
-      s.round.readyPlayers = [];
-      return s;
-    });
-  }, 3500);
+window.hostSpinWheel = async function(type) {
+   const btns = document.querySelectorAll('.primary-btn'); btns.forEach(b=>b.disabled=true);
+   AudioEngine.playTick();
+   
+   const state = await readRoom(hostCode);
+   if(type === 'LETTER') {
+       const num = 6; const targetIdx = Math.floor(Math.random() * num);
+       const result = state.round.wheelLetters[targetIdx];
+       const sliceAngle = 360 / num;
+       const newRot = state.round.letterWheelRot + (360 * 5) + (360 - (targetIdx * sliceAngle)) - (state.round.letterWheelRot % 360);
+       document.getElementById('host-wheel-letter').style.transform = `rotate(${newRot}deg)`;
+       
+       setTimeout(async () => {
+           AudioEngine.playReveal();
+           await updateRoom(hostCode, s => {
+               s.round.letterWheelRot = newRot; s.round.spins += 1;
+               if(result === '🦹‍♂️') { s.round.subPhase = 'SPIN_PLAYER'; } 
+               else { s.round.subPhase = 'PLACE_LETTER'; s.round.drawnLetter = result; s.round.readyPlayers = []; }
+               return s;
+           });
+       }, 4000);
+   } else if (type === 'PLAYER') {
+       const num = state.players.length; const targetIdx = Math.floor(Math.random() * num);
+       const thief = state.players[targetIdx];
+       const sliceAngle = 360 / num;
+       const newRot = state.round.playerWheelRot + (360 * 5) + (360 - (targetIdx * sliceAngle)) - (state.round.playerWheelRot % 360);
+       document.getElementById('host-wheel-player').style.transform = `rotate(${newRot}deg)`;
+       
+       setTimeout(async () => {
+           AudioEngine.playReveal();
+           await updateRoom(hostCode, s => {
+               s.round.playerWheelRot = newRot; s.round.subPhase = 'THIEF_ACTION'; s.round.thiefId = thief.id; s.round.thiefStage = 'PICK_VICTIM';
+               return s;
+           });
+       }, 4000);
+   }
 }
 
-// Spingo Score Calculation
-function scoreSpingoGrid(grid) {
+window.scoreBokstavGrid = function(grid) {
    let pts = 0;
-   // Grid is 4x4: indices 0-15
-   const rows = [[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]];
-   const cols = [[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15]];
+   const rows = [[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24]];
+   const cols = [[0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24]];
    const allLines = [...rows, ...cols];
-   
    allLines.forEach(line => {
-      const chars = line.map(idx => grid[idx] || ' ').join('');
-      // check substrings of length 4, 3, 2
-      let lineScored = false;
-      for(let len = 4; len >= 2; len--) {
+      const chars = line.map(idx => grid[idx] || ' ').join(''); let lineScored = false;
+      for(let len = 5; len >= 2; len--) {
           if(lineScored) break;
-          for(let i=0; i <= 4 - len; i++) {
+          for(let i=0; i <= 5 - len; i++) {
              const sub = chars.substring(i, i+len).trim();
-             if(sub.length === len && SPINGO_DICT.has(sub)) {
-                 pts += (len * 100); // 4 letters = 400, 3 = 300, 2 = 200
-                 lineScored = true; break;
-             }
+             if(sub.length === len && BOKSTAV_DICT.has(sub)) { pts += (len * 100); lineScored = true; break; }
           }
       }
-   });
-   return pts;
+   }); return pts;
 }
 
 async function finalizeRound(state){
@@ -752,11 +778,10 @@ async function finalizeRound(state){
       const drawer=s.players.find(p=>p.id===r.drawerId);
       if(drawer){ drawer.score += 50*(r.correctPlayerIds||[]).length; drawer.combo = (r.correctPlayerIds||[]).length>0 ? (drawer.combo||0)+1 : 0; }
       s.players.forEach(p=>{ if(p.id!==r.drawerId && !(r.correctPlayerIds||[]).includes(p.id)) p.combo=0; });
-    } else if(r.type==='spingo'){
+    } else if(r.type==='bokstav'){
       s.players.forEach(p=>{
-         const grid = (r.answers[p.id] && r.answers[p.id].grid) ? r.answers[p.id].grid : Array(16).fill('');
-         const earned = scoreSpingoGrid(grid);
-         p.score += earned;
+         const grid = (r.answers && r.answers[p.id] && r.answers[p.id].grid) ? r.answers[p.id].grid : Array(25).fill('');
+         p.score += window.scoreBokstavGrid(grid);
       });
     } else {
       s.players.forEach(p=>{ if(!(r.answers||{})[p.id]?.correct) p.combo=0; });
@@ -769,7 +794,7 @@ async function finalizeRound(state){
     if(r.type==='wordorder') reveal = r.correctOrder.join(' ');
     if(r.type==='sign') reveal = 'Rätt svar: '+r.correct;
     if(r.type==='match') reveal = 'Paren: '+r.pairs.map(p=>p.word+' '+p.emoji).join(', ');
-    if(r.type==='spingo') reveal = 'Kolla era papper för poäng!';
+    if(r.type==='bokstav') reveal = 'Kolla era papper för poäng!';
 
     s.lastRoundResult={type:r.type, reveal, rankBefore, rankAfter, pointsThisRound:pts};
     const isLastRound = s.planIndex >= s.plan.length - 1; s.phase = isLastRound ? 'finished' : 'round-end'; 
@@ -819,7 +844,7 @@ async function advanceRound(){
     const idx=s.planIndex+1; if(idx>=s.plan.length) return s;
     const r=buildRound(s.plan[idx].type, s.plan[idx].drawerId); r.startedAt=Date.now(); r.answers={};
     const snap={}; s.players.forEach(p=>snap[p.id]=p.score); r.scoreSnapshot=snap;
-    if(r.type==='spingo') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(16).fill('')}; }); }
+    if(r.type==='bokstav') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(25).fill('')}; }); }
     s.round=r; s.planIndex=idx; s.phase='active'; return s;
   });
   hostRenderedRoundKey=null; document.getElementById('next-round-btn').disabled = false;
@@ -858,7 +883,8 @@ async function playerPoll(){
   } else if(state.phase==='active' && state.round){
     roundView.classList.remove('hidden'); renderMiniLB(document.getElementById('player-mini-lb'),state);
     
-    const key=state.round.type+':'+state.planIndex+(state.round.type==='spingo'?':'+state.round.spins:'');
+    let key=state.round.type+':'+state.planIndex;
+    if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins;
     if(playerRenderedRoundKey!==key){ playerRenderedRoundKey=key; renderPlayerRound(state); }
     
     if(state.round.type==='draw' && state.round.drawerId!==playerId){
@@ -902,82 +928,74 @@ function renderPlayerRound(state){
   } else if(r.type==='match'){
     matchState={pairs:r.pairs, matchedWords:[], selectedWord:null, selectedEmoji:null, shuffledWords:shuffle(r.pairs.map(p=>p.word)), shuffledEmojis:shuffle(r.pairs.map(p=>p.emoji))};
     body.innerHTML=`<h2 style="font-size:1.05rem;">Para ihop</h2><div class="match-columns"><div class="match-col" id="match-words"></div><div class="match-col" id="match-emojis"></div></div><div class="status-line" id="match-status"></div>`; renderMatchColumns();
-  } else if(r.type==='spingo'){
-    renderSpingoPlayer(state);
+  } else if(r.type==='bokstav'){
+    renderBokstavPlayer(state);
   }
 }
 
-// SPINGO PLAYER UI LOGIC
-function renderSpingoPlayer(state) {
+// BOKSTAVS-JAKT PLAYER UI & ACTIONS
+function renderBokstavPlayer(state) {
    const r = state.round; const body = document.getElementById('round-content-player');
-   const myGrid = (r.answers && r.answers[playerId] && r.answers[playerId].grid) ? r.answers[playerId].grid : Array(16).fill('');
-   const pendingStolen = (r.answers && r.answers[playerId]) ? r.answers[playerId].pendingStolen : null;
-   const isReady = r.readyPlayers && r.readyPlayers.includes(playerId);
-
-   if(!r.currentAction) {
-       body.innerHTML = `<h2 style="font-size:1.4rem;">Väntar på snurr... 🎲</h2><div class="spingo-paper"><div class="spingo-grid">${myGrid.map(l=>`<div class="spingo-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
-       return;
-   }
-
-   if(isReady) {
-       body.innerHTML = `<h2 style="font-size:1.4rem; color:var(--green);">Klar! ✓</h2><div class="spingo-paper"><div class="spingo-grid">${myGrid.map(l=>`<div class="spingo-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
-       return;
-   }
-
-   if(r.currentAction === 'STEAL' && !pendingStolen) {
-       // Steal mode: select opponent
-       const targets = state.players.filter(p => p.id !== playerId && r.answers && r.answers[p.id] && r.answers[p.id].grid && r.answers[p.id].grid.some(cell=>cell!==''));
-       if(targets.length === 0) {
-           // Nobody has letters, fallback to giving a random letter
-           submitSpingoSteal(null);
-           body.innerHTML = `<h2>Hämtar bokstav...</h2>`;
+   const myGrid = (r.answers && r.answers[playerId] && r.answers[playerId].grid) ? r.answers[playerId].grid : Array(25).fill('');
+   
+   if(r.subPhase === 'SPIN_LETTER' || r.subPhase === 'SPIN_PLAYER') {
+       body.innerHTML = `<h2 style="font-size:1.4rem;">Väntar på hjulet... 🎲</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
+   } else if (r.subPhase === 'PLACE_LETTER') {
+       const isReady = r.readyPlayers && r.readyPlayers.includes(playerId);
+       if(isReady) {
+           body.innerHTML = `<h2 style="font-size:1.4rem; color:var(--green);">Klar! ✓</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
        } else {
-           body.innerHTML = `<h2 style="font-size:1.2rem; color:var(--red);">🦹‍♂️ Välj en spelare att stjäla från!</h2><div id="spingo-targets" style="text-align:left; max-width:300px; margin: 0 auto;"></div>`;
-           const tw = document.getElementById('spingo-targets');
-           targets.forEach(t => {
-               const btn = document.createElement('div'); btn.className='spingo-target-player'; btn.innerHTML=`${t.avatar} ${t.name}`;
-               btn.onclick = () => submitSpingoSteal(t.id); tw.appendChild(btn);
-           });
+           body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem; color:var(--accent); font-weight:800;">${r.drawnLetter}</span></h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" onclick="${l?'':'submitBokstavPlacement('+i+')'}">${l}</div>`).join('')}</div></div>`;
        }
-   } else {
-       // Placement mode
-       const letterToPlace = pendingStolen || r.currentAction;
-       body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem; color:var(--accent);">${letterToPlace}</span></h2><div class="spingo-paper"><div class="spingo-grid" id="my-spingo-grid"></div></div>`;
-       const gridWrap = document.getElementById('my-spingo-grid');
-       myGrid.forEach((l, i) => {
-           const cell = document.createElement('div'); cell.className=`spingo-cell ${l?'filled':'empty'}`; cell.textContent = l;
-           if(!l) cell.onclick = () => submitSpingoPlacement(i, letterToPlace);
-           gridWrap.appendChild(cell);
-       });
+   } else if (r.subPhase === 'THIEF_ACTION') {
+       if(playerId === r.thiefId) {
+           if(r.thiefStage === 'PICK_VICTIM') {
+               const validVictims = state.players.filter(p => p.id !== playerId && r.answers && r.answers[p.id] && r.answers[p.id].grid.some(c=>c!==''));
+               if(validVictims.length === 0) {
+                   body.innerHTML = `<h2>Ingen att stjäla från! Du får en slumpmässig.</h2>`;
+                   setTimeout(() => { updateRoom(playerCode, s => { if(s.round.thiefStage !== 'PLACE'){ s.round.drawnLetter = pickRandom(BOKSTAV_LETTERS.filter(l=>l!=='🦹‍♂️')); s.round.thiefStage = 'PLACE'; } return s;}); }, 2000);
+               } else {
+                   body.innerHTML = `<h2 style="font-size:1.3rem; color:var(--red);">🦹‍♂️ Välj en spelare att stjäla från!</h2><div style="display:flex; flex-direction:column; gap:0.5rem; max-width:300px; margin: 1rem auto;">${validVictims.map(v=>`<div class="bokstav-target-player" onclick="bokstavPickVictim('${v.id}')">${v.avatar} <span style="flex:1; text-align:left;">${v.name}</span> <span class="msi">chevron_right</span></div>`).join('')}</div>`;
+               }
+           } else if (r.thiefStage === 'PICK_LETTER') {
+               const vGrid = r.answers[r.victimId].grid; const vPlayer = state.players.find(p=>p.id===r.victimId);
+               body.innerHTML = `<h2>Stjäl från ${vPlayer.name}! Klicka på en bokstav.</h2><div class="bokstav-paper"><div class="bokstav-grid">${vGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" style="${l?'background:var(--accent-light); border:2px solid var(--accent);':''}" onclick="${l?'bokstavStealLetter('+i+')':''}">${l}</div>`).join('')}</div></div>`;
+           } else if (r.thiefStage === 'PLACE') {
+               body.innerHTML = `<h2>Placera stulen bokstav: <span style="color:var(--accent); font-size:2.4rem;">${r.drawnLetter}</span></h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" onclick="${l?'':'bokstavThiefPlace('+i+')'}">${l}</div>`).join('')}</div></div>`;
+           }
+       } else if (playerId === r.victimId) {
+           const thiefPlayer = state.players.find(p=>p.id===r.thiefId);
+           body.innerHTML = `<h2 style="color:var(--red); font-size:1.4rem;">Åh nej! 🦹‍♂️<br>${thiefPlayer.name} stjäl från dig!</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
+       } else {
+           const thiefPlayer = state.players.find(p=>p.id===r.thiefId);
+           body.innerHTML = `<h2>${thiefPlayer.avatar} ${thiefPlayer.name} stjäl en bokstav... 🦹‍♂️</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
+       }
    }
 }
 
-async function submitSpingoSteal(targetId) {
-    AudioEngine.playPop();
+window.submitBokstavPlacement = async function(index) {
+    document.querySelectorAll('.bokstav-cell').forEach(c=>c.onclick=null); AudioEngine.playPop();
     await updateRoom(playerCode, s => {
-        if(!s.round.answers[playerId]) s.round.answers[playerId] = {grid: Array(16).fill('')};
-        if(!targetId) { s.round.answers[playerId].pendingStolen = pickRandom(SPINGO_LETTERS); return s; }
-        const tGrid = s.round.answers[targetId].grid;
-        const filled = tGrid.map((v,i)=>v!==''?i:-1).filter(i=>i!==-1);
-        if(filled.length > 0) {
-            const idx = filled[Math.floor(Math.random()*filled.length)];
-            s.round.answers[playerId].pendingStolen = tGrid[idx];
-            s.round.answers[targetId].grid[idx] = ''; // Steal it!
-        } else {
-            s.round.answers[playerId].pendingStolen = pickRandom(SPINGO_LETTERS);
-        }
+        if(!s.round.answers) s.round.answers = {}; if(!s.round.answers[playerId]) s.round.answers[playerId] = {grid: Array(25).fill('')};
+        s.round.answers[playerId].grid[index] = s.round.drawnLetter;
+        if(!s.round.readyPlayers) s.round.readyPlayers = []; if(!s.round.readyPlayers.includes(playerId)) s.round.readyPlayers.push(playerId);
         return s;
     });
 }
-
-async function submitSpingoPlacement(index, letter) {
-    AudioEngine.playPop();
+window.bokstavPickVictim = async function(vId) {
+    AudioEngine.playPop(); await updateRoom(playerCode, s => { s.round.victimId = vId; s.round.thiefStage = 'PICK_LETTER'; return s; });
+}
+window.bokstavStealLetter = async function(index) {
+    AudioEngine.playPop(); await updateRoom(playerCode, s => {
+        const l = s.round.answers[s.round.victimId].grid[index];
+        s.round.answers[s.round.victimId].grid[index] = ''; s.round.drawnLetter = l; s.round.thiefStage = 'PLACE'; return s;
+    });
+}
+window.bokstavThiefPlace = async function(index) {
+    document.querySelectorAll('.bokstav-cell').forEach(c=>c.onclick=null); AudioEngine.playPop();
     await updateRoom(playerCode, s => {
-        if(!s.round.answers[playerId]) s.round.answers[playerId] = {grid: Array(16).fill('')};
-        s.round.answers[playerId].grid[index] = letter;
-        s.round.answers[playerId].pendingStolen = null;
-        if(!s.round.readyPlayers) s.round.readyPlayers = [];
-        if(!s.round.readyPlayers.includes(playerId)) s.round.readyPlayers.push(playerId);
+        s.round.answers[playerId].grid[index] = s.round.drawnLetter;
+        s.round.subPhase = 'SPIN_LETTER'; s.round.thiefId = null; s.round.victimId = null; s.round.thiefStage = null; s.round.drawnLetter = null;
         return s;
     });
 }
