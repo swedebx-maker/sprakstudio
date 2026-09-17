@@ -633,7 +633,13 @@ async function offerResume(){
   if(!saved || !saved.code) return;
   const state=await readRoom(saved.code, false);
   if(!state || state.phase==='cancelled'){ clearSession(); return; }
-  if(saved.role==='player' && !(state.players||[]).some(p=>p.id===saved.playerId)){ clearSession(); return; }
+  
+  if(saved.role==='player') {
+    if(!(state.players||[]).some(p=>p.id===saved.playerId)){ clearSession(); return; }
+    const lastActive = state.hostActiveAt || state.createdAt || 0;
+    if(Date.now() - lastActive > 180000) { clearSession(); return; }
+  }
+
   const box=document.getElementById('resume-box');
   const who = saved.role==='host' ? 'lärare' : (saved.avatar+' '+saved.name);
   box.innerHTML = `<button id="resume-btn"><span class="msi">restart_alt</span> Fortsätt som ${who} (rum ${saved.code})</button>
@@ -647,7 +653,7 @@ async function offerResume(){
       document.getElementById('host-room-code').textContent='KOD: '+saved.code;
       document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+saved.code);
       hostLastStateHash=''; hostRenderedRoundKey=null; hostLastPhase=null;
-      show('host-board-screen'); startHostPolling();
+      show('host-board-screen'); startHostPolling(); startHostHeartbeat();
     } else {
       AudioEngine.ensureCtx();
       playerCode=saved.code; playerId=saved.playerId;
@@ -776,6 +782,16 @@ function buildPlan(players, count=30){
 let hostCode=null, hostPollTimer=null, hostPollStop=true, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
 let hostLastStateHash = "", hostLastTheftAt = 0, hostForceRender = false;
 let hostSpinKey = null, hostSpinLocalEnd = 0, hostLocalDeadline = 0, hostAnimatedSpin = -1, hostAutoSpinAt = -1;
+let hostHeartbeatTimer = null;
+
+function startHostHeartbeat() {
+  clearInterval(hostHeartbeatTimer);
+  hostHeartbeatTimer = setInterval(() => {
+    if(!hostPollStop && hostCode) {
+      updateRoom(hostCode, s => { s.hostActiveAt = Date.now(); return s; });
+    }
+  }, 40000);
+}
 
 window.ADMIN = {
    nextRound: () => advanceRound(),
@@ -801,15 +817,15 @@ console.log("%c🎓 Admin Commands Available: ADMIN.forceThief(), ADMIN.skipToBo
 document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   AudioEngine.startMusic(); AudioEngine.preloadAudio(); 
   hostCode=randomCode();
-  await writeRoom(hostCode,{code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null});
+  await writeRoom(hostCode,{code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null, createdAt: Date.now(), hostActiveAt: Date.now()});
   document.getElementById('lobby-code-big').textContent=hostCode; document.getElementById('host-room-code').textContent='KOD: '+hostCode;
   document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+hostCode);
   isHost=true; saveSession({role:'host', code:hostCode});
-  show('host-board-screen'); startHostPolling();
+  show('host-board-screen'); startHostPolling(); startHostHeartbeat();
 });
 
 function startHostPolling(){ hostPollStop=false; clearTimeout(hostPollTimer); hostLoop(); }
-function stopHostPolling(){ hostPollStop=true; clearTimeout(hostPollTimer); }
+function stopHostPolling(){ hostPollStop=true; clearTimeout(hostPollTimer); clearInterval(hostHeartbeatTimer); }
 async function hostLoop(){
   if(hostPollStop) return;
   try{ await hostPoll(); }catch(e){ console.error(e); }
@@ -878,7 +894,9 @@ async function hostPoll(){
       }
   }
 
-  const stateHash = JSON.stringify(state);
+  const _stateClone = Object.assign({}, state);
+  delete _stateClone.hostActiveAt;
+  const stateHash = JSON.stringify(_stateClone);
   
   if(state.phase==='active' && state.round && state.round.type!=='bokstav'){
     const dur=ROUND_DURATIONS[state.round.type];
@@ -1485,9 +1503,10 @@ document.getElementById('join-btn').addEventListener('click', async ()=>{
 });
 
 async function playerPoll(){
-  const state=await readRoom(playerCode, true); if(!state) return; const hash = JSON.stringify(state);
+  const state=await readRoom(playerCode, true); if(!state) return; 
+  const _stateClone = Object.assign({}, state); delete _stateClone.hostActiveAt;
+  const hash = JSON.stringify(_stateClone);
   const idle=document.getElementById('player-idle-view'); const roundView=document.getElementById('player-round-view'); const endView=document.getElementById('player-roundend-view');
-  
   if(state.phase==='cancelled'){
     [roundView,endView].forEach(v=>v.classList.add('hidden')); idle.classList.remove('hidden'); document.getElementById('player-status-text').textContent='Läraren avslutade rummet.'; stopPlayerPolling(); clearSession(); return;
   }
