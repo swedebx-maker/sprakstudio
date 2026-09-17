@@ -104,12 +104,14 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
   color:var(--ink);border-radius:12px;padding:.8em 1.1em;cursor:pointer;}
 .choice-btn:active{background:var(--accent);color:#fff;}
 .choice-btn:disabled{opacity:.4;}
-.match-columns{display:flex;gap:1.6rem;justify-content:center;margin:1rem 0;}
-.match-col{display:flex;flex-direction:column;gap:.5rem;}
+.match-columns{display:flex;gap:2.4rem;justify-content:center;margin:1.2rem auto;max-width:420px;}
+.match-col{display:flex;flex-direction:column;gap:.6rem;flex:1;}
 .match-tile{font-family:'Nunito',sans-serif;font-weight:700;background:#fff;border:2px solid var(--accent);color:var(--ink);
-  border-radius:10px;padding:.55em 1em;cursor:pointer;min-width:84px;text-align:center;font-size:1.05rem;}
-.match-tile.selected{background:var(--accent);color:#fff;}
-.match-tile.matched{background:#E7F5EA;border-color:var(--green);color:var(--green);opacity:.6;pointer-events:none;}
+  border-radius:12px;padding:.65em .6em;cursor:pointer;width:100%;min-height:2.6em;text-align:center;font-size:1.05rem;
+  display:flex;align-items:center;justify-content:center;transition:transform .1s ease;}
+.match-tile:active{transform:scale(.96);}
+.match-tile.selected{background:var(--accent);color:#fff;border-color:var(--accent-dark);}
+.match-tile.matched{background:#E7F5EA;border-color:var(--green);color:var(--green);opacity:.55;pointer-events:none;}
 .status-line{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--muted);margin-top:.5rem;font-size:.92rem;}
 .status-line.almost{color:var(--yellow-dark);}
 .status-line.wrong{color:var(--red);}
@@ -157,7 +159,10 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 <div id="host-board-screen" class="hidden board-wrap" style="position:relative;">
   <div class="top-bar">
     <div class="room-pill hidden" id="host-room-code">KOD: ----</div>
-    <button class="cancel-btn" id="cancel-room-btn"><span class="msi">cancel</span> Avbryt rummet</button>
+    <div style="display:flex;gap:.6rem;">
+      <button class="ghost-btn" id="mute-btn"><span class="msi">volume_up</span></button>
+      <button class="cancel-btn" id="cancel-room-btn"><span class="msi">cancel</span> Avbryt rummet</button>
+    </div>
   </div>
   <div class="avatars hidden" id="host-avatars"></div>
 
@@ -179,6 +184,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
   <div id="host-roundend-view" class="hidden card" style="width:100%;">
     <h2 id="roundend-title">Rundan är slut!</h2>
     <p class="sub" id="roundend-reveal"></p>
+    <canvas id="roundend-drawing" class="draw-canvas hidden" width="400" height="240" style="max-width:280px;height:170px;margin:0 auto 1rem;display:block;"></canvas>
     <table class="leaderboard-table" id="roundend-table"></table>
     <button class="primary-btn" id="next-round-btn">Nästa runda</button>
     <button class="ghost-btn" id="end-game-btn" style="margin-top:.8rem;">Avsluta spelet</button>
@@ -289,7 +295,7 @@ const SIGNS=[
   {icon:"medical_services",title:"Vårdcentralen",lines:["Öppet Mån–Fre 8–17"],
    question:"Är vårdcentralen öppen på lördag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
   {icon:"school",title:"Skolan",lines:["Skolstart 08:00","Skolslut 14:30"],
-   question:"När börjar skolan?",choices:["08:00","09:00","10:00"],correct:"08:00"},
+   question:"När börjar skolan?",choices:["08:00","14:30","10:00"],correct:"08:00"},
   {icon:"fitness_center",title:"Gymmet",lines:["Öppet 06–23","Alla dagar"],
    question:"Kan man träna klockan 22?",choices:["Ja","Nej","Vet inte"],correct:"Ja"},
   {icon:"receipt_long",title:"Kvitto",lines:["Bananer ........ 12 kr","Ägg ............ 30 kr","Totalt ......... 42 kr"],
@@ -361,6 +367,59 @@ function show(id){
 document.getElementById('host-role-btn').addEventListener('click',()=>show('host-create-screen'));
 document.getElementById('player-role-btn').addEventListener('click',()=>show('player-join-screen'));
 
+/* ================= AUDIO ================= */
+const AudioEngine=(function(){
+  let ctx=null, musicOn=true, musicTimer=null, masterGain=null, musicGain=null, sfxGain=null, musicStep=0;
+  const bassPattern=[130.81,130.81,164.81,146.83,130.81,130.81,196.00,174.61];
+  const arpPattern=[261.63,329.63,392.00,329.63,293.66,349.23,440.00,349.23];
+  function ensureCtx(){
+    if(!ctx){
+      ctx=new (window.AudioContext||window.webkitAudioContext)();
+      masterGain=ctx.createGain(); masterGain.gain.value=0.9; masterGain.connect(ctx.destination);
+      musicGain=ctx.createGain(); musicGain.gain.value=0.16; musicGain.connect(masterGain);
+      sfxGain=ctx.createGain(); sfxGain.gain.value=0.55; sfxGain.connect(masterGain);
+    }
+    if(ctx.state==='suspended') ctx.resume();
+  }
+  function tone(freq,start,dur,type,gainNode,vol){
+    const osc=ctx.createOscillator(); const g=ctx.createGain();
+    osc.type=type||'square'; osc.frequency.value=freq;
+    g.gain.setValueAtTime(0,start);
+    g.gain.linearRampToValueAtTime(vol||0.3,start+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,start+dur);
+    osc.connect(g); g.connect(gainNode);
+    osc.start(start); osc.stop(start+dur+0.02);
+  }
+  function scheduleMusicStep(){
+    if(!musicOn||!ctx) return;
+    const t=ctx.currentTime+0.04; const stepDur=0.22;
+    tone(bassPattern[musicStep%bassPattern.length],t,stepDur*0.9,'triangle',musicGain,0.5);
+    tone(arpPattern[musicStep%arpPattern.length],t,stepDur*0.5,'square',musicGain,0.16);
+    musicStep++;
+  }
+  return {
+    ensureCtx,
+    startMusic(){ ensureCtx(); if(!musicTimer) musicTimer=setInterval(scheduleMusicStep,220); },
+    stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } },
+    toggleMusic(){ musicOn=!musicOn; if(musicOn) this.startMusic(); else this.stopMusic(); return musicOn; },
+    get isMusicOn(){ return musicOn; },
+    playCorrect(){ ensureCtx(); const t=ctx.currentTime;
+      tone(523.25,t,0.12,'square',sfxGain,0.35); tone(659.25,t+0.1,0.12,'square',sfxGain,0.35); tone(783.99,t+0.2,0.18,'square',sfxGain,0.4); },
+    playWrong(){ ensureCtx(); const t=ctx.currentTime;
+      tone(196,t,0.25,'sawtooth',sfxGain,0.28); tone(146.83,t+0.12,0.28,'sawtooth',sfxGain,0.28); },
+    playAlmost(){ ensureCtx(); const t=ctx.currentTime;
+      tone(392,t,0.15,'triangle',sfxGain,0.3); tone(440,t+0.1,0.18,'triangle',sfxGain,0.3); },
+    playRoundStart(){ ensureCtx(); const t=ctx.currentTime;
+      for(let i=0;i<6;i++) tone(300+i*60,t+i*0.03,0.08,'square',sfxGain,0.22); },
+    playTick(){ ensureCtx(); const t=ctx.currentTime; tone(880,t,0.06,'square',sfxGain,0.2); },
+    playReveal(){ ensureCtx(); const t=ctx.currentTime;
+      [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,t+i*0.09,0.3,'triangle',sfxGain,0.3)); },
+    playVictory(){ ensureCtx(); const t=ctx.currentTime;
+      [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,t+i*0.13,0.4,'square',sfxGain,0.35)); },
+    playJoin(){ ensureCtx(); const t=ctx.currentTime; tone(440,t,0.08,'sine',sfxGain,0.25); tone(660,t+0.06,0.1,'sine',sfxGain,0.25); }
+  };
+})();
+
 /* ================= ROUND BUILDERS ================= */
 function buildRound(type,drawerId){
   if(type==='draw'){
@@ -382,7 +441,7 @@ function buildRound(type,drawerId){
     return {type:'sign',icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct};
   }
   if(type==='match'){
-    const pairs=shuffle(MATCH_PAIRS_POOL).slice(0,4);
+    const pairs=shuffle(MATCH_PAIRS_POOL).slice(0,6);
     return {type:'match',pairs};
   }
 }
@@ -396,9 +455,10 @@ function buildPlan(players){
 }
 
 /* ================= HOST LOGIC ================= */
-let hostCode=null, hostPollTimer=null, hostRenderedRoundKey=null;
+let hostCode=null, hostPollTimer=null, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
 
 document.getElementById('create-room-btn').addEventListener('click', async ()=>{
+  AudioEngine.startMusic();
   hostCode=randomCode();
   const initial={code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null};
   await writeRoom(hostCode,initial);
@@ -407,6 +467,11 @@ document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   show('host-board-screen');
   hostPollTimer=setInterval(hostPoll,1000);
   hostPoll();
+});
+
+document.getElementById('mute-btn').addEventListener('click', (e)=>{
+  const on=AudioEngine.toggleMusic();
+  e.currentTarget.querySelector('.msi').textContent = on ? 'volume_up' : 'volume_off';
 });
 
 document.getElementById('cancel-room-btn').addEventListener('click', async ()=>{
@@ -429,6 +494,9 @@ async function hostPoll(){
   document.getElementById('host-roundend-view').classList.toggle('hidden', state.phase!=='round-end');
   document.getElementById('host-finished-view').classList.toggle('hidden', state.phase!=='finished');
 
+  if(state.players.length>hostLastPlayerCount) AudioEngine.playJoin();
+  hostLastPlayerCount=state.players.length;
+
   if(state.phase==='active' && state.round){
     renderMiniLB(document.getElementById('host-mini-lb'),state);
     const dur=ROUND_DURATIONS[state.round.type];
@@ -436,8 +504,14 @@ async function hostPoll(){
     const timeLeft=Math.max(0,dur-elapsed);
     document.getElementById('host-timer-bar').style.width=(100*timeLeft/dur)+'%';
     const key=state.round.type+':'+(state.round.word||state.round.statement||state.round.title||JSON.stringify(state.round.correctOrder||state.round.pairs))+':'+state.planIndex;
-    if(hostRenderedRoundKey!==key){ hostRenderedRoundKey=key; renderHostRound(state); }
+    if(hostRenderedRoundKey!==key){
+      hostRenderedRoundKey=key; hostLastTickSecond=null;
+      renderHostRound(state); AudioEngine.playRoundStart();
+    }
     else if(state.round.type==='draw'){ redrawCanvas(document.getElementById('host-canvas'),state.round.strokes); }
+
+    const ceilLeft=Math.ceil(timeLeft);
+    if(ceilLeft<=5 && ceilLeft>=1 && ceilLeft!==hostLastTickSecond){ hostLastTickSecond=ceilLeft; AudioEngine.playTick(); }
 
     const answeredCount=Object.keys(state.round.answers||{}).length;
     const doneEarly = state.round.type==='draw'
@@ -445,8 +519,15 @@ async function hostPoll(){
       : answeredCount >= state.players.length;
     if(timeLeft<=0 || doneEarly){ await finalizeRound(state); }
   }
-  if(state.phase==='round-end'){ renderRoundEnd(state); }
-  if(state.phase==='finished'){ renderPodium(state); }
+  if(state.phase==='round-end'){
+    renderRoundEnd(state);
+    if(hostLastPhase!=='round-end') AudioEngine.playReveal();
+  }
+  if(state.phase==='finished'){
+    renderPodium(state);
+    if(hostLastPhase!=='finished') AudioEngine.playVictory();
+  }
+  hostLastPhase=state.phase;
 }
 
 function renderAvatars(wrap,state){
@@ -550,9 +631,34 @@ function revealText(r){
   if(r.type==='match') return 'Paren: '+r.pairs.map(p=>p.word+' '+p.emoji).join(', ');
 }
 
+function renderPlayerAnswerSummary(r, playerId){
+  const a = (r.answers||{})[playerId];
+  if(r.type==='draw' && r.drawerId===playerId) return '<span style="color:var(--muted);">ritade</span>';
+  if(!a) return '<span style="color:var(--muted);">–</span>';
+  if(r.type==='wordorder'){
+    const submitted = a.value || [];
+    return submitted.map((w,i)=>{
+      const ok = r.correctOrder[i]===w;
+      return `<span style="display:inline-block;margin:1px;padding:.1em .4em;border-radius:6px;font-size:.78rem;
+        background:${ok?'#E7F5EA':'#FBE1E0'};color:${ok?'var(--green)':'var(--red)'};">${w}</span>`;
+    }).join('');
+  }
+  if(r.type==='truefalse') return a.value ? 'Rätt' : 'Fel';
+  if(r.type==='sign') return a.value;
+  if(r.type==='match') return a.correct ? 'Klar ✓' : '–';
+  if(r.type==='draw') return a.value ? `"${a.value}"` : '–';
+  return '–';
+}
 function renderRoundEnd(state){
   const res=state.lastRoundResult;
   document.getElementById('roundend-reveal').textContent = res ? res.reveal : '';
+  const drawCanvas=document.getElementById('roundend-drawing');
+  if(state.round && state.round.type==='draw'){
+    drawCanvas.classList.remove('hidden');
+    redrawCanvas(drawCanvas, state.round.strokes);
+  } else {
+    drawCanvas.classList.add('hidden');
+  }
   const table=document.getElementById('roundend-table');
   const sorted=[...state.players].sort((a,b)=>b.score-a.score);
   table.innerHTML = sorted.map((p,i)=>{
@@ -563,8 +669,10 @@ function renderRoundEnd(state){
     else if(before<after) arrow=`<span class="delta-down">▼${after-before}</span>`;
     else arrow='–';
     const gained=res.pointsThisRound[p.id]||0;
+    const answerSummary = state.round ? renderPlayerAnswerSummary(state.round, p.id) : '–';
     return `<tr><td class="rank">#${i+1}</td><td>${p.avatar} ${p.name}</td>
-      <td>${arrow}</td><td class="gained">+${gained}</td><td>${p.score}</td></tr>`;
+      <td>${arrow}</td><td class="gained">+${gained}</td>
+      <td style="max-width:160px;">${answerSummary}</td></tr>`;
   }).join('');
 }
 function renderPodium(state){
@@ -611,6 +719,7 @@ let matchState=null;
 let drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
 
 document.getElementById('join-btn').addEventListener('click', async ()=>{
+  AudioEngine.ensureCtx();
   const code=document.getElementById('join-code').value.trim().toUpperCase();
   const name=document.getElementById('join-name').value.trim();
   const err=document.getElementById('join-error'); err.textContent='';
@@ -621,6 +730,7 @@ document.getElementById('join-btn').addEventListener('click', async ()=>{
   const avatar=pickRandom(AVATARS);
   const ok=await updateRoom(code, s=>{ s.players.push({id:playerId,name,avatar,score:0,combo:0}); return s; });
   if(!ok){ err.textContent='Något gick fel, försök igen.'; return; }
+  AudioEngine.playJoin();
   playerCode=code;
   document.getElementById('player-name-tag').textContent=avatar+' '+name;
   show('player-game-screen');
@@ -761,32 +871,43 @@ function renderDragChips(container, order){
   });
 }
 function attachDragHandlers(el, container, order){
-  el.addEventListener('pointerdown', e=>{
+  let dragging=false;
+  function getX(e){ return e.touches ? e.touches[0].clientX : e.clientX; }
+  function onDown(e){
     e.preventDefault();
-    el.setPointerCapture(e.pointerId);
+    dragging=true;
     el.classList.add('dragging'); el.classList.remove('jiggle');
-    function onMove(ev){
-      const children=[...container.children].filter(c=>c!==el);
-      const x=ev.clientX;
-      let insertBefore=null;
-      for(const child of children){
-        const rect=child.getBoundingClientRect();
-        if(x < rect.left+rect.width/2){ insertBefore=child; break; }
-      }
-      if(insertBefore) container.insertBefore(el, insertBefore);
-      else container.appendChild(el);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, {passive:false});
+    document.addEventListener('touchend', onUp);
+  }
+  function onMove(e){
+    if(!dragging) return;
+    e.preventDefault();
+    const x=getX(e);
+    const children=[...container.children].filter(c=>c!==el);
+    let insertBefore=null;
+    for(const child of children){
+      const rect=child.getBoundingClientRect();
+      if(x < rect.left+rect.width/2){ insertBefore=child; break; }
     }
-    function onUp(){
-      try{ el.releasePointerCapture(e.pointerId); }catch(err){}
-      el.classList.remove('dragging'); el.classList.add('jiggle');
-      el.removeEventListener('pointermove', onMove);
-      el.removeEventListener('pointerup', onUp);
-      const newOrder=[...container.children].map(c=>c.textContent);
-      order.length=0; order.push(...newOrder);
-    }
-    el.addEventListener('pointermove', onMove);
-    el.addEventListener('pointerup', onUp);
-  });
+    if(insertBefore) container.insertBefore(el, insertBefore);
+    else container.appendChild(el);
+  }
+  function onUp(){
+    if(!dragging) return;
+    dragging=false;
+    el.classList.remove('dragging'); el.classList.add('jiggle');
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onUp);
+    const newOrder=[...container.children].map(c=>c.textContent);
+    order.length=0; order.push(...newOrder);
+  }
+  el.addEventListener('mousedown', onDown);
+  el.addEventListener('touchstart', onDown, {passive:false});
 }
 
 function renderMatchColumns(){
@@ -937,17 +1058,21 @@ async function submitGuess(){
   if(resultInfo.correct){
     status.textContent='Rätt! Väntar...'; status.className='status-line right';
     input.disabled=true; btn.disabled=true;
+    AudioEngine.playCorrect();
   } else if(resultInfo.sim>=60){
     status.textContent='Nästan rätt! ('+resultInfo.sim+'%) Försök igen'; status.className='status-line almost';
     input.value=''; input.focus();
+    AudioEngine.playAlmost();
   } else {
     status.textContent='Fel, försök igen'; status.className='status-line wrong';
     input.value=''; input.focus();
+    AudioEngine.playWrong();
   }
 }
 
 async function submitAnswer(value){
   document.querySelectorAll('.tf-btn,.choice-btn').forEach(b=>b.disabled=true);
+  let wasCorrect=null;
   await updateRoom(playerCode, s=>{
     if(s.phase!=='active' || !s.round) return s;
     const r=s.round;
@@ -965,11 +1090,15 @@ async function submitAnswer(value){
       const pts=calcScore(timeLeft/dur, player.combo||0);
       player.score+=pts; player.combo=(player.combo||0)+1;
       r.answers[playerId]={value,correct:true,points:pts};
+      wasCorrect=true;
     } else {
       r.answers[playerId]={value,correct:false,points:0};
+      wasCorrect=false;
     }
     return s;
   });
+  if(wasCorrect===true) AudioEngine.playCorrect();
+  else if(wasCorrect===false) AudioEngine.playWrong();
   const st=document.getElementById('tf-status')||document.getElementById('wo-status')||document.getElementById('sign-status')||document.getElementById('match-status');
   if(st){ st.textContent='Skickat! Väntar på övriga...'; st.className='status-line'; }
 }
