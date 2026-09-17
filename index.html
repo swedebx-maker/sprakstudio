@@ -10,6 +10,7 @@
 <style>
 :root{
   --accent:#2B7DE0; --accent-dark:#195CA8; --accent-light:#EAF2FC;
+  --yellow:#FFC72C; --yellow-dark:#8A6200; --yellow-border:#E8B000;
   --bg:#F3F6FA; --card:#FFFFFF; --border:#DCE6F2;
   --ink:#233246; --muted:#7C8CA0;
   --green:#2E9E52; --red:#D9534F;
@@ -64,7 +65,7 @@ input:focus{outline:none;border-color:var(--accent);}
 .round-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:3vh 3vw;width:100%;
   text-align:center;position:relative;}
 .timer-bar-wrap{width:100%;height:10px;background:var(--accent-light);border-radius:999px;overflow:hidden;margin-bottom:1.4vh;}
-.timer-bar{height:100%;background:var(--accent);border-radius:999px;transition:width .3s linear;}
+.timer-bar{height:100%;background:var(--yellow);border-radius:999px;transition:width .3s linear;}
 .round-type-label{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--accent-dark);font-size:.95rem;
   margin-bottom:.3em;display:flex;align-items:center;justify-content:center;gap:.3em;}
 .word-hint{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(1.6rem,3.6vw,2.4rem);letter-spacing:.22em;
@@ -85,10 +86,14 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .tf-btn.true{background:var(--green);}
 .tf-btn.false{background:var(--red);}
 .tf-btn:disabled{opacity:.4;}
-.drag-row{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:1rem 0;min-height:3em;}
-.drag-chip{font-family:'Nunito',sans-serif;font-weight:700;background:#fff;border:2px solid var(--accent);color:var(--ink);
-  border-radius:10px;padding:.55em 1em;cursor:grab;font-size:1rem;}
-.drag-chip.dragging{opacity:.35;}
+.drag-row{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin:1.2rem 0;min-height:3.6em;touch-action:none;}
+.drag-chip{font-family:'Nunito',sans-serif;font-weight:800;background:var(--yellow);border:2px solid var(--yellow-border);
+  color:var(--ink);border-radius:12px;padding:.7em 1.1em;cursor:grab;font-size:1.1rem;touch-action:none;
+  user-select:none;position:relative;}
+.drag-chip.jiggle{animation:jiggle .26s ease-in-out infinite;}
+.drag-chip.dragging{opacity:.92;transform:scale(1.12) !important;z-index:20;box-shadow:0 8px 18px rgba(0,0,0,.25);
+  animation:none;cursor:grabbing;}
+@keyframes jiggle{0%,100%{transform:rotate(-2.5deg);}50%{transform:rotate(2.5deg);}}
 .sign-box{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.1em 1.3em;margin:1rem auto;
   max-width:360px;text-align:left;font-family:'Nunito',sans-serif;}
 .sign-box .sign-title{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;color:var(--accent-dark);
@@ -106,6 +111,9 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .match-tile.selected{background:var(--accent);color:#fff;}
 .match-tile.matched{background:#E7F5EA;border-color:var(--green);color:var(--green);opacity:.6;pointer-events:none;}
 .status-line{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--muted);margin-top:.5rem;font-size:.92rem;}
+.status-line.almost{color:var(--yellow-dark);}
+.status-line.wrong{color:var(--red);}
+.status-line.right{color:var(--green);}
 .result-flash{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;margin-top:.7rem;}
 .result-flash.correct{color:var(--green);}
 .result-flash.wrong{color:var(--red);}
@@ -214,16 +222,26 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 <script>
 const AVATARS=["🦊","🐻","🐼","🐸","🦁","🐨","🐯","🐰","🐷","🐵"];
 const DRAW_CATEGORIES={
-  mat:{name:"Mat",emoji:"🍎",words:["äpple","bröd","mjölk","ägg","fisk","kaffe","banan","ost"]},
-  djur:{name:"Djur",emoji:"🐶",words:["hund","katt","häst","ko","gris","fågel"]},
-  hem:{name:"Hem",emoji:"🏠",words:["stol","bord","säng","dörr","lampa","soffa"]},
-  kropp:{name:"Kropp",emoji:"🧍",words:["hand","fot","öga","öra","mun","hår"]},
-  vader:{name:"Väder",emoji:"☀️",words:["sol","regn","snö","moln"]}
+  mat:{name:"Mat",emoji:"🍎",words:["äpple","bröd","mjölk","ägg","fisk","kaffe","banan","ost","tomat","potatis"]},
+  djur:{name:"Djur",emoji:"🐶",words:["hund","katt","häst","ko","gris","fågel","anka","get"]},
+  hem:{name:"Hem",emoji:"🏠",words:["stol","bord","säng","dörr","lampa","soffa","fönster","nyckel","klocka"]},
+  kropp:{name:"Kropp",emoji:"🧍",words:["hand","fot","öga","öra","mun","hår","arm","ben","huvud"]},
+  vader:{name:"Väder",emoji:"☀️",words:["sol","regn","snö","moln","vind"]},
+  klader:{name:"Kläder",emoji:"👕",words:["tröja","byxor","sko","mössa","jacka","klänning"]},
+  transport:{name:"Transport",emoji:"🚗",words:["bil","buss","tåg","cykel","flygplan","båt"]},
+  skola:{name:"Skola",emoji:"🏫",words:["bok","penna","dator","tavla","sax","suddgummi"]},
+  natur:{name:"Natur",emoji:"🌳",words:["träd","blomma","berg","sjö","skog","stjärna"]},
+  leksaker:{name:"Leksaker",emoji:"🧸",words:["boll","docka","nalle","pussel","drake"]}
 };
 const SENTENCES=[
   ["Jag","heter","Ali"],["Hon","bor","här"],["Vi","äter","mat"],
   ["Han","dricker","kaffe"],["Barnet","sover"],["Jag","mår","bra"],
-  ["Katten","sover"],["Vi","går","hem"]
+  ["Katten","sover"],["Vi","går","hem"],["Han","är","glad"],
+  ["Hon","har","en","bok"],["Jag","ser","dig"],["Hunden","springer"],
+  ["Han","läser","en","bok"],["Jag","vill","ha","vatten"],["Hon","lagar","mat"],
+  ["Barnen","leker"],["Jag","tycker","om","kaffe"],["Vi","pratar","svenska"],
+  ["Han","kör","bil"],["Solen","skiner"],["Det","regnar","idag"],
+  ["Jag","är","trött"],["Vi","ses","imorgon"]
 ];
 const STATEMENTS=[
   {text:"Solen är gul.",isTrue:true},
@@ -233,7 +251,19 @@ const STATEMENTS=[
   {text:"Vintern är kall.",isTrue:true},
   {text:"Bröd är mat.",isTrue:true},
   {text:"En katt kan flyga.",isTrue:false},
-  {text:"ICA är en matbutik.",isTrue:true}
+  {text:"ICA är en matbutik.",isTrue:true},
+  {text:"Gräset är rött.",isTrue:false},
+  {text:"En fisk kan simma.",isTrue:true},
+  {text:"Kaffe är varmt.",isTrue:true},
+  {text:"En elefant är liten.",isTrue:false},
+  {text:"Snö är vit.",isTrue:true},
+  {text:"En bil har fyra hjul.",isTrue:true},
+  {text:"En cykel har två hjul.",isTrue:true},
+  {text:"Himlen är grön.",isTrue:false},
+  {text:"Vatten är blött.",isTrue:true},
+  {text:"En bok har sidor.",isTrue:true},
+  {text:"En sten kan prata.",isTrue:false},
+  {text:"Sommaren är varm.",isTrue:true}
 ];
 const SIGNS=[
   {icon:"storefront",title:"ICA Affär",lines:["Öppet: Mån–Fre 9–18","Lördag 10–15","Söndag Stängt"],
@@ -243,13 +273,37 @@ const SIGNS=[
   {icon:"directions_bus",title:"Busshållplats",lines:["Buss 4 → Centrum","Avgång var 10:e minut"],
    question:"Hur ofta kommer buss 4?",choices:["Var 10:e minut","Var timme","En gång om dagen"],correct:"Var 10:e minut"},
   {icon:"local_pharmacy",title:"Apoteket",lines:["Öppet alla dagar","8–22"],
-   question:"Kan man handla på apoteket en söndag kväll?",choices:["Ja","Nej","Vet inte"],correct:"Ja"}
+   question:"Kan man handla på apoteket en söndag kväll?",choices:["Ja","Nej","Vet inte"],correct:"Ja"},
+  {icon:"local_post_office",title:"Posten",lines:["Öppet Mån–Fre 9–17","Stängt helger"],
+   question:"Är posten öppen på lördag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
+  {icon:"local_library",title:"Biblioteket",lines:["Öppet alla dagar","10–19"],
+   question:"Kan man låna böcker på kvällen?",choices:["Ja","Nej","Vet inte"],correct:"Ja"},
+  {icon:"account_balance",title:"Banken",lines:["Öppet Mån–Fre 10–15","Stängt helger"],
+   question:"Är banken öppen på söndag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
+  {icon:"train",title:"Tåget",lines:["Tåg till Stockholm","Avgång 14:32","Spår 3"],
+   question:"Vilket spår går tåget från?",choices:["Spår 1","Spår 3","Spår 5"],correct:"Spår 3"},
+  {icon:"local_parking",title:"Parkering",lines:["Max 2 timmar","Kl 9–18"],
+   question:"Hur länge får man parkera?",choices:["1 timme","2 timmar","Hela dagen"],correct:"2 timmar"},
+  {icon:"recycling",title:"Återvinning",lines:["Glas","Papper","Plast"],
+   question:"Var kastar man en glasflaska?",choices:["Glas","Papper","Plast"],correct:"Glas"},
+  {icon:"medical_services",title:"Vårdcentralen",lines:["Öppet Mån–Fre 8–17"],
+   question:"Är vårdcentralen öppen på lördag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
+  {icon:"school",title:"Skolan",lines:["Skolstart 08:00","Skolslut 14:30"],
+   question:"När börjar skolan?",choices:["08:00","09:00","10:00"],correct:"08:00"},
+  {icon:"fitness_center",title:"Gymmet",lines:["Öppet 06–23","Alla dagar"],
+   question:"Kan man träna klockan 22?",choices:["Ja","Nej","Vet inte"],correct:"Ja"},
+  {icon:"receipt_long",title:"Kvitto",lines:["Bananer ........ 12 kr","Ägg ............ 30 kr","Totalt ......... 42 kr"],
+   question:"Vad kostar äggen?",choices:["12 kr","30 kr","42 kr"],correct:"30 kr"}
 ];
 const MATCH_PAIRS_POOL=[
   {word:"äpple",emoji:"🍎"},{word:"bröd",emoji:"🍞"},{word:"mjölk",emoji:"🥛"},
   {word:"hund",emoji:"🐶"},{word:"katt",emoji:"🐱"},{word:"sol",emoji:"☀️"},
   {word:"regn",emoji:"🌧️"},{word:"hand",emoji:"✋"},{word:"öga",emoji:"👁️"},
-  {word:"bok",emoji:"📖"},{word:"stol",emoji:"🪑"},{word:"hus",emoji:"🏠"}
+  {word:"bok",emoji:"📖"},{word:"stol",emoji:"🪑"},{word:"hus",emoji:"🏠"},
+  {word:"bil",emoji:"🚗"},{word:"fisk",emoji:"🐟"},{word:"ägg",emoji:"🥚"},
+  {word:"boll",emoji:"⚽"},{word:"klocka",emoji:"⏰"},{word:"nyckel",emoji:"🔑"},
+  {word:"penna",emoji:"✏️"},{word:"träd",emoji:"🌳"},{word:"blomma",emoji:"🌸"},
+  {word:"ko",emoji:"🐮"},{word:"gris",emoji:"🐷"},{word:"fågel",emoji:"🐦"}
 ];
 const ROUND_DURATIONS={draw:90,truefalse:15,wordorder:40,sign:20,match:45};
 const NON_DRAW_TYPES=["truefalse","wordorder","sign","match"];
@@ -274,10 +328,31 @@ function randomCode(){const L="ABCDEFGHJKLMNPQRSTUVWXYZ";let c="";for(let i=0;i<
 function newId(){return Math.random().toString(36).slice(2,10);}
 function pickRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function shuffleNotEqual(arr){
+  if(arr.length<2) return arr.slice();
+  let s;
+  do{ s=shuffle(arr); }while(JSON.stringify(s)===JSON.stringify(arr));
+  return s;
+}
 function calcScore(timeLeftFraction,combo){
   const base=200+Math.round(800*Math.max(0,Math.min(1,timeLeftFraction)));
   const mult=1+0.1*Math.min(combo,5);
   return Math.round(base*mult);
+}
+function normalizeSwedish(s){
+  return s.toLowerCase().trim().replace(/å|ä/g,'a').replace(/ö/g,'o');
+}
+function similarity(a,b){
+  const m=a.length,n=b.length;
+  if(m===0) return n===0?1:0;
+  if(n===0) return 0;
+  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0]=i;
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+    dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  const dist=dp[m][n]; const maxLen=Math.max(m,n);
+  return maxLen===0?1:1-dist/maxLen;
 }
 function show(id){
   ['role-screen','host-create-screen','host-board-screen','player-join-screen','player-game-screen']
@@ -300,7 +375,7 @@ function buildRound(type,drawerId){
   }
   if(type==='wordorder'){
     const words=pickRandom(SENTENCES);
-    return {type:'wordorder',correctOrder:words,scrambled:shuffle(words)};
+    return {type:'wordorder',correctOrder:words,scrambled:shuffleNotEqual(words)};
   }
   if(type==='sign'){
     const s=pickRandom(SIGNS);
@@ -403,7 +478,7 @@ function renderHostRound(state){
     body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
   } else if(r.type==='wordorder'){
     label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`;
-    body.innerHTML=`<div class="drag-row">${r.scrambled.map(w=>`<span class="drag-chip" style="cursor:default;">${w}</span>`).join('')}</div>`;
+    body.innerHTML=`<div class="drag-row">${r.scrambled.map(w=>`<span class="drag-chip" style="cursor:default;animation:none;">${w}</span>`).join('')}</div>`;
   } else if(r.type==='sign'){
     label.innerHTML=`<span class="msi">signpost</span> Vad säger skylten?`;
     body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div>`;
@@ -580,7 +655,11 @@ async function playerPoll(){
     else if(state.round.type==='draw' && state.round.drawerId!==playerId){
       redrawCanvas(document.getElementById('player-canvas'),state.round.strokes);
       const gs=document.getElementById('player-guess-status');
-      if(gs) gs.textContent = (state.round.correctPlayerIds||[]).includes(playerId) ? 'Rätt! Väntar...' : '';
+      if(gs && (state.round.correctPlayerIds||[]).includes(playerId)){
+        gs.textContent='Rätt! Väntar...'; gs.className='status-line right';
+        const inp=document.getElementById('guess-input'); if(inp) inp.disabled=true;
+        const btn=document.getElementById('guess-submit-btn'); if(btn) btn.disabled=true;
+      }
     }
   } else if(state.phase==='round-end'){
     endView.classList.remove('hidden');
@@ -672,25 +751,41 @@ function renderPlayerRound(state){
 
 function renderDragChips(container, order){
   container.innerHTML='';
-  order.forEach((w,i)=>{
+  order.forEach((w)=>{
     const el=document.createElement('div');
-    el.className='drag-chip';
+    el.className='drag-chip jiggle';
     el.textContent=w;
-    el.draggable=true;
-    el.dataset.index=i;
-    el.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', i); el.classList.add('dragging'); });
-    el.addEventListener('dragend', ()=> el.classList.remove('dragging'));
-    el.addEventListener('dragover', e=> e.preventDefault());
-    el.addEventListener('drop', e=>{
-      e.preventDefault();
-      const fromIdx = +e.dataTransfer.getData('text/plain');
-      const toIdx = +el.dataset.index;
-      if(fromIdx===toIdx) return;
-      const [item]=order.splice(fromIdx,1);
-      order.splice(toIdx,0,item);
-      renderDragChips(container, order);
-    });
+    el.style.animationDelay=(Math.random()*0.2).toFixed(2)+'s';
     container.appendChild(el);
+    attachDragHandlers(el, container, order);
+  });
+}
+function attachDragHandlers(el, container, order){
+  el.addEventListener('pointerdown', e=>{
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    el.classList.add('dragging'); el.classList.remove('jiggle');
+    function onMove(ev){
+      const children=[...container.children].filter(c=>c!==el);
+      const x=ev.clientX;
+      let insertBefore=null;
+      for(const child of children){
+        const rect=child.getBoundingClientRect();
+        if(x < rect.left+rect.width/2){ insertBefore=child; break; }
+      }
+      if(insertBefore) container.insertBefore(el, insertBefore);
+      else container.appendChild(el);
+    }
+    function onUp(){
+      try{ el.releasePointerCapture(e.pointerId); }catch(err){}
+      el.classList.remove('dragging'); el.classList.add('jiggle');
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerup', onUp);
+      const newOrder=[...container.children].map(c=>c.textContent);
+      order.length=0; order.push(...newOrder);
+    }
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerup', onUp);
   });
 }
 
@@ -810,26 +905,45 @@ async function syncStrokes(){
 
 async function submitGuess(){
   const input=document.getElementById('guess-input');
+  const btn=document.getElementById('guess-submit-btn');
+  const status=document.getElementById('player-guess-status');
   const val=input.value.trim(); if(!val) return;
-  input.disabled=true; document.getElementById('guess-submit-btn').disabled=true;
+  btn.disabled=true;
+  let resultInfo=null;
   await updateRoom(playerCode, s=>{
     if(s.phase!=='active' || !s.round || s.round.type!=='draw') return s;
     const r=s.round;
-    if((r.correctPlayerIds||[]).includes(playerId)) return s;
-    const correct = val.toLowerCase()===r.word.toLowerCase();
+    if((r.correctPlayerIds||[]).includes(playerId)){ resultInfo={correct:true}; return s; }
     const player=s.players.find(p=>p.id===playerId);
-    if(correct){
+    const exact = val.toLowerCase()===r.word.toLowerCase();
+    const diacriticMatch = !exact && normalizeSwedish(val)===normalizeSwedish(r.word);
+    const isCorrect = exact || diacriticMatch;
+    if(isCorrect){
       const dur=ROUND_DURATIONS.draw;
       const timeLeft=Math.max(0,dur-(Date.now()-r.startedAt)/1000);
       const pts=calcScore(timeLeft/dur, player.combo||0);
       player.score+=pts; player.combo=(player.combo||0)+1;
       r.correctPlayerIds=(r.correctPlayerIds||[]).concat(playerId);
       r.answers=r.answers||{}; r.answers[playerId]={value:val,correct:true,points:pts};
+      resultInfo={correct:true};
+    } else {
+      const sim=Math.round(similarity(normalizeSwedish(val),normalizeSwedish(r.word))*100);
+      resultInfo={correct:false, sim};
     }
     return s;
   });
-  const status=document.getElementById('player-guess-status');
-  if(status) status.textContent='Skickat! Väntar...';
+  btn.disabled=false;
+  if(!status || !resultInfo) return;
+  if(resultInfo.correct){
+    status.textContent='Rätt! Väntar...'; status.className='status-line right';
+    input.disabled=true; btn.disabled=true;
+  } else if(resultInfo.sim>=60){
+    status.textContent='Nästan rätt! ('+resultInfo.sim+'%) Försök igen'; status.className='status-line almost';
+    input.value=''; input.focus();
+  } else {
+    status.textContent='Fel, försök igen'; status.className='status-line wrong';
+    input.value=''; input.focus();
+  }
 }
 
 async function submitAnswer(value){
@@ -857,7 +971,7 @@ async function submitAnswer(value){
     return s;
   });
   const st=document.getElementById('tf-status')||document.getElementById('wo-status')||document.getElementById('sign-status')||document.getElementById('match-status');
-  if(st) st.textContent='Skickat! Väntar på övriga...';
+  if(st){ st.textContent='Skickat! Väntar på övriga...'; st.className='status-line'; }
 }
 </script>
 </body>
