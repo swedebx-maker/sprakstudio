@@ -16,6 +16,10 @@
   --green:#2E9E52; --red:#D9534F;
 }
 *{box-sizing:border-box;}
+
+/* УВЕЛИЧЕННЫЙ МАСШТАБ СТРАНИЦЫ (18px вместо стандартных 16px) */
+html{font-size: 18px;} 
+
 html,body{margin:0;padding:0;min-height:100%;font-family:'Nunito',sans-serif;
   background:var(--bg); color:var(--ink); -webkit-user-select:none; user-select:none; overflow-x:hidden;}
 #app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3vh 3vw;}
@@ -132,20 +136,29 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .leaderboard-table .delta-down{color:var(--red);}
 .leaderboard-table .gained{color:var(--accent-dark);font-family:'Fredoka',sans-serif;}
 
-/* EPIC PODIUM STYLES */
+/* EPIC FULLSCREEN PODIUM STYLES */
 #host-finished-view {
-  overflow: hidden; /* Держим фон внутри закругленных углов */
-  position: relative;
+  position: fixed !important; /* Делаем на весь экран! */
+  top: 0; left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100% !important; /* Сбрасываем ограничение .card */
+  border-radius: 0 !important;
+  margin: 0 !important;
   background: linear-gradient(135deg, #ffffff, #f0f4f8);
   border: none;
-  box-shadow: 0 10px 40px rgba(43, 125, 224, 0.15);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 #host-finished-view::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background: url('jarven.png') center/cover no-repeat;
-  opacity: 0.08; /* Еле видный фон */
+  opacity: 0.12; /* Чуть виднее */
   z-index: 0;
   pointer-events: none;
 }
@@ -154,7 +167,16 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
   z-index: 1; /* Контент поверх фона */
 }
 
-.podium{display:flex;align-items:flex-end;justify-content:center;gap:1.5rem;margin:7vh 0 2vh;}
+/* Огромный пьедестал */
+.podium{
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:2rem;
+  margin: 8vh 0 6vh;
+  transform: scale(1.35); /* Скейл вверх */
+  transform-origin: center bottom;
+}
 .podium-slot{
   border-radius:16px 16px 0 0;padding:1rem;text-align:center;
   font-family:'Fredoka',sans-serif;font-weight:700;color:var(--ink);
@@ -169,8 +191,8 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 }
 
 .podium-slot .podium-avatar { 
-  font-size: 3.5rem; 
-  margin-top: -55px; /* Вылезает за пределы пьедестала */
+  font-size: 3.8rem; 
+  margin-top: -60px; /* Вылезает за пределы пьедестала */
   margin-bottom: 5px; 
   position:relative; 
   z-index:2; 
@@ -196,10 +218,9 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
   text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* Красивые градиенты (Золото, Серебро, Бронза) */
-.podium-slot.p1{height:250px;background:linear-gradient(180deg, #FFD000, #FF7B00); color:#fff; animation-delay: 0.6s;}
-.podium-slot.p2{height:190px;background:linear-gradient(180deg, #00B4D8, #0077B6); animation-delay: 0.3s;}
-.podium-slot.p3{height:150px;background:linear-gradient(180deg, #52B788, #2D6A4F); animation-delay: 0s;}
+.podium-slot.p1{height:260px;background:linear-gradient(180deg, #FFD000, #FF7B00); color:#fff; animation-delay: 0.6s;}
+.podium-slot.p2{height:200px;background:linear-gradient(180deg, #00B4D8, #0077B6); animation-delay: 0.3s;}
+.podium-slot.p3{height:160px;background:linear-gradient(180deg, #52B788, #2D6A4F); animation-delay: 0s;}
 
 .crown { 
   position:absolute; 
@@ -279,11 +300,13 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
     <table class="leaderboard-table" id="roundend-table"></table>
     <button class="primary-btn hidden" id="next-round-btn">Nästa runda</button>
   </div>
-  <div id="host-finished-view" class="hidden card" style="width:100%;">
-    <h2 style="font-size: 2.5rem; margin-bottom: 0;">🏆 Spelet är slut!</h2>
-    <p class="sub" style="margin-bottom: 0.5rem; font-size: 1.2rem;">Bra jobbat allihopa!</p>
+  
+  <!-- ФИНАЛЬНЫЙ ЭКРАН ХОСТА (ПОЛНОЭКРАННЫЙ) -->
+  <div id="host-finished-view" class="hidden">
+    <h2 style="font-size: 4rem; margin-bottom: 0;">🏆 Spelet är slut!</h2>
+    <p class="sub" style="margin-bottom: 0.5rem; font-size: 1.8rem; color: #555;">Bra jobbat allihopa!</p>
     <div class="podium" id="podium"></div>
-    <button class="primary-btn" id="add-rounds-btn" style="background:var(--yellow);color:var(--ink); margin-top:2rem; position:relative; z-index:2;"><span class="msi">add_circle</span> Spela mer (20 rundor till)</button>
+    <button class="primary-btn" id="add-rounds-btn" style="background:var(--yellow);color:var(--ink); margin-top:3rem; position:relative; z-index:2; font-size: 1.2rem; padding: 1rem 2rem;"><span class="msi">add_circle</span> Spela mer (20 rundor till)</button>
   </div>
 </div>
 
@@ -529,7 +552,8 @@ const AudioEngine=(function(){
     stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } },
     toggleMusic(){ musicOn=!musicOn; if(musicOn) this.startMusic(); else this.stopMusic(); return musicOn; },
     
-    playFinaleSequence(){
+    // Эту функцию теперь вызывает ТОЛЬКО хост (экран учителя)
+    playHostFinaleSequence(){
       ensureCtx();
       if(!musicOn) return;
       // Fade out 8-bit music
@@ -555,6 +579,7 @@ const AudioEngine=(function(){
       }
     },
 
+    playVictory(){ ensureCtx(); const t=ctx.currentTime; [523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,t+i*0.13,0.4,'square',sfxGain,0.35)); },
     playCorrect(){ ensureCtx(); const t=ctx.currentTime; tone(523.25,t,0.12,'square',sfxGain,0.35); tone(659.25,t+0.1,0.12,'square',sfxGain,0.35); },
     playWrong(){ ensureCtx(); const t=ctx.currentTime; tone(196,t,0.25,'sawtooth',sfxGain,0.28); tone(146.83,t+0.12,0.28,'sawtooth',sfxGain,0.28); },
     playAlmost(){ ensureCtx(); const t=ctx.currentTime; tone(392,t,0.15,'triangle',sfxGain,0.3); tone(440,t+0.1,0.18,'triangle',sfxGain,0.3); },
@@ -681,7 +706,8 @@ async function hostPoll(){
   if(state.phase==='finished' && hostLastPhase!=='finished'){
     renderPodium(state);
     Confetti.shoot();
-    AudioEngine.playFinaleSequence(); // Start crossfade magic
+    // ТОЛЬКО ХОСТ ИГРАЕТ МУЗЫКУ ИЗ MP3 ФАЙЛОВ
+    AudioEngine.playHostFinaleSequence(); 
   }
   
   hostLastPhase=state.phase;
@@ -711,7 +737,7 @@ function renderHostRound(state){
     body.innerHTML=`<div class="word-hint">${'_ '.repeat(r.wordLength)}</div><canvas class="draw-canvas" id="host-canvas" width="560" height="340"></canvas>`;
     redrawCanvas(document.getElementById('host-canvas'),r.strokes);
   } else if(r.type==='truefalse'){
-    label.innerHTML=`<span class="msi">quiz</span> Rätt eller fel`; body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
+    label.innerHTML=`<span class="msi">quiz</span> Rätt или fel`; body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
   } else if(r.type==='wordorder'){
     label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`;
     body.innerHTML=`<div class="drag-row">${r.scrambled.map((w,i)=>`<span class="drag-chip jiggle-soft" style="animation-delay:${(i*0.07).toFixed(2)}s;">${w}</span>`).join('')}</div>`;
@@ -818,6 +844,11 @@ document.getElementById('next-round-btn').addEventListener('click', advanceRound
 document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
   await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,20)); return s; });
   await advanceRound();
+  
+  // Возвращаем хоста из экрана финала обратно в режим игры
+  document.getElementById('host-finished-view').classList.add('hidden');
+  document.getElementById('host-round-view').classList.remove('hidden');
+  AudioEngine.startMusic();
 });
 
 async function advanceRound(){
@@ -838,9 +869,10 @@ let playerCode=null, playerId=null, playerPollTimer=null, playerRenderedRoundKey
 let playerLastStateHash = "";
 let wordOrderLocal=[], matchState=null;
 let drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
+let playerLastPhase = null;
 
 document.getElementById('join-btn').addEventListener('click', async ()=>{
-  AudioEngine.ensureCtx(); AudioEngine.preloadFinale(); // Preload for players too!
+  AudioEngine.ensureCtx();
   const code=document.getElementById('join-code').value.trim().toUpperCase();
   const name=document.getElementById('join-name').value.trim();
   const err=document.getElementById('join-error'); err.textContent='';
@@ -919,9 +951,15 @@ async function playerPoll(){
     document.getElementById('roundend-player-text').textContent='Spelet är slut! 🏆';
     document.getElementById('roundend-player-sub').textContent = 'Bra jobbat!';
     document.getElementById('roundend-player-icon').textContent = 'emoji_events';
-    Confetti.shoot(); // Client side celebration
-    AudioEngine.playFinaleSequence();
+    
+    if (playerLastPhase !== 'finished') {
+        Confetti.shoot(); // Client side celebration
+        // ПЛЕЕР ИГРАЕТ ПРОСТО КОРОТКИЙ ПОБЕДНЫЙ ЗВУК, ЧТОБЫ НЕ ПЕРЕБИВАТЬ МУЗЫКУ УЧИТЕЛЯ
+        AudioEngine.playVictory(); 
+    }
   }
+
+  playerLastPhase = state.phase;
 }
 
 function renderPlayerRound(state){
