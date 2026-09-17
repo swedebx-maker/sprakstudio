@@ -145,8 +145,11 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .wheel-container.mini .wheel-center { width: 16px; height: 16px; border-width: 3px; }
 .wheel-container.solo { width: min(260px, 72vw); height: min(260px, 72vw); margin: .6rem auto; }
 .wheel-container.solo .wheel-slice { transform-origin: 50% 130px; width: 86px; margin-left: -43px; height: 130px; font-size: 1.9rem; padding-top: 12px; }
-.wheel-grid { display: flex; flex-wrap: wrap; gap: .5rem 1rem; justify-content: center; align-items: flex-start; margin: .5rem 0 1rem; }
-.wheel-cell { width: 140px; text-align: center; }
+.wheel-grid { display: flex; flex-wrap: wrap; gap: .6rem 1.2rem; justify-content: center; align-items: flex-start; margin: .5rem 0 1rem; }
+.wheel-cell { text-align: center; }
+.wheel-scale > .wheel-container { transform: scale(var(--k,1)); transform-origin: top center; }
+.round-card.wheel-board { position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; margin: 0; border-radius: 0; z-index: 900; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: auto; padding: 2vh 2vw; box-shadow: none; }
+.round-card.wheel-board .wheel-grid { margin-top: 1.2rem; }
 .wheel-cell .wc-name { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: .95rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wheel-cell .wc-state { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .85rem; min-height: 1.2em; }
 .wheel-cell.done .wc-state { color: var(--green); }
@@ -743,7 +746,7 @@ function buildPlan(players, count=30){
 
 let hostCode=null, hostPollTimer=null, hostPollStop=true, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
 let hostLastStateHash = "", hostLastTheftAt = 0, hostForceRender = false;
-let hostSpinKey = null, hostSpinLocalEnd = 0, hostLocalDeadline = 0;
+let hostSpinKey = null, hostSpinLocalEnd = 0, hostLocalDeadline = 0, hostAnimatedSpin = -1;
 
 window.ADMIN = {
    nextRound: () => advanceRound(),
@@ -850,8 +853,11 @@ async function hostPoll(){
     const r=state.round;
     if(r.theft && r.theft.at !== hostLastTheftAt){ hostLastTheftAt=r.theft.at; showTheftOverlay(state); }
     if(r.subPhase==='PLACE' && hostLastStateHash===stateHash){
-      if(Date.now() > (r.deadline||0) && Date.now() > (r.spinEndsAt||0)){ await bokstavAutoResolve(); return; }
-      const allReady = state.players.every(p=>(r.readyPlayers||[]).indexOf(p.id)!==-1);
+      const allReady = state.players.every(p=>(r.readyPlayers||[]).indexOf(p.id)!==-1)
+        && !(r.thiefId && r.thiefStage && r.thiefStage!=='DONE');
+      if(!allReady && Date.now() > (r.deadline||0) && Date.now() > (r.spinEndsAt||0)){
+        await bokstavAutoResolve(); return;
+      }
       if(allReady){
         const anyBonus = state.players.some(p=>((r.bonusLeft||{})[p.id]||0) > 0);
         if(r.spins >= r.maxSpins && !anyBonus){ await finalizeRound(state); return; }
@@ -881,12 +887,18 @@ async function hostPoll(){
   if(state.players.length>hostLastPlayerCount) AudioEngine.playJoin();
   hostLastPlayerCount=state.players.length;
 
+  if(state.phase!=='active'){
+    const rc=document.querySelector('#host-round-view .round-card');
+    if(rc) rc.classList.remove('wheel-board');
+  }
   if(state.phase==='active'){
     if (hostLastPhase !== 'active') AudioEngine.setMusicVolume(AudioEngine.VOL_MAIN, 1.0);
     if(state.round) {
       renderMiniLB(document.getElementById('host-mini-lb'),state);
       document.getElementById('round-counter').textContent='Runda '+(state.planIndex+1)+' / '+state.plan.length;
       document.getElementById('host-timer-bar-wrap').classList.toggle('hidden', state.round.type==='bokstav');
+      const rcard=document.querySelector('#host-round-view .round-card');
+      if(rcard) rcard.classList.toggle('wheel-board', state.round.type==='bokstav');
 
       let key=state.round.type+':'+state.planIndex;
       if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId+':'+((state.round.readyPlayers||[]).length);
@@ -970,7 +982,10 @@ function renderHostRound(state){
            <div class="status-line">Väntar på: ${waiting.length ? waiting.map(p=>p.avatar).join(' ') : 'ingen - klart!'}</div>`;
       body.innerHTML = head + renderWheelGrid(state, who, r);
     }
-    animateWheels(r.wheels, 'host-wheel-');
+    if(hostAnimatedSpin !== r.spins && r.subPhase==='PLACE'){
+      hostAnimatedSpin = r.spins;
+      animateWheels(r.wheels, 'host-wheel-');
+    }
     if(spinning){
       clearTimeout(window._hostSpinTimer);
       window._hostSpinTimer=setTimeout(()=>{
@@ -981,14 +996,19 @@ function renderHostRound(state){
 }
 
 function renderWheelGrid(state, who, r){
+  const n = Math.max(1, who.length);
+  const k = n<=2 ? 2.4 : n<=4 ? 2.0 : n<=6 ? 1.7 : n<=9 ? 1.4 : n<=12 ? 1.2 : n<=16 ? 1.0 : 0.82;
+  const cellW = Math.round(130*k) + 16;
   const cells = who.map(p=>{
     const w = (r.wheels||{})[p.id];
     const drawn = (r.draws||{})[p.id];
     const ready = (r.readyPlayers||[]).indexOf(p.id)!==-1;
     const isThief = r.thiefId===p.id;
     const spinning = Date.now() < hostSpinLocalEnd;
+    const fresh = hostAnimatedSpin !== r.spins && r.subPhase==='PLACE';
+    const startRot = w ? (fresh ? (w.prevRot||0) : w.rot) : 0;
     const wheelHTML = w
-      ? window.buildWheelHTML(w.letters, 'host-wheel-'+p.id, w.prevRot||0, 'mini')
+      ? window.buildWheelHTML(w.letters, 'host-wheel-'+p.id, startRot, 'mini')
       : window.buildWheelHTML(['?','?','?','?','?','?'], 'host-wheel-'+p.id, 0, 'mini');
     let stateTxt = '';
     if(!spinning && drawn !== undefined){
@@ -996,11 +1016,12 @@ function renderWheelGrid(state, who, r){
       else if(ready) stateTxt = '✓ klar';
       else stateTxt = 'placerar ' + drawn;
     }
+    const nameSize = k>=1.7 ? '1.5rem' : k>=1.2 ? '1.15rem' : '.95rem';
     const stolenCount = (r.stolen||{})[p.id] || 0;
     const bonus = (r.bonusLeft||{})[p.id] || 0;
-    return `<div class="wheel-cell ${ready?'done':'waiting'} ${isThief?'thief':''}">
-      ${wheelHTML}
-      <div class="wc-name">${p.avatar} ${p.name}</div>
+    return `<div class="wheel-cell ${ready?'done':'waiting'} ${isThief?'thief':''}" style="width:${cellW}px;">
+      <div class="wheel-scale" style="--k:${k}; height:${Math.round(128*k)}px;">${wheelHTML}</div>
+      <div class="wc-name" style="font-size:${nameSize};">${p.avatar} ${p.name}</div>
       <div class="wc-state">${stateTxt}</div>
       ${stolenCount ? `<div class="wc-state" style="color:var(--red);font-size:.75rem;">bestulen ${stolenCount}x${bonus?` (+${bonus} bonus)`:''}</div>` : ''}
     </div>`;
@@ -1353,7 +1374,7 @@ async function advanceRound(){
   hostRenderedRoundKey=null; document.getElementById('next-round-btn').disabled = false;
 }
 
-let playerForceRender=false, playerSpinKey=null, playerSpinLocalEnd=0, playerLocalDeadline=0;
+let playerForceRender=false, playerSpinKey=null, playerSpinLocalEnd=0, playerLocalDeadline=0, playerAnimatedSpin=-1;
 let playerCode=null, playerId=null, playerPollTimer=null, playerPollStop=true, playerRenderedRoundKey=null, playerLastStateHash = "", playerLastPhase = null;
 let playerSpellNote='';
 let wordOrderLocal=[], matchState=null, drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
@@ -1498,11 +1519,14 @@ function renderBokstavPlayer(state) {
   }
 
   if(spinning && myWheel){
+    const fresh = playerAnimatedSpin !== r.spins;
     body.innerHTML = `<h2 style="font-size:1.3rem;">Ditt hjul snurrar!</h2>
-      ${window.buildWheelHTML(myWheel.letters, 'my-wheel', myWheel.prevRot||0, 'solo')}`;
-    animateWheels({[playerId]: myWheel}, 'my-wh');
-    const el=document.getElementById('my-wheel');
-    if(el) requestAnimationFrame(()=>requestAnimationFrame(()=>{ el.style.transform='rotate('+myWheel.rot+'deg)'; }));
+      ${window.buildWheelHTML(myWheel.letters, 'my-wheel', fresh ? (myWheel.prevRot||0) : myWheel.rot, 'solo')}`;
+    if(fresh){
+      playerAnimatedSpin = r.spins;
+      const el=document.getElementById('my-wheel');
+      if(el) requestAnimationFrame(()=>requestAnimationFrame(()=>{ el.style.transform='rotate('+myWheel.rot+'deg)'; }));
+    }
     rerenderAt(playerSpinLocalEnd-Date.now()+200);
     return;
   }
