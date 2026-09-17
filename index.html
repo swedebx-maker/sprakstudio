@@ -91,6 +91,8 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
   color:var(--ink);border-radius:12px;padding:.7em 1.1em;cursor:grab;font-size:1.1rem;touch-action:none;
   user-select:none;position:relative;}
 .drag-chip.jiggle{animation:jiggle .26s ease-in-out infinite;}
+.drag-chip.jiggle-soft{animation:jiggle-soft .5s ease-in-out infinite;}
+@keyframes jiggle-soft{0%,100%{transform:rotate(-1deg);}50%{transform:rotate(1deg);}}
 .drag-chip.dragging{opacity:.92;transform:scale(1.12) !important;z-index:20;box-shadow:0 8px 18px rgba(0,0,0,.25);
   animation:none;cursor:grabbing;}
 @keyframes jiggle{0%,100%{transform:rotate(-2.5deg);}50%{transform:rotate(2.5deg);}}
@@ -106,12 +108,13 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .choice-btn:disabled{opacity:.4;}
 .match-columns{display:flex;gap:2.4rem;justify-content:center;margin:1.2rem auto;max-width:420px;}
 .match-col{display:flex;flex-direction:column;gap:.6rem;flex:1;}
-.match-tile{font-family:'Nunito',sans-serif;font-weight:700;background:#fff;border:2px solid var(--accent);color:var(--ink);
-  border-radius:12px;padding:.65em .6em;cursor:pointer;width:100%;min-height:2.6em;text-align:center;font-size:1.05rem;
-  display:flex;align-items:center;justify-content:center;transition:transform .1s ease;}
+.match-tile{font-family:'Nunito',sans-serif;font-weight:700;background:#FFFDF7;border:2px dashed var(--accent);color:var(--ink);
+  border-radius:255px 15px 225px 15px/15px 225px 15px 255px;padding:.65em .6em;cursor:pointer;width:100%;min-height:2.6em;
+  text-align:center;font-size:1.05rem;display:flex;align-items:center;justify-content:center;
+  transition:transform .1s ease;box-shadow:1px 2px 0 rgba(35,50,70,.08);}
 .match-tile:active{transform:scale(.96);}
-.match-tile.selected{background:var(--accent);color:#fff;border-color:var(--accent-dark);}
-.match-tile.matched{background:#E7F5EA;border-color:var(--green);color:var(--green);opacity:.55;pointer-events:none;}
+.match-tile.selected{background:var(--accent);color:#fff;border-color:var(--accent-dark);border-style:solid;}
+.match-tile.matched{background:#E7F5EA;border-color:var(--green);border-style:solid;color:var(--green);opacity:.55;pointer-events:none;}
 .status-line{font-family:'Fredoka',sans-serif;font-weight:600;color:var(--muted);margin-top:.5rem;font-size:.92rem;}
 .status-line.almost{color:var(--yellow-dark);}
 .status-line.wrong{color:var(--red);}
@@ -390,10 +393,22 @@ if(urlCode){
 
 /* ================= AUDIO ================= */
 const AudioEngine=(function(){
-  let ctx=null, musicOn=true, musicTimer=null, masterGain=null, musicGain=null, sfxGain=null, musicStep=0;
-  const bassPattern=[130.81,130.81,164.81,146.83,130.81,130.81,196.00,174.61];
-  const arpPattern=[261.63,329.63,392.00,329.63,293.66,349.23,440.00,349.23];
-  const leadPattern=[523.25,0,659.25,587.33,523.25,0,440.00,493.88];
+  let ctx=null, musicOn=true, musicTimer=null, masterGain=null, musicGain=null, sfxGain=null, musicStep=0, musicStartTime=0;
+  const SECTIONS=[
+    { bass:[130.81,130.81,164.81,146.83,130.81,130.81,196.00,174.61],
+      arp:[261.63,329.63,392.00,329.63,293.66,349.23,440.00,349.23],
+      lead:[523.25,0,659.25,587.33,523.25,0,440.00,493.88] },
+    { bass:[174.61,174.61,196.00,220.00,174.61,174.61,146.83,164.81],
+      arp:[349.23,440.00,523.25,440.00,392.00,466.16,587.33,466.16],
+      lead:[698.46,0,880.00,783.99,698.46,0,587.33,659.25] },
+    { bass:[130.81,130.81,164.81,146.83,130.81,130.81,196.00,174.61],
+      arp:[261.63,329.63,392.00,329.63,293.66,349.23,440.00,349.23],
+      lead:[523.25,0,659.25,587.33,523.25,0,440.00,493.88] },
+    { bass:[196.00,196.00,220.00,246.94,196.00,196.00,164.81,174.61],
+      arp:[392.00,493.88,587.33,493.88,440.00,523.25,659.25,523.25],
+      lead:[783.99,0,987.77,880.00,783.99,0,659.25,698.46] }
+  ];
+  const SECTION_LEN=30; // seconds per section, 4 sections = 2 min full cycle
   function ensureCtx(){
     if(!ctx){
       ctx=new (window.AudioContext||window.webkitAudioContext)();
@@ -412,32 +427,51 @@ const AudioEngine=(function(){
     osc.connect(g); g.connect(gainNode);
     osc.start(start); osc.stop(start+dur+0.02);
   }
-  function pluck(freq,start,dur,gainNode,vol){
-    const osc=ctx.createOscillator(); osc.type='sawtooth'; osc.frequency.value=freq;
-    const osc2=ctx.createOscillator(); osc2.type='triangle'; osc2.frequency.value=freq*1.003;
-    const filter=ctx.createBiquadFilter(); filter.type='lowpass'; filter.Q.value=1.2;
-    filter.frequency.setValueAtTime(freq*7,start);
-    filter.frequency.exponentialRampToValueAtTime(freq*1.4,start+dur*0.9);
+  // Karplus-Strong plucked-string synthesis: a noise burst circulated through
+  // a short delay line with averaging/decay — this is what actually produces
+  // a guitar-like pluck timbre (oscillators alone can't do this).
+  function karplusStrongBuffer(freq,dur){
+    const sr=ctx.sampleRate;
+    const N=Math.max(4,Math.round(sr/freq));
+    const totalSamples=Math.max(1,Math.floor(sr*dur));
+    const ring=new Float32Array(N);
+    for(let i=0;i<N;i++) ring[i]=Math.random()*2-1;
+    const buffer=ctx.createBuffer(1,totalSamples,sr);
+    const data=buffer.getChannelData(0);
+    let prev=0;
+    for(let i=0;i<totalSamples;i++){
+      const idx=i%N;
+      const cur=ring[idx];
+      data[i]=cur;
+      ring[idx]=0.5*(cur+prev)*0.994;
+      prev=cur;
+    }
+    return buffer;
+  }
+  function pluckGuitar(freq,start,dur,gainNode,vol){
+    const buffer=karplusStrongBuffer(freq,dur);
+    const src=ctx.createBufferSource(); src.buffer=buffer;
     const g=ctx.createGain();
-    g.gain.setValueAtTime(0,start);
-    g.gain.linearRampToValueAtTime(vol||0.25,start+0.006);
-    g.gain.exponentialRampToValueAtTime(0.0001,start+dur);
-    osc.connect(filter); osc2.connect(filter); filter.connect(g); g.connect(gainNode);
-    osc.start(start); osc.stop(start+dur+0.03);
-    osc2.start(start); osc2.stop(start+dur+0.03);
+    g.gain.setValueAtTime(vol||0.35,start);
+    g.gain.exponentialRampToValueAtTime(0.001,start+dur);
+    src.connect(g); g.connect(gainNode);
+    src.start(start);
   }
   function scheduleMusicStep(){
     if(!musicOn||!ctx) return;
+    const elapsed=ctx.currentTime-musicStartTime;
+    const sectionIdx=Math.floor((elapsed%(SECTION_LEN*SECTIONS.length))/SECTION_LEN);
+    const sec=SECTIONS[sectionIdx];
     const t=ctx.currentTime+0.04; const stepDur=0.22;
-    tone(bassPattern[musicStep%bassPattern.length],t,stepDur*0.9,'triangle',musicGain,0.5);
-    tone(arpPattern[musicStep%arpPattern.length],t,stepDur*0.5,'square',musicGain,0.16);
-    const leadFreq=leadPattern[musicStep%leadPattern.length];
-    if(leadFreq>0) pluck(leadFreq,t,stepDur*1.3,musicGain,0.26);
+    tone(sec.bass[musicStep%sec.bass.length],t,stepDur*0.9,'triangle',musicGain,0.5);
+    tone(sec.arp[musicStep%sec.arp.length],t,stepDur*0.5,'square',musicGain,0.14);
+    const leadFreq=sec.lead[musicStep%sec.lead.length];
+    if(leadFreq>0) pluckGuitar(leadFreq,t,stepDur*1.6,musicGain,0.4);
     musicStep++;
   }
   return {
     ensureCtx,
-    startMusic(){ ensureCtx(); if(!musicTimer) musicTimer=setInterval(scheduleMusicStep,220); },
+    startMusic(){ ensureCtx(); if(!musicTimer){ musicStartTime=ctx.currentTime; musicTimer=setInterval(scheduleMusicStep,220); } },
     stopMusic(){ if(musicTimer){ clearInterval(musicTimer); musicTimer=null; } },
     toggleMusic(){ musicOn=!musicOn; if(musicOn) this.startMusic(); else this.stopMusic(); return musicOn; },
     get isMusicOn(){ return musicOn; },
@@ -604,7 +638,8 @@ function renderHostRound(state){
     body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
   } else if(r.type==='wordorder'){
     label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`;
-    body.innerHTML=`<div class="drag-row">${r.scrambled.map(w=>`<span class="drag-chip" style="cursor:default;animation:none;">${w}</span>`).join('')}</div>`;
+    body.innerHTML=`<div class="drag-row">${r.scrambled.map((w,i)=>`<span class="drag-chip jiggle-soft" style="cursor:default;animation-delay:${(i*0.07).toFixed(2)}s;">${w}</span>`).join('')}</div>
+      <p class="status-line"><span class="msi" style="font-size:1.1rem;">tablet_mac</span> Dra orden i rätt ordning på din iPad</p>`;
   } else if(r.type==='sign'){
     label.innerHTML=`<span class="msi">signpost</span> Vad säger skylten?`;
     body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div>`;
@@ -973,6 +1008,7 @@ function renderMatchColumns(){
     const el=document.createElement('div');
     el.className='match-tile'+(matchState.matchedWords.includes(w)?' matched':'');
     el.textContent=w;
+    el.style.transform='rotate('+(Math.random()*4-2).toFixed(1)+'deg)';
     el.addEventListener('click', ()=>onMatchWordClick(w,el));
     wordsWrap.appendChild(el);
   });
@@ -981,6 +1017,7 @@ function renderMatchColumns(){
     const pair=matchState.pairs.find(p=>p.emoji===em);
     el.className='match-tile'+(matchState.matchedWords.includes(pair.word)?' matched':'');
     el.textContent=em;
+    el.style.transform='rotate('+(Math.random()*4-2).toFixed(1)+'deg)';
     el.addEventListener('click', ()=>onMatchEmojiClick(em,el));
     emojisWrap.appendChild(el);
   });
