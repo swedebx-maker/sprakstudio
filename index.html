@@ -191,8 +191,6 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 #net-status.ok{background:#E7F5EA;color:#1E7A3C;border-color:#A9DCB8;}
 #resume-box{margin-top:1.6rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;}
 #resume-btn{background:var(--green);color:#fff;border:none;border-radius:12px;padding:.8rem 1.6rem;font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;cursor:pointer;}
-.tts-btn{background:var(--accent-light);color:var(--accent-dark);border:2px solid var(--accent);border-radius:999px;padding:.35em .8em;font-family:'Fredoka',sans-serif;font-weight:700;cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;gap:.3em;vertical-align:middle;}
-.tts-btn:disabled{opacity:.4;cursor:default;}
 .tp-toggle{width:100%;height:22px;margin-top:.8rem;border:none;border-radius:8px;background:var(--accent-light);color:var(--accent-dark);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s;}
 .tp-toggle:hover{background:#DCE9F9;}
 .tp-toggle .msi{font-size:16px;line-height:1;}
@@ -253,7 +251,6 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
     </div>
     <div class="avatars" id="lobby-avatars-big"></div>
     <button class="primary-btn" id="start-game-btn" disabled>Starta spelet</button>
-    <div id="tts-warn" class="tp-hint hidden" style="margin-top:.8rem;max-width:520px;">🔇 Ingen svensk röst hittades i webbläsaren - uppläsning är avstängd. Installera svenskt tal i Windows (Inställningar → Tid och språk → Tal) eller öppna sidan i Microsoft Edge.</div>
   </div>
 
   <div id="host-round-view" class="hidden" style="position:relative;width:100%;">
@@ -278,7 +275,6 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
           <input id="tp-word" placeholder="ord" maxlength="24">
           <button id="tp-approve-word"><span class="msi">spellcheck</span> Godkänn ord</button>
           <button id="tp-approve-answer" class="alt"><span class="msi">done_all</span> Godkänn svar</button>
-          <button id="tp-speak"><span class="msi">volume_up</span> Läs upp</button>
         </div>
         <div class="tp-msg" id="tp-msg"></div>
       </div>
@@ -573,69 +569,7 @@ function saveSession(obj){ try{ sessionStorage.setItem(SESSION_KEY, JSON.stringi
 function clearSession(){ try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){} }
 function loadSession(){ try{ return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null'); }catch(e){ return null; } }
 
-const TTS=(function(){
-  const engine = typeof window!=='undefined' && 'speechSynthesis' in window;
-  let voice=null;
-  function score(v){
-    const n=(v.name||'').toLowerCase();
-    let s=0;
-    if(n.includes('natural')) s+=6;
-    if(n.includes('online')) s+=4;
-    if(n.includes('google')) s+=5;
-    if(n.includes('neural')) s+=4;
-    if(n.includes('sofie')||n.includes('mattias')||n.includes('hillevi')||n.includes('bengt')) s+=2;
-    if(v.localService) s+=1;
-    return s;
-  }
-  function pickVoice(){
-    if(!engine) return null;
-    const vs=window.speechSynthesis.getVoices()||[];
-    const sv=vs.filter(v=>/^sv([-_]|$)/i.test(v.lang||''));
-    sv.sort((a,b)=>score(b)-score(a));
-    voice = sv[0] || null;
-    return voice;
-  }
-  if(engine){ pickVoice(); window.speechSynthesis.onvoiceschanged=()=>{ pickVoice(); document.dispatchEvent(new CustomEvent('tts-voices')); }; }
-  return {
-    get supported(){ return engine && !!voice; },
-    engine, hasSwedish(){ return !!voice; }, refresh: pickVoice,
-    voiceName(){ return voice ? voice.name : null; },
-    cancel(){ if(supported){ try{ window.speechSynthesis.cancel(); }catch(e){} } },
-    speak(text, opts){
-      if(!engine || !text) return;
-      if(!voice) pickVoice();
-      if(!voice) return;
-      opts=opts||{};
-      try{
-        window.speechSynthesis.cancel();
-        const u=new SpeechSynthesisUtterance(String(text));
-        u.voice=voice; u.lang=voice.lang||'sv-SE';
-        u.rate=opts.rate||1.02; u.pitch=1; u.volume=1;
-        const restore=opts.restore;
-        if(restore!==undefined) AudioEngine.setMusicVolume(0.02,0.25);
-        const back=()=>{ if(restore!==undefined) AudioEngine.setMusicVolume(restore,0.8); };
-        u.onend=back; u.onerror=back;
-        window.speechSynthesis.speak(u);
-      }catch(e){}
-    }
-  };
-})();
-
 function escAttr(str){ return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-function ttsBtn(text,label){
-  if(!TTS.supported || !text) return '';
-  return `<button class="tts-btn" data-tts="${escAttr(text)}"><span class="msi">volume_up</span>${label||'Lyssna'}</button>`;
-}
-function hostSpeak(text, restore){
-  if(!isHost || !text) return;
-  TTS.speak(text, {restore: restore===undefined ? AudioEngine.VOL_MAIN : restore});
-}
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest ? e.target.closest('[data-tts]') : null;
-  if(!btn) return;
-  TTS.speak(btn.getAttribute('data-tts'), {restore: isHost ? AudioEngine.VOL_DUCK_LB : undefined});
-});
-
 const _usedPool={};
 function pickFresh(key, arr){
   if(!arr || !arr.length) return null;
@@ -682,7 +616,7 @@ async function offerResume(){
       document.getElementById('host-room-code').textContent='KOD: '+saved.code;
       document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+saved.code);
       hostLastStateHash=''; hostRenderedRoundKey=null; hostLastPhase=null;
-      refreshTtsWarning(); show('host-board-screen'); startHostPolling();
+      show('host-board-screen'); startHostPolling();
     } else {
       AudioEngine.ensureCtx();
       playerCode=saved.code; playerId=saved.playerId;
@@ -837,15 +771,9 @@ document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   await writeRoom(hostCode,{code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null});
   document.getElementById('lobby-code-big').textContent=hostCode; document.getElementById('host-room-code').textContent='KOD: '+hostCode;
   document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+hostCode);
-  isHost=true; saveSession({role:'host', code:hostCode}); refreshTtsWarning();
+  isHost=true; saveSession({role:'host', code:hostCode});
   show('host-board-screen'); startHostPolling();
 });
-
-function refreshTtsWarning(){
-  const el=document.getElementById('tts-warn'); if(!el) return;
-  el.classList.toggle('hidden', !isHost || TTS.hasSwedish());
-}
-document.addEventListener('tts-voices', refreshTtsWarning);
 
 function startHostPolling(){ hostPollStop=false; clearTimeout(hostPollTimer); hostLoop(); }
 function stopHostPolling(){ hostPollStop=true; clearTimeout(hostPollTimer); }
@@ -878,7 +806,7 @@ document.getElementById('mute-btn').addEventListener('click', (e)=>{
 document.getElementById('cancel-room-btn').addEventListener('click', async ()=>{
   if(!confirm('Avbryta rummet? Alla elever kopplas bort.')) return;
   await updateRoom(hostCode, s=>{ s.phase='cancelled'; return s; });
-  stopHostPolling(); clearSession(); isHost=false; TTS.cancel(); show('role-screen');
+  stopHostPolling(); clearSession(); isHost=false; show('role-screen');
 });
 
 async function hostPoll(){
@@ -1002,15 +930,12 @@ function renderHostRound(state){
     redrawCanvas(document.getElementById('host-canvas'),r.strokes);
   } else if(r.type==='truefalse'){
     label.innerHTML=`<span class="msi">quiz</span> Rätt eller fel`;
-    body.innerHTML=`<div class="statement-text">"${r.statement}"</div><div style="margin-top:.6rem;">${ttsBtn(r.statement,'Lyssna igen')}</div>`;
-    setTimeout(()=>hostSpeak(r.statement), 500);
+    body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
   } else if(r.type==='wordorder'){
     label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`; body.innerHTML=`<div class="drag-row">${r.scrambled.map((w,i)=>`<span class="drag-chip jiggle-soft" style="animation-delay:${(i*0.07).toFixed(2)}s;">${w}</span>`).join('')}</div>`;
   } else if(r.type==='sign'){
     label.innerHTML=`<span class="msi">signpost</span> Vad säger skylten?`;
-    const signSpeech = r.title;
-    body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div><div style="margin-top:.6rem;">${ttsBtn(signSpeech,'Lyssna igen')}</div>`;
-    setTimeout(()=>hostSpeak(signSpeech), 500);
+    body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div>`;
   } else if(r.type==='match'){
     label.innerHTML=`<span class="msi">join_inner</span> Para ihop`; body.innerHTML=`<div style="font-size:2.2rem;">${r.pairs.map(p=>p.emoji).join('   ')}</div>`;
   } else if(r.type==='bokstav'){
@@ -1293,23 +1218,9 @@ async function finalizeRound(state){
   });
 }
 
-function revealSpeechText(state){
-  const r=state.round; if(!r) return '';
-  if(r.type==='draw') return r.word;
-  if(r.type==='truefalse') return r.statement;
-  if(r.type==='wordorder') return r.correctOrder.join(' ');
-  if(r.type==='sign') return r.correct;
-  if(r.type==='match') return r.pairs.map(p=>p.word).join(', ');
-  if(r.type==='bokstav') return '';
-  return '';
-}
-
 function renderRoundEnd(state){
   const res=state.lastRoundResult;
-  const revealEl=document.getElementById('roundend-reveal');
-  const speech=revealSpeechText(state);
-  revealEl.innerHTML = (res ? escAttr(res.reveal) : '') + ' ' + ttsBtn(speech,'Lyssna');
-  if(speech) setTimeout(()=>hostSpeak(speech, AudioEngine.VOL_DUCK_LB), 900);
+  document.getElementById('roundend-reveal').textContent = res ? res.reveal : '';
   const drawCanvas=document.getElementById('roundend-drawing');
   if(state.round && state.round.type==='draw'){ drawCanvas.classList.remove('hidden'); redrawCanvas(drawCanvas, state.round.strokes); }
   else { drawCanvas.classList.add('hidden'); }
@@ -1373,7 +1284,7 @@ document.getElementById('tp-approve-word').addEventListener('click', async ()=>{
     return s;
   });
   if(!ok) return tpMsg('Gick inte att spara, försök igen.', 'var(--red)');
-  AudioEngine.playCorrect(); hostSpeak(clean.toLowerCase(), AudioEngine.VOL_DUCK_LB);
+  AudioEngine.playCorrect();
   document.getElementById('tp-word').value='';
   tpMsg('"'+clean+'" godkänt: +'+pts+' p. Ordet finns nu i ordlistan.');
   const fresh=await readRoom(hostCode,false); if(fresh) renderRoundEnd(fresh);
@@ -1394,11 +1305,7 @@ document.getElementById('tp-approve-answer').addEventListener('click', async ()=
   const fresh=await readRoom(hostCode,false); if(fresh) renderRoundEnd(fresh);
 });
 
-document.getElementById('tp-speak').addEventListener('click', ()=>{
-  const word=(document.getElementById('tp-word').value||'').trim();
-  if(word) hostSpeak(word, AudioEngine.VOL_DUCK_LB);
-  else tpMsg('Skriv något att läsa upp.', 'var(--muted)');
-});
+
 
 function renderPodium(state){
   const sorted=[...state.players].sort((a,b)=>b.score-a.score); const el=document.getElementById('podium');
