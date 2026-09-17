@@ -134,7 +134,6 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .leaderboard-table .gained{color:var(--accent-dark);font-family:'Fredoka',sans-serif;}
 .leaderboard-table .answer-summary {font-size:0.9rem; max-width:200px; color:var(--muted);}
 
-/* BOKSTAVS-JAKT CSS (PERFECT WHEEL & 5x5 GRID) */
 .wheel-container { position:relative; width: 300px; height: 300px; margin: 1rem auto; border-radius: 50%; overflow: hidden; border: 8px solid var(--ink); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
 .wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; transition: transform 4s cubic-bezier(0.2, 0.9, 0.3, 1); }
 .wheel-slice { position: absolute; top: 0; left: 50%; transform-origin: 50% 150px; width: 100px; margin-left: -50px; height: 150px; display: flex; justify-content: center; align-items: flex-start; padding-top: 15px; font-family: 'Fredoka', sans-serif; font-size: 2.2rem; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
@@ -151,11 +150,10 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .bokstav-target-player { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 0.8rem; display: flex; align-items: center; gap: 0.8rem; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.5rem; cursor: pointer; transition: transform 0.1s; }
 .bokstav-target-player:active { background: var(--accent-light); border-color: var(--accent); transform: scale(0.96); }
 
-/* EPIC FULLSCREEN PODIUM STYLES */
-#host-finished-view { position: fixed !important; top: 0; left: 0; width: 100vw !important; height: 100vh !important; max-width: 100% !important; border-radius: 0 !important; margin: 0 !important; background: linear-gradient(135deg, #ffffff, #f0f4f8); border: none; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: box-shadow 0.1s ease-out; }
+#host-finished-view { position: fixed !important; top: 0; left: 0; width: 100vw !important; height: 100vh !important; max-width: 100% !important; border-radius: 0 !important; margin: 0 !important; background: linear-gradient(135deg, #ffffff, #f0f4f8); border: none; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 4vh; overflow: hidden; transition: box-shadow 0.1s ease-out; }
 #host-finished-view::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('jarven.png') center/cover no-repeat; opacity: 0.15; z-index: 0; pointer-events: none; }
 #host-finished-view > * { position: relative; z-index: 1; }
-.podium{ display:flex; align-items:flex-end; justify-content:center; gap:2.5rem; margin: 15vh 0 4vh; transform: scale(1.4); transform-origin: center bottom; }
+.podium{ display:flex; align-items:flex-end; justify-content:center; gap:2.5rem; order:1; margin: auto 0 0; transform: scale(1.4); transform-origin: center bottom; }
 .podium-slot{ border-radius:16px 16px 0 0;padding:1rem;text-align:center; font-family:'Fredoka',sans-serif;font-weight:700;color:var(--ink); box-shadow: 0 -4px 20px rgba(0,0,0,0.15); position: relative; width: 150px; animation: podiumRise 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
 @keyframes podiumRise { 0% { transform: translateY(200px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 .podium-slot .podium-avatar { font-size: 3.8rem; margin-top: -65px; margin-bottom: 5px; position:relative; z-index:2; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25)); }
@@ -271,7 +269,6 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 </div>
 
 <script>
-// --- GLOBAL WHEEL HELPER ---
 window.getConicGradient = function(num) {
     const colors = ['#FFC72C', '#2B7DE0', '#2E9E52', '#D9534F', '#8A2387', '#FF8C42', '#195CA8', '#8A6200', '#DCE6F2'];
     let grad = []; const step = 360 / num;
@@ -287,7 +284,6 @@ window.buildWheelHTML = function(items, id, rotation) {
     return `<div class="wheel-container"><div class="wheel-pointer"></div><div class="wheel-center"></div><div class="wheel" id="${id}" style="background: ${bgGrad}; transform: rotate(${rotation}deg);">${slices}</div></div>`;
 };
 
-// --- CONFETTI SYSTEM ---
 const Confetti = (function(){
   let canvas, ctx, particles = [], animating = false;
   const colors = ['#2B7DE0', '#FFC72C', '#2E9E52', '#D9534F', '#FF8C42', '#8A2387'];
@@ -313,7 +309,6 @@ const Confetti = (function(){
   return { shoot, startPlayerLoop };
 })();
 
-// --- DATA DICTIONARIES ---
 const AVATARS=["🦊","🐻","🐼","🐸","🦁","🐨","🐯","🐰","🐷","🐵","🐶","🐱","🐹","🐭","🦄","🐙","🐬","🦋","🐢","🐞"];
 const DRAW_CATEGORIES={
   mat:{name:"Mat",emoji:"🍎",words:["äpple","bröd","mjölk","ägg","fisk","kaffe","banan","ost","tomat","potatis"]},
@@ -380,7 +375,6 @@ document.getElementById('player-role-btn').addEventListener('click',()=>show('pl
 const urlCode=new URLSearchParams(location.search).get('code');
 if(urlCode){ show('player-join-screen'); document.getElementById('join-code').value=urlCode.toUpperCase(); }
 
-/* ================= 16-BIT AUDIO ENGINE & DUCKING ================= */
 const AudioEngine=(function(){
   let ctx=null, musicOn=true, masterGain=null, musicGain=null, sfxGain=null, sfxFilter=null;
   let bgSource = null, bgBuffer = null, bg2Source = null, bg2Buffer = null;
@@ -477,7 +471,6 @@ const AudioEngine=(function(){
   };
 })();
 
-/* ================= ROUND BUILDERS ================= */
 function buildRound(type,drawerId){
   if(type==='draw'){ const cat=DRAW_CATEGORIES[pickRandom(Object.keys(DRAW_CATEGORIES))]; const word=pickRandom(cat.words); return {type:'draw',drawerId,word,wordLength:word.length,emoji:cat.emoji,strokes:[],correctPlayerIds:[],revealedIndices:[]}; }
   if(type==='truefalse'){ const s=pickRandom(STATEMENTS); return {type:'truefalse',statement:s.text,isTrue:s.isTrue}; }
@@ -495,11 +488,9 @@ function buildPlan(players, count=20){
   return plan.slice(0,count);
 }
 
-/* ================= HOST LOGIC ================= */
 let hostCode=null, hostPollTimer=null, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
 let hostLastStateHash = "";
 
-// Admin Commands
 window.ADMIN = {
    nextRound: () => advanceRound(),
    winRound: () => updateRoom(hostCode, s => { if(s.round) s.round.startedAt = 0; return s; }),
@@ -543,7 +534,6 @@ document.getElementById('cancel-room-btn').addEventListener('click', async ()=>{
 async function hostPoll(){
   const state=await readRoom(hostCode); if(!state) return;
   
-  // DYNAMIC DRAW HINTS (Every 15s)
   if(state.phase==='active' && state.round && state.round.type==='draw'){
       const elapsed = (Date.now() - state.round.startedAt) / 1000;
       const targetReveals = Math.min(Math.floor(elapsed / 15), state.round.wordLength - 2); 
@@ -555,7 +545,7 @@ async function hostPoll(){
               if(unrev.length > 0) s.round.revealedIndices.push(pickRandom(unrev));
               return s;
           });
-          return; // State changed, wait for next poll
+          return;
       }
   }
 
@@ -704,7 +694,7 @@ window.hostSpinWheel = async function(type) {
        const num = 6; const targetIdx = Math.floor(Math.random() * num);
        const result = state.round.wheelLetters[targetIdx];
        const sliceAngle = 360 / num;
-       const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.7); // Randomize stop position within slice
+       const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.7);
        const targetDeg = (360 - (targetIdx * sliceAngle)) - (sliceAngle/2) + randomOffset;
        const newRot = state.round.letterWheelRot + (360 * 5) - (state.round.letterWheelRot % 360) + targetDeg;
        document.getElementById('host-wheel-letter').style.transform = `rotate(${newRot}deg)`;
@@ -857,7 +847,6 @@ async function advanceRound(){
   hostRenderedRoundKey=null; document.getElementById('next-round-btn').disabled = false;
 }
 
-/* ================= PLAYER LOGIC ================= */
 let playerCode=null, playerId=null, playerPollTimer=null, playerRenderedRoundKey=null, playerLastStateHash = "", playerLastPhase = null;
 let wordOrderLocal=[], matchState=null, drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
 
@@ -943,7 +932,6 @@ function renderPlayerRound(state){
   }
 }
 
-// BOKSTAVS-JAKT PLAYER UI & ACTIONS
 function renderBokstavPlayer(state) {
    const r = state.round; const body = document.getElementById('round-content-player');
    const myGrid = (r.answers && r.answers[playerId] && r.answers[playerId].grid) ? r.answers[playerId].grid : Array(25).fill('');
