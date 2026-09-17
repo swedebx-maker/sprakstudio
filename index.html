@@ -139,6 +139,26 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .wheel-slice { position: absolute; top: 0; left: 50%; transform-origin: 50% 150px; width: 100px; margin-left: -50px; height: 150px; display: flex; justify-content: center; align-items: flex-start; padding-top: 15px; font-family: 'Fredoka', sans-serif; font-size: 2.2rem; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 .wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 35px solid var(--ink); z-index: 5; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
 .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #fff; border: 6px solid var(--ink); border-radius: 50%; z-index: 2; }
+.wheel-container.mini { width: 120px; height: 120px; border-width: 5px; margin: .1rem auto; }
+.wheel-container.mini .wheel-slice { transform-origin: 50% 55px; width: 46px; margin-left: -23px; height: 55px; font-size: 1.15rem; padding-top: 5px; }
+.wheel-container.mini .wheel-pointer { top: -6px; border-left-width: 9px; border-right-width: 9px; border-top-width: 16px; }
+.wheel-container.mini .wheel-center { width: 16px; height: 16px; border-width: 3px; }
+.wheel-container.solo { width: min(260px, 72vw); height: min(260px, 72vw); margin: .6rem auto; }
+.wheel-container.solo .wheel-slice { transform-origin: 50% 130px; width: 86px; margin-left: -43px; height: 130px; font-size: 1.9rem; padding-top: 12px; }
+.wheel-grid { display: flex; flex-wrap: wrap; gap: .5rem 1rem; justify-content: center; align-items: flex-start; margin: .5rem 0 1rem; }
+.wheel-cell { width: 140px; text-align: center; }
+.wheel-cell .wc-name { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: .95rem; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wheel-cell .wc-state { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .85rem; min-height: 1.2em; }
+.wheel-cell.done .wc-state { color: var(--green); }
+.wheel-cell.waiting .wc-state { color: var(--muted); }
+.wheel-cell.thief { outline: 3px solid var(--red); outline-offset: 4px; border-radius: 14px; }
+#theft-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(20,24,34,.92); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Fredoka', sans-serif; font-weight: 700; gap: 1rem; animation: popIn .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+#theft-overlay .to-thief { font-size: 8rem; line-height: 1; }
+#theft-overlay .to-line { font-size: 2.6rem; }
+#theft-overlay .to-letter { font-size: 9rem; color: var(--yellow); line-height: 1; text-shadow: 0 6px 24px rgba(0,0,0,.5); }
+#theft-overlay .to-victim { font-size: 2rem; color: #ffb4b0; }
+.deadline-pill { display: inline-flex; align-items: center; gap: .3em; font-family: 'Fredoka', sans-serif; font-weight: 700; background: var(--accent-light); color: var(--accent-dark); border-radius: 999px; padding: .25em .8em; font-size: 1rem; }
+.deadline-pill.hot { background: #FBE1E0; color: var(--red); }
 .bokstav-paper { background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 0.8rem; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); display: inline-block; position:relative; }
 .bokstav-paper::before { content: '📝'; position: absolute; top: -15px; right: -15px; font-size: 2rem; transform: rotate(15deg); }
 .bokstav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(340px, 85vw); }
@@ -173,8 +193,10 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 #resume-btn{background:var(--green);color:#fff;border:none;border-radius:12px;padding:.8rem 1.6rem;font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.05rem;cursor:pointer;}
 .tts-btn{background:var(--accent-light);color:var(--accent-dark);border:2px solid var(--accent);border-radius:999px;padding:.35em .8em;font-family:'Fredoka',sans-serif;font-weight:700;cursor:pointer;font-size:1rem;display:inline-flex;align-items:center;gap:.3em;vertical-align:middle;}
 .tts-btn:disabled{opacity:.4;cursor:default;}
-.teacher-panel{margin-top:1rem;border:2px dashed var(--border);border-radius:14px;padding:.8rem;background:#FCFDFF;text-align:left;}
-.teacher-panel h3{font-family:'Fredoka',sans-serif;font-size:1rem;margin:0 0 .5rem;color:var(--accent-dark);display:flex;align-items:center;gap:.4em;}
+.tp-toggle{width:100%;height:22px;margin-top:.8rem;border:none;border-radius:8px;background:var(--accent-light);color:var(--accent-dark);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .15s;}
+.tp-toggle:hover{background:#DCE9F9;}
+.tp-toggle .msi{font-size:16px;line-height:1;}
+.teacher-panel{margin-top:.5rem;border:2px dashed var(--border);border-radius:14px;padding:.8rem;background:#FCFDFF;text-align:left;}
 .teacher-panel .tp-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.5rem;}
 .teacher-panel select,.teacher-panel input{font-family:'Nunito',sans-serif;font-weight:700;padding:.45em .6em;border-radius:10px;border:2px solid var(--border);background:#fff;color:var(--ink);font-size:.95rem;margin:0;width:auto;}
 .teacher-panel button{font-family:'Fredoka',sans-serif;font-weight:700;border:none;border-radius:10px;padding:.5em 1em;cursor:pointer;background:var(--accent);color:#fff;font-size:.95rem;}
@@ -189,6 +211,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
+<div id="theft-overlay" class="hidden"></div>
 <div id="net-status" class="hidden"><span class="msi">wifi_off</span><span id="net-status-text">Ingen kontakt...</span></div>
 <div id="app">
 
@@ -230,6 +253,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
     </div>
     <div class="avatars" id="lobby-avatars-big"></div>
     <button class="primary-btn" id="start-game-btn" disabled>Starta spelet</button>
+    <div id="tts-warn" class="tp-hint hidden" style="margin-top:.8rem;max-width:520px;">🔇 Ingen svensk röst hittades i webbläsaren - uppläsning är avstängd. Installera svenskt tal i Windows (Inställningar → Tid och språk → Tal) eller öppna sidan i Microsoft Edge.</div>
   </div>
 
   <div id="host-round-view" class="hidden" style="position:relative;width:100%;">
@@ -246,17 +270,18 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
     <p class="sub" id="roundend-reveal"></p>
     <canvas id="roundend-drawing" class="draw-canvas hidden" width="400" height="240" style="max-width:280px;height:170px;margin:0 auto 1rem;display:block;"></canvas>
     <table class="leaderboard-table" id="roundend-table"></table>
-    <div class="teacher-panel" id="teacher-panel">
-      <h3><span class="msi">school</span> Lärarkontroll</h3>
-      <div class="tp-row">
-        <select id="tp-player"></select>
-        <input id="tp-word" placeholder="ord / svar" maxlength="24">
-        <button id="tp-approve-word"><span class="msi">spellcheck</span> Godkänn ord</button>
-        <button id="tp-approve-answer" class="alt"><span class="msi">done_all</span> Godkänn svar (+300)</button>
-        <button id="tp-speak"><span class="msi">volume_up</span> Läs upp</button>
+    <div id="teacher-panel-wrap" class="hidden">
+      <button class="tp-toggle" id="tp-toggle" aria-label="Lärarkontroll"><span class="msi">school</span></button>
+      <div class="teacher-panel hidden" id="teacher-panel">
+        <div class="tp-row">
+          <select id="tp-player"></select>
+          <input id="tp-word" placeholder="ord" maxlength="24">
+          <button id="tp-approve-word"><span class="msi">spellcheck</span> Godkänn ord</button>
+          <button id="tp-approve-answer" class="alt"><span class="msi">done_all</span> Godkänn svar</button>
+          <button id="tp-speak"><span class="msi">volume_up</span> Läs upp</button>
+        </div>
+        <div class="tp-msg" id="tp-msg"></div>
       </div>
-      <div class="tp-hint" id="tp-hint">Godkänt ord läggs till i ordlistan för hela lektionen och ger 100 p per bokstav.</div>
-      <div class="tp-msg" id="tp-msg"></div>
     </div>
     <button class="primary-btn hidden" id="next-round-btn">Nästa runda</button>
   </div>
@@ -265,7 +290,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
     <h2 style="font-size: 4rem; margin-bottom: 0; animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🏆 Spelet är slut!</h2>
     <p class="sub" style="margin-bottom: 0.5rem; font-size: 1.8rem; color: #555; animation: popIn 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">Bra jobbat allihopa!</p>
     <div class="podium" id="podium"></div>
-    <button class="primary-btn" id="add-rounds-btn" style="background:var(--yellow);color:var(--ink); margin-top:3rem; position:relative; z-index:2; font-size: 1.2rem; padding: 1rem 2rem;"><span class="msi">add_circle</span> Spela mer (20 rundor till)</button>
+    <button class="primary-btn" id="add-rounds-btn" style="background:var(--yellow);color:var(--ink); margin-top:3rem; position:relative; z-index:2; font-size: 1.2rem; padding: 1rem 2rem;"><span class="msi">add_circle</span> Spela mer (30 rundor till)</button>
   </div>
 </div>
 
@@ -306,13 +331,13 @@ window.getConicGradient = function(num) {
     for(let i=0; i<num; i++) grad.push(`${colors[i%colors.length]} ${i*step}deg ${(i+1)*step}deg`);
     return `conic-gradient(${grad.join(', ')})`;
 };
-window.buildWheelHTML = function(items, id, rotation) {
+window.buildWheelHTML = function(items, id, rotation, cls) {
     const num = items.length; const angle = 360 / num; const bgGrad = window.getConicGradient(num);
     const slices = items.map((item, i) => {
         const rot = i * angle + (angle/2);
         return `<div class="wheel-slice" style="transform: rotate(${rot}deg);"><span style="transform: rotate(${-rot}deg); display:inline-block;">${item}</span></div>`;
     }).join('');
-    return `<div class="wheel-container"><div class="wheel-pointer"></div><div class="wheel-center"></div><div class="wheel" id="${id}" style="background: ${bgGrad}; transform: rotate(${rotation}deg);">${slices}</div></div>`;
+    return `<div class="wheel-container ${cls||''}"><div class="wheel-pointer"></div><div class="wheel-center"></div><div class="wheel" id="${id}" style="background: ${bgGrad}; transform: rotate(${rotation}deg);">${slices}</div></div>`;
 };
 
 const Confetti = (function(){
@@ -549,27 +574,43 @@ function clearSession(){ try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){
 function loadSession(){ try{ return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null'); }catch(e){ return null; } }
 
 const TTS=(function(){
-  const supported = typeof window!=='undefined' && 'speechSynthesis' in window;
+  const engine = typeof window!=='undefined' && 'speechSynthesis' in window;
   let voice=null;
+  function score(v){
+    const n=(v.name||'').toLowerCase();
+    let s=0;
+    if(n.includes('natural')) s+=6;
+    if(n.includes('online')) s+=4;
+    if(n.includes('google')) s+=5;
+    if(n.includes('neural')) s+=4;
+    if(n.includes('sofie')||n.includes('mattias')||n.includes('hillevi')||n.includes('bengt')) s+=2;
+    if(v.localService) s+=1;
+    return s;
+  }
   function pickVoice(){
-    if(!supported) return null;
+    if(!engine) return null;
     const vs=window.speechSynthesis.getVoices()||[];
-    voice = vs.find(v=>/^sv/i.test(v.lang)) || null;
+    const sv=vs.filter(v=>/^sv([-_]|$)/i.test(v.lang||''));
+    sv.sort((a,b)=>score(b)-score(a));
+    voice = sv[0] || null;
     return voice;
   }
-  if(supported){ pickVoice(); window.speechSynthesis.onvoiceschanged=pickVoice; }
+  if(engine){ pickVoice(); window.speechSynthesis.onvoiceschanged=()=>{ pickVoice(); document.dispatchEvent(new CustomEvent('tts-voices')); }; }
   return {
-    supported, hasSwedish(){ return !!voice; }, refresh: pickVoice,
+    get supported(){ return engine && !!voice; },
+    engine, hasSwedish(){ return !!voice; }, refresh: pickVoice,
+    voiceName(){ return voice ? voice.name : null; },
     cancel(){ if(supported){ try{ window.speechSynthesis.cancel(); }catch(e){} } },
     speak(text, opts){
-      if(!supported || !text) return;
+      if(!engine || !text) return;
+      if(!voice) pickVoice();
+      if(!voice) return;
       opts=opts||{};
       try{
         window.speechSynthesis.cancel();
-        if(!voice) pickVoice();
         const u=new SpeechSynthesisUtterance(String(text));
-        if(voice) u.voice=voice;
-        u.lang='sv-SE'; u.rate=opts.rate||0.85; u.pitch=1; u.volume=1;
+        u.voice=voice; u.lang=voice.lang||'sv-SE';
+        u.rate=opts.rate||1.02; u.pitch=1; u.volume=1;
         const restore=opts.restore;
         if(restore!==undefined) AudioEngine.setMusicVolume(0.02,0.25);
         const back=()=>{ if(restore!==undefined) AudioEngine.setMusicVolume(restore,0.8); };
@@ -641,7 +682,7 @@ async function offerResume(){
       document.getElementById('host-room-code').textContent='KOD: '+saved.code;
       document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+saved.code);
       hostLastStateHash=''; hostRenderedRoundKey=null; hostLastPhase=null;
-      show('host-board-screen'); startHostPolling();
+      refreshTtsWarning(); show('host-board-screen'); startHostPolling();
     } else {
       AudioEngine.ensureCtx();
       playerCode=saved.code; playerId=saved.playerId;
@@ -658,7 +699,7 @@ const AudioEngine=(function(){
   let bgSource = null, bgBuffer = null, bg2Source = null, bg2Buffer = null;
   let finaleBuffers = [];
   const FINALE_URLS = ['audio/sound1.mp3', 'audio/sound2.mp3', 'audio/sound3.mp3', 'audio/sound4.mp3'];
-  const VOL_MAIN = 0.60, VOL_DUCK_TIMER = 0.06, VOL_DUCK_LB = 0.03, VOL_BG2 = 0.30;
+  const VOL_MAIN = 0.60, VOL_DUCK_TIMER = 0.14, VOL_DUCK_LB = 0.11, VOL_BG2 = 0.30;
   let analyser = null, dataArray = null, finaleStartTime = 0, beatThreshold = 100, lastBeatTime = 0, hasDoneGrandBurst = false;
   
   function ensureCtx(){
@@ -755,9 +796,9 @@ function buildRound(type,drawerId){
   if(type==='wordorder'){ const words=pickFresh('sent',SENTENCES); return {type:'wordorder',correctOrder:words,scrambled:shuffleNotEqual(words)}; }
   if(type==='sign'){ const s=pickFresh('sign',SIGNS); return {type:'sign',icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct}; }
   if(type==='match'){ return {type:'match',pairs:shuffle(MATCH_PAIRS_POOL).slice(0,6)}; }
-  if(type==='bokstav'){ return {type:'bokstav',spins:0,maxSpins:25,wheelLetters:shuffle(BOKSTAV_LETTERS).slice(0,6),subPhase:'SPIN_LETTER',letterWheelRot:0,playerWheelRot:0}; }
+  if(type==='bokstav'){ return {type:'bokstav',spins:0,maxSpins:25,subPhase:'SPIN',wheels:{},draws:{},readyPlayers:[],stolen:{},bonusLeft:{},theft:null,thiefId:null,thiefStage:null,victimId:null,spinEndsAt:0,deadline:0,bonusMode:false}; }
 }
-function buildPlan(players, count=20){
+function buildPlan(players, count=30){
   const plan=[]; let i=0;
   while(plan.length<count){
     plan.push({type:'draw',drawerId:players[i%players.length].id});
@@ -767,16 +808,16 @@ function buildPlan(players, count=20){
 }
 
 let hostCode=null, hostPollTimer=null, hostPollStop=true, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
-let hostLastStateHash = "";
+let hostLastStateHash = "", hostLastTheftAt = 0;
 
 window.ADMIN = {
    nextRound: () => advanceRound(),
    winRound: () => updateRoom(hostCode, s => { if(s.round) s.round.startedAt = 0; return s; }),
    forceThief: () => updateRoom(hostCode, s => {
-       if(s.round && s.round.type === 'bokstav' && s.round.subPhase === 'SPIN_LETTER') {
-           s.round.wheelLetters[0] = '🦹‍♂️';
-           console.log("🦹‍♂️ Вор поставлен на 1-й слот. Крути колесо!");
-       } else { console.log("Сначала дождись этапа вращения колеса в Bokstavs-jakt!"); }
+       if(s.round && s.round.type === 'bokstav' && s.round.subPhase === 'SPIN') {
+           s.round.forceThief = true;
+           console.log("🦹 Nästa snurr: tjuv garanterad.");
+       } else { console.log("Vänta tills hjulen står stilla (SPIN)."); }
        return s;
    }),
    skipToBokstav: () => updateRoom(hostCode, s => {
@@ -796,9 +837,15 @@ document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   await writeRoom(hostCode,{code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null});
   document.getElementById('lobby-code-big').textContent=hostCode; document.getElementById('host-room-code').textContent='KOD: '+hostCode;
   document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+hostCode);
-  isHost=true; saveSession({role:'host', code:hostCode});
+  isHost=true; saveSession({role:'host', code:hostCode}); refreshTtsWarning();
   show('host-board-screen'); startHostPolling();
 });
+
+function refreshTtsWarning(){
+  const el=document.getElementById('tts-warn'); if(!el) return;
+  el.classList.toggle('hidden', !isHost || TTS.hasSwedish());
+}
+document.addEventListener('tts-voices', refreshTtsWarning);
 
 function startHostPolling(){ hostPollStop=false; clearTimeout(hostPollTimer); hostLoop(); }
 function stopHostPolling(){ hostPollStop=true; clearTimeout(hostPollTimer); }
@@ -871,21 +918,18 @@ async function hostPoll(){
   }
 
   if(state.phase==='active' && state.round && state.round.type==='bokstav'){
-     if(state.round.subPhase === 'PLACE_LETTER') {
-         const readyCount = state.round.readyPlayers ? state.round.readyPlayers.length : 0;
-         if(readyCount >= state.players.length && hostLastStateHash === stateHash) {
-             if(state.round.spins >= state.round.maxSpins) { await finalizeRound(state); return; }
-             else {
-                 await updateRoom(hostCode, s => {
-                     s.round.subPhase = 'SPIN_LETTER'; s.round.readyPlayers = [];
-                     if(s.round.spins === 1 && !s.round.wheelLetters.includes('🦹‍♂️')) s.round.wheelLetters[0] = '🦹‍♂️';
-                     else { const newL = shuffle(BOKSTAV_LETTERS).filter(l => l !== '🦹‍♂️').slice(0,5); s.round.wheelLetters = ['🦹‍♂️', ...newL]; }
-                     return s;
-                 });
-                 return;
-             }
-         }
-     }
+    const r=state.round;
+    if(r.theft && r.theft.at !== hostLastTheftAt){ hostLastTheftAt=r.theft.at; showTheftOverlay(state); }
+    if(r.subPhase==='PLACE' && hostLastStateHash===stateHash){
+      if(Date.now() > (r.deadline||0)){ await bokstavAutoResolve(); return; }
+      const allReady = state.players.every(p=>(r.readyPlayers||[]).indexOf(p.id)!==-1);
+      if(allReady){
+        const anyBonus = state.players.some(p=>((r.bonusLeft||{})[p.id]||0) > 0);
+        if(r.spins >= r.maxSpins && !anyBonus){ await finalizeRound(state); return; }
+        await updateRoom(hostCode, st=>{ if(st.round.subPhase==='PLACE'){ st.round.subPhase='SPIN'; st.round.theft=null; } return st; });
+        return;
+      }
+    }
   }
 
   if (stateHash === hostLastStateHash) return;
@@ -915,7 +959,7 @@ async function hostPoll(){
       document.getElementById('host-timer-bar-wrap').classList.toggle('hidden', state.round.type==='bokstav');
 
       let key=state.round.type+':'+state.planIndex;
-      if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId;
+      if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId+':'+((state.round.readyPlayers||[]).length);
       else if(state.round.type==='draw') key += ':'+(state.round.revealedIndices||[]).length;
       
       if(hostRenderedRoundKey!==key){
@@ -964,29 +1008,172 @@ function renderHostRound(state){
     label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`; body.innerHTML=`<div class="drag-row">${r.scrambled.map((w,i)=>`<span class="drag-chip jiggle-soft" style="animation-delay:${(i*0.07).toFixed(2)}s;">${w}</span>`).join('')}</div>`;
   } else if(r.type==='sign'){
     label.innerHTML=`<span class="msi">signpost</span> Vad säger skylten?`;
-    const signSpeech = r.title+'. '+r.lines.join('. ')+'. '+r.question;
+    const signSpeech = r.title;
     body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div><div style="margin-top:.6rem;">${ttsBtn(signSpeech,'Lyssna igen')}</div>`;
     setTimeout(()=>hostSpeak(signSpeech), 500);
   } else if(r.type==='match'){
     label.innerHTML=`<span class="msi">join_inner</span> Para ihop`; body.innerHTML=`<div style="font-size:2.2rem;">${r.pairs.map(p=>p.emoji).join('   ')}</div>`;
   } else if(r.type==='bokstav'){
     label.innerHTML=`<span class="msi">grid_on</span> Bokstavs-jakt`;
-    if(r.subPhase === 'SPIN_LETTER') {
-        const wHTML = window.buildWheelHTML(r.wheelLetters, 'host-wheel-letter', r.letterWheelRot);
-        body.innerHTML = `${wHTML}<button class="primary-btn" onclick="hostSpinWheel('LETTER')" style="font-size:1.3rem; padding:1rem 2rem;">🎲 Snurra hjulet (${r.spins}/${r.maxSpins})</button>`;
-    } else if (r.subPhase === 'PLACE_LETTER') {
-        const wHTML = window.buildWheelHTML(r.wheelLetters, 'host-wheel-letter', r.letterWheelRot);
-        body.innerHTML = `${wHTML}<div style="margin-top:1.5rem; font-size:1.5rem; font-family:'Fredoka',sans-serif; font-weight:700;">Eleverna placerar: <span style="color:var(--accent); font-size:2.8rem; vertical-align:middle;">${r.drawnLetter}</span> ${ttsBtn('Bokstaven '+r.drawnLetter,'Lyssna')}</div>`;
-        setTimeout(()=>hostSpeak('Bokstaven '+r.drawnLetter), 400);
-    } else if (r.subPhase === 'SPIN_PLAYER') {
-        const pNames = state.players.map(p => p.avatar);
-        const wHTML = window.buildWheelHTML(pNames, 'host-wheel-player', r.playerWheelRot);
-        body.innerHTML = `<h2 style="color:var(--red);">🦹‍♂️ Tjuven är lös! Vem får stjäla?</h2>${wHTML}<button class="primary-btn" onclick="hostSpinWheel('PLAYER')" style="font-size:1.3rem; padding:1rem 2rem; background:var(--purple);">Välj Tjuv</button>`;
-    } else if (r.subPhase === 'THIEF_ACTION') {
-        const thief = state.players.find(p=>p.id===r.thiefId);
-        body.innerHTML = `<div style="font-size:6rem; margin:2rem 0; animation:jiggle-soft 1s infinite;">🦹‍♂️</div><h2 style="font-size:2rem;">${thief.avatar} ${thief.name} letar efter ett byte...</h2>`;
+    const bonusPlayers = state.players.filter(p => (r.bonusLeft||{})[p.id] > 0);
+    const spinning = Date.now() < (r.spinEndsAt||0);
+
+    if(r.subPhase === 'SPIN'){
+      const isBonus = r.spins >= r.maxSpins;
+      const who = isBonus ? bonusPlayers : state.players;
+      const label2 = isBonus
+        ? `🎁 Bonussnurr för ${who.map(p=>p.avatar+' '+p.name).join(', ')}`
+        : `Alla snurrar samtidigt (${r.spins}/${r.maxSpins})`;
+      body.innerHTML = `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:.4rem;">${label2}</div>
+        ${renderWheelGrid(state, who, r)}
+        <button class="primary-btn" onclick="hostSpinAllWheels()" style="font-size:1.3rem; padding:1rem 2rem;">🎲 Snurra alla hjul</button>`;
+    } else {
+      const who = state.players.filter(p => r.draws && r.draws[p.id] !== undefined);
+      const waiting = state.players.filter(p => (r.readyPlayers||[]).indexOf(p.id)===-1);
+      const head = spinning
+        ? `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.6rem;">Hjulen snurrar...</div>`
+        : `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;">Eleverna placerar sina bokstäver ${deadlinePill(r.deadline)}</div>
+           <div class="status-line">Väntar på: ${waiting.length ? waiting.map(p=>p.avatar).join(' ') : 'ingen - klart!'}</div>`;
+      body.innerHTML = head + renderWheelGrid(state, who, r);
     }
+    animateWheels(r.wheels, 'host-wheel-');
+    if(spinning) setTimeout(()=>{ hostRenderedRoundKey=null; hostPoll(); }, (r.spinEndsAt-Date.now())+150);
   }
+}
+
+function renderWheelGrid(state, who, r){
+  const cells = who.map(p=>{
+    const w = (r.wheels||{})[p.id];
+    const drawn = (r.draws||{})[p.id];
+    const ready = (r.readyPlayers||[]).indexOf(p.id)!==-1;
+    const isThief = r.thiefId===p.id;
+    const spinning = Date.now() < (r.spinEndsAt||0);
+    const wheelHTML = w
+      ? window.buildWheelHTML(w.letters, 'host-wheel-'+p.id, w.prevRot||0, 'mini')
+      : window.buildWheelHTML(['?','?','?','?','?','?'], 'host-wheel-'+p.id, 0, 'mini');
+    let stateTxt = '';
+    if(!spinning && drawn !== undefined){
+      if(isThief) stateTxt = '🦹 TJUV!';
+      else if(ready) stateTxt = '✓ klar';
+      else stateTxt = 'placerar ' + drawn;
+    }
+    const stolenCount = (r.stolen||{})[p.id] || 0;
+    const bonus = (r.bonusLeft||{})[p.id] || 0;
+    return `<div class="wheel-cell ${ready?'done':'waiting'} ${isThief?'thief':''}">
+      ${wheelHTML}
+      <div class="wc-name">${p.avatar} ${p.name}</div>
+      <div class="wc-state">${stateTxt}</div>
+      ${stolenCount ? `<div class="wc-state" style="color:var(--red);font-size:.75rem;">bestulen ${stolenCount}x${bonus?` (+${bonus} bonus)`:''}</div>` : ''}
+    </div>`;
+  }).join('');
+  return `<div class="wheel-grid">${cells}</div>`;
+}
+
+function showTheftOverlay(state){
+  const r=state.round; if(!r || !r.theft) return;
+  const t=r.theft;
+  const thief=state.players.find(p=>p.id===t.thiefId);
+  const victim=state.players.find(p=>p.id===t.victimId);
+  if(!thief || !victim) return;
+  const el=document.getElementById('theft-overlay');
+  el.innerHTML = `<div class="to-thief">🦹‍♂️</div>
+    <div class="to-line">${thief.avatar} ${thief.name} stal bokstaven</div>
+    <div class="to-letter">${t.letter}</div>
+    <div class="to-victim">från ${victim.avatar} ${victim.name}</div>`;
+  el.classList.remove('hidden');
+  AudioEngine.playWrong(); Confetti.shoot(40);
+  clearTimeout(window._theftTimer);
+  window._theftTimer=setTimeout(()=>{ el.classList.add('hidden'); }, 5000);
+}
+
+window.hostSpinAllWheels = async function(){
+  document.querySelectorAll('.primary-btn').forEach(b=>b.disabled=true);
+  AudioEngine.playTick();
+  const state = await readRoom(hostCode, false);
+  if(!state || !state.round || state.round.type!=='bokstav') return;
+  const r = state.round;
+  const bonusMode = r.spins >= r.maxSpins;
+  const participants = bonusMode
+    ? state.players.filter(p => (r.bonusLeft||{})[p.id] > 0)
+    : state.players.slice();
+  if(!participants.length) return;
+
+  let thiefPid = null;
+  if(!bonusMode && participants.length >= 2){
+    const canBeThief = participants.filter(p => state.players.some(v => v.id!==p.id && bokstavHasLetters(r, v.id)));
+    const chance = r.forceThief ? 1 : (r.spins >= 1 ? 0.3 : 0);
+    if(canBeThief.length && Math.random() < chance) thiefPid = pickRandom(canBeThief).id;
+  }
+
+  const wheels={}, draws={};
+  participants.forEach(p=>{
+    const letters = shuffle(BOKSTAV_LETTERS).filter(l=>l!=='🦹‍♂️').slice(0, bonusMode?6:5);
+    const slices = bonusMode ? letters : ['🦹‍♂️', ...letters];
+    const thiefIdx = slices.indexOf('🦹‍♂️');
+    let idx;
+    if(p.id===thiefPid) idx = thiefIdx;
+    else idx = pickRandom(slices.map((_,i)=>i).filter(i=>i!==thiefIdx));
+    const prev = ((r.wheels||{})[p.id] || {}).rot || 0;
+    const sliceAngle = 360/slices.length;
+    const offset = (Math.random()-0.5)*(sliceAngle*0.6);
+    const target = (360-(idx*sliceAngle)) - (sliceAngle/2) + offset;
+    wheels[p.id] = {letters: slices, rot: prev + 360*5 - (prev%360) + target, prevRot: prev};
+    draws[p.id] = slices[idx];
+  });
+
+  const now=Date.now();
+  await updateRoom(hostCode, st=>{
+    const rr=st.round; if(rr.type!=='bokstav' || rr.subPhase!=='SPIN') return st;
+    rr.wheels=wheels; rr.draws=draws; rr.spins+=1; rr.subPhase='PLACE';
+    rr.bonusMode=bonusMode; rr.theft=null; rr.victimId=null;
+    rr.spinEndsAt=now+4300; rr.deadline=now+4300+BOKSTAV_TURN_MS;
+    rr.readyPlayers=[];
+    rr.forceThief=false;
+    rr.bonusLeft=rr.bonusLeft||{};
+    if(bonusMode) participants.forEach(p=>{ rr.bonusLeft[p.id]=Math.max(0,(rr.bonusLeft[p.id]||0)-1); });
+    if(thiefPid){ rr.thiefId=thiefPid; rr.thiefStage='PICK_VICTIM'; }
+    else { rr.thiefId=null; rr.thiefStage=null; }
+    st.players.forEach(p=>{ if(draws[p.id]===undefined) bokstavMarkReady(rr, p.id); });
+    return st;
+  });
+}
+
+async function bokstavAutoResolve(){
+  await updateRoom(hostCode, st=>{
+    const r=st.round;
+    if(!r || r.type!=='bokstav' || r.subPhase!=='PLACE' || Date.now() < r.deadline) return st;
+    if(r.thiefId && r.thiefStage && r.thiefStage!=='DONE'){
+      const tid=r.thiefId;
+      if(r.thiefStage==='PICK_VICTIM'){
+        const victims=st.players.filter(p=>p.id!==tid && bokstavHasLetters(r,p.id));
+        if(victims.length){ r.victimId=pickRandom(victims).id; r.thiefStage='PICK_LETTER'; }
+        else { r.draws[tid]=pickRandom(BOKSTAV_LETTERS.filter(l=>l!=='🦹‍♂️')); r.thiefStage='PLACE'; }
+      }
+      if(r.thiefStage==='PICK_LETTER'){
+        const g=bokstavGrid(r, r.victimId);
+        const filled=g.map((c,i)=>c?i:-1).filter(i=>i>=0);
+        if(filled.length){
+          const i=pickRandom(filled); const letter=g[i]; g[i]='';
+          r.draws[tid]=letter;
+          r.stolen=r.stolen||{}; r.stolen[r.victimId]=(r.stolen[r.victimId]||0)+1;
+          r.bonusLeft=r.bonusLeft||{}; r.bonusLeft[r.victimId]=(r.bonusLeft[r.victimId]||0)+1;
+          r.theft={thiefId:tid, victimId:r.victimId, letter, at:Date.now()};
+        } else { r.draws[tid]=pickRandom(BOKSTAV_LETTERS.filter(l=>l!=='🦹‍♂️')); }
+        r.thiefStage='PLACE';
+      }
+      if(r.thiefStage==='PLACE'){
+        bokstavPlaceRandom(r, tid, r.draws[tid]);
+        bokstavMarkReady(r, tid); r.thiefStage='DONE';
+      }
+    }
+    st.players.forEach(p=>{
+      if((r.readyPlayers||[]).indexOf(p.id)!==-1) return;
+      const l=r.draws[p.id];
+      if(l!==undefined && l!=='🦹‍♂️') bokstavPlaceRandom(r, p.id, l);
+      bokstavMarkReady(r, p.id);
+    });
+    return st;
+  });
 }
 function renderSignHTML(r){ return `<div class="sign-box"><div class="sign-title"><span class="msi">${r.icon}</span>${r.title}</div>${r.lines.map(l=>`<div class="sign-line">${l}</div>`).join('')}</div>`; }
 function redrawCanvas(canvas,strokes){
@@ -995,46 +1182,41 @@ function redrawCanvas(canvas,strokes){
   ctx.globalCompositeOperation='source-over';
 }
 
-window.hostSpinWheel = async function(type) {
-   const btns = document.querySelectorAll('.primary-btn'); btns.forEach(b=>b.disabled=true);
-   AudioEngine.playTick();
-   
-   const state = await readRoom(hostCode, false);
-   if(type === 'LETTER') {
-       const num = 6; const targetIdx = Math.floor(Math.random() * num);
-       const result = state.round.wheelLetters[targetIdx];
-       const sliceAngle = 360 / num;
-       const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.7);
-       const targetDeg = (360 - (targetIdx * sliceAngle)) - (sliceAngle/2) + randomOffset;
-       const newRot = state.round.letterWheelRot + (360 * 5) - (state.round.letterWheelRot % 360) + targetDeg;
-       document.getElementById('host-wheel-letter').style.transform = `rotate(${newRot}deg)`;
-       
-       setTimeout(async () => {
-           AudioEngine.playReveal();
-           await updateRoom(hostCode, s => {
-               s.round.letterWheelRot = newRot; s.round.spins += 1;
-               if(result === '🦹‍♂️') { s.round.subPhase = 'SPIN_PLAYER'; } 
-               else { s.round.subPhase = 'PLACE_LETTER'; s.round.drawnLetter = result; s.round.readyPlayers = []; }
-               return s;
-           });
-       }, 4000);
-   } else if (type === 'PLAYER') {
-       const num = state.players.length; const targetIdx = Math.floor(Math.random() * num);
-       const thief = state.players[targetIdx];
-       const sliceAngle = 360 / num;
-       const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.75);
-       const targetDeg = (360 - (targetIdx * sliceAngle)) - (sliceAngle/2) + randomOffset;
-       const newRot = state.round.playerWheelRot + (360 * 5) - (state.round.playerWheelRot % 360) + targetDeg;
-       document.getElementById('host-wheel-player').style.transform = `rotate(${newRot}deg)`;
-       
-       setTimeout(async () => {
-           AudioEngine.playReveal();
-           await updateRoom(hostCode, s => {
-               s.round.playerWheelRot = newRot; s.round.subPhase = 'THIEF_ACTION'; s.round.thiefId = thief.id; s.round.thiefStage = 'PICK_VICTIM';
-               return s;
-           });
-       }, 4000);
-   }
+const BOKSTAV_TURN_MS = 60000;
+function bokstavGrid(r, pid){
+  r.answers = r.answers || {};
+  if(!r.answers[pid]) r.answers[pid] = {grid: Array(25).fill('')};
+  if(!r.answers[pid].grid) r.answers[pid].grid = Array(25).fill('');
+  return r.answers[pid].grid;
+}
+function bokstavHasLetters(r, pid){ return bokstavGrid(r,pid).some(c=>c!==''); }
+function bokstavEmptyCells(r, pid){ return bokstavGrid(r,pid).map((c,i)=>c?-1:i).filter(i=>i>=0); }
+function bokstavPlaceRandom(r, pid, letter){
+  if(!letter || letter==='🦹\u200d♂️') return;
+  const free=bokstavEmptyCells(r,pid);
+  if(!free.length) return;
+  bokstavGrid(r,pid)[pickRandom(free)] = letter;
+}
+function bokstavMarkReady(r, pid){
+  r.readyPlayers = r.readyPlayers || [];
+  if(r.readyPlayers.indexOf(pid)===-1) r.readyPlayers.push(pid);
+}
+function secondsLeft(ts){ return Math.max(0, Math.ceil((ts-Date.now())/1000)); }
+function deadlinePill(ts){ return `<span class="deadline-pill" data-deadline="${ts}"><span class="msi">timer</span><span class="dl-val">${secondsLeft(ts)}</span>s</span>`; }
+setInterval(()=>{
+  document.querySelectorAll('[data-deadline]').forEach(el=>{
+    const left=secondsLeft(Number(el.getAttribute('data-deadline')));
+    const v=el.querySelector('.dl-val'); if(v) v.textContent=left;
+    el.classList.toggle('hot', left<=10);
+  });
+}, 500);
+function animateWheels(wheels, prefix){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    Object.keys(wheels||{}).forEach(pid=>{
+      const el=document.getElementById(prefix+pid);
+      if(el) el.style.transform='rotate('+wheels[pid].rot+'deg)';
+    });
+  }));
 }
 
 window.scoreBokstavGrid = function(grid) {
@@ -1114,10 +1296,11 @@ async function finalizeRound(state){
 function revealSpeechText(state){
   const r=state.round; if(!r) return '';
   if(r.type==='draw') return r.word;
-  if(r.type==='truefalse') return r.statement+'. '+(r.isTrue?'Det är sant.':'Det är fel.');
+  if(r.type==='truefalse') return r.statement;
   if(r.type==='wordorder') return r.correctOrder.join(' ');
-  if(r.type==='sign') return r.question+' '+r.correct;
+  if(r.type==='sign') return r.correct;
   if(r.type==='match') return r.pairs.map(p=>p.word).join(', ');
+  if(r.type==='bokstav') return '';
   return '';
 }
 
@@ -1151,14 +1334,14 @@ function renderRoundEnd(state){
     document.getElementById('roundend-table').insertAdjacentElement('afterend', box);
   }
 
+  const isBokstav = !!(state.round && state.round.type==='bokstav');
+  document.getElementById('teacher-panel-wrap').classList.toggle('hidden', !isBokstav);
+  if(!isBokstav) document.getElementById('teacher-panel').classList.add('hidden');
   const sel=document.getElementById('tp-player');
-  if(sel){
+  if(sel && isBokstav){
     sel.innerHTML=[...state.players].map(p=>`<option value="${p.id}">${p.avatar} ${p.name}</option>`).join('');
     document.getElementById('tp-msg').textContent='';
     document.getElementById('tp-word').value='';
-    document.getElementById('tp-hint').textContent = (state.round && state.round.type==='bokstav')
-      ? 'Skriv ett ord eleven har lagt men som saknas i ordlistan. Det ger 100 p per bokstav och gäller resten av lektionen.'
-      : 'Skriv ett ord för att lägga till det i ordlistan, eller godkänn ett svar manuellt (+300 p).';
   }
   document.getElementById('next-round-btn').classList.remove('hidden');
 }
@@ -1168,6 +1351,10 @@ function tpMsg(text, color){
   el.style.color = color || 'var(--green)'; el.textContent=text;
   setTimeout(()=>{ if(el.textContent===text) el.textContent=''; }, 5000);
 }
+
+document.getElementById('tp-toggle').addEventListener('click', ()=>{
+  document.getElementById('teacher-panel').classList.toggle('hidden');
+});
 
 document.getElementById('tp-approve-word').addEventListener('click', async ()=>{
   const word=(document.getElementById('tp-word').value||'').trim();
@@ -1224,11 +1411,11 @@ function renderPodium(state){
 
 document.getElementById('start-game-btn').addEventListener('click', async ()=>{
   document.getElementById('start-game-btn').disabled = true; const state=await readRoom(hostCode);
-  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,20); s.planIndex=-1; return s; }); await advanceRound();
+  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,30); s.planIndex=-1; return s; }); await advanceRound();
 });
 document.getElementById('next-round-btn').addEventListener('click', advanceRound);
 document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
-  await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,20)); return s; }); await advanceRound();
+  await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,30)); return s; }); await advanceRound();
   document.getElementById('host-finished-view').style.boxShadow = 'none'; document.getElementById('host-finished-view').classList.add('hidden'); document.getElementById('host-round-view').classList.remove('hidden');
   AudioEngine.stopMusic(); AudioEngine.startMusic(); AudioEngine.setMusicVolume(AudioEngine.VOL_MAIN, 1.0);
 });
@@ -1239,13 +1426,14 @@ async function advanceRound(){
     const idx=s.planIndex+1; if(idx>=s.plan.length) return s;
     const r=buildRound(s.plan[idx].type, s.plan[idx].drawerId); r.startedAt=Date.now(); r.answers={};
     const snap={}; s.players.forEach(p=>snap[p.id]=p.score); r.scoreSnapshot=snap;
-    if(r.type==='bokstav') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(25).fill('')}; }); }
+    if(r.type==='bokstav') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(25).fill('')}; }); r.stolen={}; r.bonusLeft={}; r.readyPlayers=[]; }
     s.round=r; s.planIndex=idx; s.phase='active'; return s;
   });
   hostRenderedRoundKey=null; document.getElementById('next-round-btn').disabled = false;
 }
 
 let playerCode=null, playerId=null, playerPollTimer=null, playerPollStop=true, playerRenderedRoundKey=null, playerLastStateHash = "", playerLastPhase = null;
+let playerSpellNote='';
 let wordOrderLocal=[], matchState=null, drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
 
 document.getElementById('join-btn').addEventListener('click', async ()=>{
@@ -1279,14 +1467,17 @@ async function playerPoll(){
     roundView.classList.remove('hidden'); renderMiniLB(document.getElementById('player-mini-lb'),state);
     
     let key=state.round.type+':'+state.planIndex;
-    if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId+':'+(state.round.readyPlayers||[]).length;
+    if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId+':'+(state.round.readyPlayers||[]).length+':'+((state.round.draws||{})[playerId]);
     else if(state.round.type==='draw') key += ':'+(state.round.revealedIndices||[]).length;
     
-    if(playerRenderedRoundKey!==key){ playerRenderedRoundKey=key; renderPlayerRound(state); }
+    if(playerRenderedRoundKey!==key){ if(playerRenderedRoundKey && playerRenderedRoundKey.split(':')[1]!==String(state.planIndex)) playerSpellNote=''; playerRenderedRoundKey=key; renderPlayerRound(state); }
     
     if(state.round.type==='draw' && state.round.drawerId!==playerId){
       const gs=document.getElementById('player-guess-status');
-      if(gs && (state.round.correctPlayerIds||[]).includes(playerId)){ gs.textContent='Rätt! Väntar...'; gs.className='status-line right'; document.getElementById('guess-input').disabled=true; document.getElementById('guess-submit-btn').disabled=true; }
+      if(gs && (state.round.correctPlayerIds||[]).includes(playerId)){
+        if(playerSpellNote) gs.innerHTML=playerSpellNote; else gs.textContent='Rätt! Väntar...';
+        gs.className='status-line right'; document.getElementById('guess-input').disabled=true; document.getElementById('guess-submit-btn').disabled=true;
+      }
     }
   } else if(state.phase==='round-end'){
     endView.classList.remove('hidden'); const res=state.lastRoundResult; const gained = res ? (res.pointsThisRound[playerId]||0) : 0;
@@ -1331,70 +1522,168 @@ function renderPlayerRound(state){
   }
 }
 
+function bokstavGridHTML(grid, clickable, letterToPlace){
+  return `<div class="bokstav-paper"><div class="bokstav-grid">${grid.map((l,i)=>{
+    const canClick = clickable && !l;
+    return `<div class="bokstav-cell ${l?'filled':'empty'}" ${canClick?`data-cell="${i}"`:''}>${l}</div>`;
+  }).join('')}</div></div>`;
+}
+
+function bindCellClicks(handler, letter){
+  document.querySelectorAll('.bokstav-cell[data-cell]').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      const idx = Number(cell.getAttribute('data-cell'));
+      document.querySelectorAll('.bokstav-cell[data-cell]').forEach(c=>c.removeAttribute('data-cell'));
+      if(letter){ cell.textContent = letter; cell.classList.remove('empty'); cell.classList.add('filled'); }
+      AudioEngine.playPop();
+      handler(idx);
+    }, {once:true});
+  });
+}
+
 function renderBokstavPlayer(state) {
-   const r = state.round; const body = document.getElementById('round-content-player');
-   const myGrid = (r.answers && r.answers[playerId] && r.answers[playerId].grid) ? r.answers[playerId].grid : Array(25).fill('');
-   
-   if(r.subPhase === 'SPIN_LETTER' || r.subPhase === 'SPIN_PLAYER') {
-       body.innerHTML = `<h2 style="font-size:1.4rem;">Väntar på hjulet... 🎲</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
-   } else if (r.subPhase === 'PLACE_LETTER') {
-       const isReady = r.readyPlayers && r.readyPlayers.includes(playerId);
-       if(isReady) {
-           body.innerHTML = `<h2 style="font-size:1.4rem; color:var(--green);">Klar! ✓</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
-       } else {
-           body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem; color:var(--accent); font-weight:800;">${r.drawnLetter}</span></h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" onclick="${l?'':'window.submitBokstavPlacement('+i+')'}">${l}</div>`).join('')}</div></div>`;
-       }
-   } else if (r.subPhase === 'THIEF_ACTION') {
-       if(playerId === r.thiefId) {
-           if(r.thiefStage === 'PICK_VICTIM') {
-               const validVictims = state.players.filter(p => p.id !== playerId && r.answers && r.answers[p.id] && r.answers[p.id].grid.some(c=>c!==''));
-               if(validVictims.length === 0) {
-                   body.innerHTML = `<h2>Ingen att stjäla från! Du får en slumpmässig.</h2>`;
-                   setTimeout(() => { updateRoom(playerCode, s => { if(s.round.thiefStage !== 'PLACE'){ s.round.drawnLetter = pickRandom(BOKSTAV_LETTERS.filter(l=>l!=='🦹‍♂️')); s.round.thiefStage = 'PLACE'; } return s;}); }, 2000);
-               } else {
-                   body.innerHTML = `<h2 style="font-size:1.3rem; color:var(--red);">🦹‍♂️ Välj en spelare att stjäla från!</h2><div style="display:flex; flex-direction:column; gap:0.5rem; max-width:300px; margin: 1rem auto;">${validVictims.map(v=>`<div class="bokstav-target-player" onclick="window.bokstavPickVictim('${v.id}')">${v.avatar} <span style="flex:1; text-align:left;">${v.name}</span> <span class="msi">chevron_right</span></div>`).join('')}</div>`;
-               }
-           } else if (r.thiefStage === 'PICK_LETTER') {
-               const vGrid = r.answers[r.victimId].grid; const vPlayer = state.players.find(p=>p.id===r.victimId);
-               body.innerHTML = `<h2>Stjäl från ${vPlayer.name}! Klicka på en bokstav.</h2><div class="bokstav-paper"><div class="bokstav-grid">${vGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" style="${l?'background:var(--accent-light); border:2px solid var(--accent);':''}" onclick="${l?'window.bokstavStealLetter('+i+')':''}">${l}</div>`).join('')}</div></div>`;
-           } else if (r.thiefStage === 'PLACE') {
-               body.innerHTML = `<h2>Placera stulen bokstav: <span style="color:var(--accent); font-size:2.4rem;">${r.drawnLetter}</span></h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" onclick="${l?'':'window.bokstavThiefPlace('+i+')'}">${l}</div>`).join('')}</div></div>`;
-           }
-       } else if (playerId === r.victimId) {
-           const thiefPlayer = state.players.find(p=>p.id===r.thiefId);
-           body.innerHTML = `<h2 style="color:var(--red); font-size:1.4rem;">Åh nej! 🦹‍♂️<br>${thiefPlayer.name} stjäl från dig!</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
-       } else {
-           const thiefPlayer = state.players.find(p=>p.id===r.thiefId);
-           body.innerHTML = `<h2>${thiefPlayer.avatar} ${thiefPlayer.name} stjäl en bokstav... 🦹‍♂️</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
-       }
-   }
+  const r = state.round;
+  const body = document.getElementById('round-content-player');
+  const myGrid = bokstavGrid(r, playerId).slice();
+  const spinning = Date.now() < (r.spinEndsAt||0);
+  const myWheel = (r.wheels||{})[playerId];
+  const myDraw = (r.draws||{})[playerId];
+  const isReady = (r.readyPlayers||[]).indexOf(playerId)!==-1;
+  const isThief = r.thiefId===playerId;
+  const isVictim = r.victimId===playerId;
+
+  const rerenderAt = (ms)=>setTimeout(()=>{ playerRenderedRoundKey=null; playerPoll(); }, ms);
+
+  if(r.subPhase==='SPIN'){
+    const bonus=(r.bonusLeft||{})[playerId]||0;
+    body.innerHTML = `<h2 style="font-size:1.3rem;">Väntar på läraren... 🎲</h2>
+      ${bonus?`<div class="status-line" style="color:var(--green);">Du får ${bonus} bonussnurr (någon stal från dig)</div>`:''}
+      ${bokstavGridHTML(myGrid,false)}`;
+    return;
+  }
+
+  if(spinning && myWheel){
+    body.innerHTML = `<h2 style="font-size:1.3rem;">Ditt hjul snurrar!</h2>
+      ${window.buildWheelHTML(myWheel.letters, 'my-wheel', myWheel.prevRot||0, 'solo')}`;
+    animateWheels({[playerId]: myWheel}, 'my-wh');
+    const el=document.getElementById('my-wheel');
+    if(el) requestAnimationFrame(()=>requestAnimationFrame(()=>{ el.style.transform='rotate('+myWheel.rot+'deg)'; }));
+    rerenderAt((r.spinEndsAt-Date.now())+200);
+    return;
+  }
+
+  if(isThief && r.thiefStage && r.thiefStage!=='DONE'){
+    if(r.thiefStage==='PICK_VICTIM'){
+      const victims = state.players.filter(p=>p.id!==playerId && bokstavHasLetters(r,p.id));
+      if(!victims.length){
+        body.innerHTML = `<h2>Ingen att stjäla från - du får en vanlig bokstav.</h2>`;
+        setTimeout(()=>updateRoom(playerCode, st=>{
+          const rr=st.round; if(rr.thiefStage!=='PICK_VICTIM') return st;
+          rr.draws[playerId]=pickRandom(BOKSTAV_LETTERS.filter(l=>l!=='🦹‍♂️')); rr.thiefStage='PLACE'; return st;
+        }), 1500);
+        return;
+      }
+      body.innerHTML = `<h2 style="font-size:1.25rem; color:var(--red);">🦹‍♂️ Du är tjuven! Välj vem du stjäl från ${deadlinePill(r.deadline)}</h2>
+        <div style="display:flex;flex-direction:column;gap:.5rem;max-width:300px;margin:1rem auto;">
+        ${victims.map(v=>`<div class="bokstav-target-player" data-victim="${v.id}">${v.avatar} <span style="flex:1;text-align:left;">${v.name}</span> <span class="msi">chevron_right</span></div>`).join('')}</div>`;
+      document.querySelectorAll('[data-victim]').forEach(el=>el.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-victim]').forEach(e=>e.style.opacity='.4');
+        el.style.opacity='1'; el.style.borderColor='var(--accent)';
+        AudioEngine.playPop();
+        window.bokstavPickVictim(el.getAttribute('data-victim'));
+      }, {once:true}));
+      return;
+    }
+    if(r.thiefStage==='PICK_LETTER'){
+      const vGrid = bokstavGrid(r, r.victimId);
+      const vPlayer = state.players.find(p=>p.id===r.victimId);
+      body.innerHTML = `<h2 style="font-size:1.15rem;">Stjäl en bokstav från ${vPlayer?vPlayer.name:'?'} ${deadlinePill(r.deadline)}</h2>
+        <div class="bokstav-paper"><div class="bokstav-grid">${vGrid.map((l,i)=>
+          `<div class="bokstav-cell ${l?'filled':'empty'}" ${l?`data-steal="${i}"`:''} style="${l?'background:var(--accent-light);border:2px solid var(--accent);':''}">${l}</div>`).join('')}</div></div>`;
+      document.querySelectorAll('[data-steal]').forEach(cell=>cell.addEventListener('click', ()=>{
+        const idx=Number(cell.getAttribute('data-steal'));
+        document.querySelectorAll('[data-steal]').forEach(c=>c.removeAttribute('data-steal'));
+        cell.textContent=''; cell.classList.add('empty'); AudioEngine.playPop();
+        window.bokstavStealLetter(idx);
+      }, {once:true}));
+      return;
+    }
+    if(r.thiefStage==='PLACE'){
+      const letter = r.draws[playerId];
+      body.innerHTML = `<h2 style="font-size:1.15rem;">Placera din stulna bokstav: <span style="color:var(--accent);font-size:2.2rem;">${letter}</span> ${deadlinePill(r.deadline)}</h2>
+        ${bokstavGridHTML(myGrid, true, letter)}`;
+      bindCellClicks(idx=>window.bokstavThiefPlace(idx), letter);
+      return;
+    }
+  }
+
+  if(isVictim && r.thiefStage && r.thiefStage!=='DONE'){
+    const thief=state.players.find(p=>p.id===r.thiefId);
+    body.innerHTML = `<h2 style="color:var(--red);font-size:1.3rem;">Åh nej! 🦹‍♂️<br>${thief?thief.name:'Någon'} stjäl från dig!</h2>
+      <div class="status-line" style="color:var(--green);">Du får ett bonussnurr senare.</div>
+      ${bokstavGridHTML(myGrid,false)}`;
+    return;
+  }
+
+  if(isReady || myDraw===undefined || myDraw==='🦹‍♂️'){
+    const waiting = state.players.filter(p=>(r.readyPlayers||[]).indexOf(p.id)===-1).length;
+    body.innerHTML = `<h2 style="font-size:1.3rem;color:var(--green);">Klar! ✓</h2>
+      <div class="status-line">${waiting?('Väntar på '+waiting+' elever'):'Väntar på läraren'}</div>
+      ${bokstavGridHTML(myGrid,false)}`;
+    return;
+  }
+
+  body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem;color:var(--accent);font-weight:800;">${myDraw}</span> ${deadlinePill(r.deadline)}</h2>
+    ${bokstavGridHTML(myGrid, true, myDraw)}`;
+  bindCellClicks(idx=>window.submitBokstavPlacement(idx), myDraw);
 }
 
 window.submitBokstavPlacement = async function(index) {
-    document.querySelectorAll('.bokstav-cell').forEach(c=>c.onclick=null); AudioEngine.playPop();
-    await updateRoom(playerCode, s => {
-        if(!s.round.answers) s.round.answers = {}; if(!s.round.answers[playerId]) s.round.answers[playerId] = {grid: Array(25).fill('')};
-        s.round.answers[playerId].grid[index] = s.round.drawnLetter;
-        if(!s.round.readyPlayers) s.round.readyPlayers = []; if(!s.round.readyPlayers.includes(playerId)) s.round.readyPlayers.push(playerId);
-        return s;
-    });
+  await updateRoom(playerCode, s => {
+    const r=s.round; if(!r || r.type!=='bokstav' || r.subPhase!=='PLACE') return s;
+    if((r.readyPlayers||[]).indexOf(playerId)!==-1) return s;
+    const grid=bokstavGrid(r, playerId);
+    const letter=r.draws[playerId];
+    if(letter===undefined || letter==='🦹‍♂️') return s;
+    if(grid[index]) bokstavPlaceRandom(r, playerId, letter); else grid[index]=letter;
+    bokstavMarkReady(r, playerId);
+    return s;
+  });
 }
 window.bokstavPickVictim = async function(vId) {
-    AudioEngine.playPop(); await updateRoom(playerCode, s => { s.round.victimId = vId; s.round.thiefStage = 'PICK_LETTER'; return s; });
+  await updateRoom(playerCode, s => {
+    const r=s.round; if(!r || r.thiefId!==playerId || r.thiefStage!=='PICK_VICTIM') return s;
+    r.victimId=vId; r.thiefStage='PICK_LETTER'; return s;
+  });
 }
 window.bokstavStealLetter = async function(index) {
-    AudioEngine.playPop(); await updateRoom(playerCode, s => {
-        const l = s.round.answers[s.round.victimId].grid[index];
-        s.round.answers[s.round.victimId].grid[index] = ''; s.round.drawnLetter = l; s.round.thiefStage = 'PLACE'; return s;
-    });
+  await updateRoom(playerCode, s => {
+    const r=s.round; if(!r || r.thiefId!==playerId || r.thiefStage!=='PICK_LETTER') return s;
+    const g=bokstavGrid(r, r.victimId);
+    let letter=g[index];
+    if(!letter){
+      const filled=g.map((c,i)=>c?i:-1).filter(i=>i>=0);
+      if(!filled.length){ r.draws[playerId]=pickRandom(BOKSTAV_LETTERS.filter(l=>l!=='🦹‍♂️')); r.thiefStage='PLACE'; return s; }
+      index=pickRandom(filled); letter=g[index];
+    }
+    g[index]='';
+    r.draws[playerId]=letter; r.thiefStage='PLACE';
+    r.stolen=r.stolen||{}; r.stolen[r.victimId]=(r.stolen[r.victimId]||0)+1;
+    r.bonusLeft=r.bonusLeft||{}; r.bonusLeft[r.victimId]=(r.bonusLeft[r.victimId]||0)+1;
+    r.theft={thiefId:playerId, victimId:r.victimId, letter, at:Date.now()};
+    return s;
+  });
 }
 window.bokstavThiefPlace = async function(index) {
-    document.querySelectorAll('.bokstav-cell').forEach(c=>c.onclick=null); AudioEngine.playPop();
-    await updateRoom(playerCode, s => {
-        s.round.answers[playerId].grid[index] = s.round.drawnLetter;
-        s.round.subPhase = 'SPIN_LETTER'; s.round.thiefId = null; s.round.victimId = null; s.round.thiefStage = null; s.round.drawnLetter = null;
-        return s;
-    });
+  await updateRoom(playerCode, s => {
+    const r=s.round; if(!r || r.thiefId!==playerId || r.thiefStage!=='PLACE') return s;
+    const grid=bokstavGrid(r, playerId);
+    const letter=r.draws[playerId];
+    if(grid[index]) bokstavPlaceRandom(r, playerId, letter); else grid[index]=letter;
+    r.thiefStage='DONE';
+    bokstavMarkReady(r, playerId);
+    return s;
+  });
 }
 
 function renderDragChips(container, order){ container.innerHTML=''; order.forEach((w)=>{ const el=document.createElement('div'); el.className='drag-chip jiggle'; el.textContent=w; el.style.animationDelay=(Math.random()*0.2).toFixed(2)+'s'; container.appendChild(el); attachDragHandlers(el, container, order); }); }
@@ -1446,8 +1735,9 @@ async function submitGuess(){
   btn.disabled=false;
   if(resultInfo.correct){
     if(resultInfo.word && resultInfo.exact===false){
-      status.innerHTML='Rätt! Stavas så här: <span class="spell-correct">'+resultInfo.word+'</span>';
-    } else { status.textContent='Rätt! Väntar...'; }
+      playerSpellNote='Rätt! Stavas så här: <span class="spell-correct">'+resultInfo.word+'</span>';
+      status.innerHTML=playerSpellNote;
+    } else { playerSpellNote=''; status.textContent='Rätt! Väntar...'; }
     status.className='status-line right'; input.disabled=true; btn.disabled=true; AudioEngine.playCorrect();
   } 
   else if(resultInfo.sim>=60){ status.textContent='Nästan rätt! ('+resultInfo.sim+'%) Försök igen'; status.className='status-line almost'; input.value=''; input.focus(); AudioEngine.playAlmost(); } 
