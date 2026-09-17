@@ -133,29 +133,85 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .leaderboard-table .gained{color:var(--accent-dark);font-family:'Fredoka',sans-serif;}
 
 /* EPIC PODIUM STYLES */
-.podium{display:flex;align-items:flex-end;justify-content:center;gap:1rem;margin:3vh 0;}
-.podium-slot{
-  border-radius:12px 12px 0 0;padding:1rem;text-align:center;
-  font-family:'Fredoka',sans-serif;font-weight:700;color:var(--ink);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+#host-finished-view {
+  overflow: hidden; /* Держим фон внутри закругленных углов */
   position: relative;
-  width: 110px;
+  background: linear-gradient(135deg, #ffffff, #f0f4f8);
+  border: none;
+  box-shadow: 0 10px 40px rgba(43, 125, 224, 0.15);
+}
+#host-finished-view::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('jarven.png') center/cover no-repeat;
+  opacity: 0.08; /* Еле видный фон */
+  z-index: 0;
+  pointer-events: none;
+}
+#host-finished-view > * {
+  position: relative;
+  z-index: 1; /* Контент поверх фона */
+}
+
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:1.5rem;margin:7vh 0 2vh;}
+.podium-slot{
+  border-radius:16px 16px 0 0;padding:1rem;text-align:center;
+  font-family:'Fredoka',sans-serif;font-weight:700;color:var(--ink);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  position: relative;
+  width: 140px;
   animation: podiumRise 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
 }
 @keyframes podiumRise {
-  0% { transform: translateY(100px); opacity: 0; }
+  0% { transform: translateY(150px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
 }
-.podium-slot .podium-avatar { font-size: 2.8rem; margin-bottom: -15px; position:relative; z-index:2; }
-.podium-slot .podium-name { background: rgba(255,255,255,0.9); padding: 0.2rem 0.5rem; border-radius: 8px; font-size: 1.1rem; display:inline-block; margin-top:0.5rem; width:100%; overflow:hidden; text-overflow:ellipsis; }
-.podium-slot .podium-score { color: rgba(255,255,255,0.9); font-size: 1.2rem; margin-top: 0.5rem; }
 
-.podium-slot.p1{height:200px;background:linear-gradient(135deg, #8A2387, #E94057, #F27121); color:#fff; animation-delay: 0.6s;}
-.podium-slot.p2{height:150px;background:linear-gradient(135deg, #1f4037, #99f2c8); animation-delay: 0.3s;}
-.podium-slot.p3{height:120px;background:linear-gradient(135deg, #f2709c, #ff9472); animation-delay: 0s;}
+.podium-slot .podium-avatar { 
+  font-size: 3.5rem; 
+  margin-top: -55px; /* Вылезает за пределы пьедестала */
+  margin-bottom: 5px; 
+  position:relative; 
+  z-index:2; 
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));
+}
+.podium-slot .podium-name { 
+  background: rgba(255,255,255,0.95); 
+  color: #233246;
+  padding: 0.3rem 0.6rem; 
+  border-radius: 10px; 
+  font-size: 1.15rem; 
+  display:inline-block; 
+  margin-top:0.5rem; 
+  width:100%; 
+  overflow:hidden; 
+  text-overflow:ellipsis;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.podium-slot .podium-score { 
+  color: rgba(255,255,255,1); 
+  font-size: 1.5rem; 
+  margin-top: 0.6rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
 
-.crown { position:absolute; top:-40px; left:50%; transform:translateX(-50%); font-size:3rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); animation: crownDrop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards; animation-delay: 1.2s; }
-@keyframes crownDrop { 0% { transform: translate(-50%, -50px) scale(0); opacity:0;} 100% { transform: translate(-50%, 0) scale(1); opacity:1;} }
+/* Красивые градиенты (Золото, Серебро, Бронза) */
+.podium-slot.p1{height:250px;background:linear-gradient(180deg, #FFD000, #FF7B00); color:#fff; animation-delay: 0.6s;}
+.podium-slot.p2{height:190px;background:linear-gradient(180deg, #00B4D8, #0077B6); animation-delay: 0.3s;}
+.podium-slot.p3{height:150px;background:linear-gradient(180deg, #52B788, #2D6A4F); animation-delay: 0s;}
+
+.crown { 
+  position:absolute; 
+  top:-110px; /* Над аватаркой */
+  left:50%; 
+  transform:translateX(-50%); 
+  font-size:4.5rem; 
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); 
+  animation: crownDrop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards; 
+  animation-delay: 1.2s; 
+}
+@keyframes crownDrop { 0% { transform: translate(-50%, -80px) scale(0); opacity:0;} 100% { transform: translate(-50%, 0) scale(1); opacity:1;} }
 
 .player-idle{text-align:center;}
 .player-idle .big-emoji{font-size:3.2rem;color:var(--accent); animation: pulse 1.3s infinite ease-in-out;}
@@ -222,13 +278,12 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
     <canvas id="roundend-drawing" class="draw-canvas hidden" width="400" height="240" style="max-width:280px;height:170px;margin:0 auto 1rem;display:block;"></canvas>
     <table class="leaderboard-table" id="roundend-table"></table>
     <button class="primary-btn hidden" id="next-round-btn">Nästa runda</button>
-    <button class="primary-btn hidden" id="add-rounds-btn" style="background:var(--yellow);color:var(--ink);"><span class="msi">add_circle</span> Lägg till 20 rundor till</button>
-    <button class="ghost-btn" id="end-game-btn" style="margin-top:.8rem;">Avsluta spelet</button>
   </div>
   <div id="host-finished-view" class="hidden card" style="width:100%;">
-    <h2 style="font-size: 2.2rem; margin-bottom: 0;">🏆 Spelet är slut!</h2>
-    <p class="sub" style="margin-bottom: 2rem;">Bra jobbat allihopa!</p>
+    <h2 style="font-size: 2.5rem; margin-bottom: 0;">🏆 Spelet är slut!</h2>
+    <p class="sub" style="margin-bottom: 0.5rem; font-size: 1.2rem;">Bra jobbat allihopa!</p>
     <div class="podium" id="podium"></div>
+    <button class="primary-btn" id="add-rounds-btn" style="background:var(--yellow);color:var(--ink); margin-top:2rem; position:relative; z-index:2;"><span class="msi">add_circle</span> Spela mer (20 rundor till)</button>
   </div>
 </div>
 
@@ -419,7 +474,7 @@ if(urlCode){ show('player-join-screen'); document.getElementById('join-code').va
 const AudioEngine=(function(){
   let ctx=null, musicOn=true, musicTimer=null, masterGain=null, musicGain=null, sfxGain=null, musicStep=0, musicStartTime=0;
   let finaleBuffers = [];
-  const FINALE_URLS = ['sound1.mp3', 'sound2.mp3', 'sound3.mp3', 'sound4.mp3'];
+  const FINALE_URLS = ['audio/sound1.mp3', 'audio/sound2.mp3', 'audio/sound3.mp3', 'audio/sound4.mp3'];
 
   const SECTIONS=[
     { bass:[130.81,130.81,164.81,146.83], arp:[261.63,329.63,392.00,329.63], lead:[523.25,0,659.25,587.33] },
@@ -709,17 +764,17 @@ async function finalizeRound(state){
     if(r.type==='match') reveal = 'Paren: '+r.pairs.map(p=>p.word+' '+p.emoji).join(', ');
 
     s.lastRoundResult={type:r.type, reveal, rankBefore, rankAfter, pointsThisRound:pts};
-    s.phase='round-end'; return s;
+    
+    // ПРОВЕРКА НА ПОСЛЕДНИЙ РАУНД - СРАЗУ В ФИНАЛ
+    const isLastRound = s.planIndex >= s.plan.length - 1;
+    s.phase = isLastRound ? 'finished' : 'round-end'; 
+    return s;
   });
 }
 
 function renderRoundEnd(state){
   const res=state.lastRoundResult;
   document.getElementById('roundend-reveal').textContent = res ? res.reveal : '';
-  const hasNext = state.planIndex+1 < state.plan.length;
-  document.getElementById('next-round-btn').classList.toggle('hidden', !hasNext);
-  document.getElementById('add-rounds-btn').classList.toggle('hidden', hasNext);
-  
   const drawCanvas=document.getElementById('roundend-drawing');
   if(state.round && state.round.type==='draw'){ drawCanvas.classList.remove('hidden'); redrawCanvas(drawCanvas, state.round.strokes); }
   else { drawCanvas.classList.add('hidden'); }
@@ -731,6 +786,8 @@ function renderRoundEnd(state){
     return `<tr><td class="rank">#${i+1}</td><td>${p.avatar} ${p.name}</td><td>${arrow}</td>
       <td class="gained">+${res.pointsThisRound[p.id]||0}</td></tr>`;
   }).join('');
+  
+  document.getElementById('next-round-btn').classList.remove('hidden');
 }
 
 function renderPodium(state){
@@ -761,9 +818,6 @@ document.getElementById('next-round-btn').addEventListener('click', advanceRound
 document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
   await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,20)); return s; });
   await advanceRound();
-});
-document.getElementById('end-game-btn').addEventListener('click', async ()=>{
-  await updateRoom(hostCode, s=>{ s.phase='finished'; return s; });
 });
 
 async function advanceRound(){
