@@ -742,7 +742,8 @@ function buildPlan(players, count=30){
 }
 
 let hostCode=null, hostPollTimer=null, hostPollStop=true, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
-let hostLastStateHash = "", hostLastTheftAt = 0;
+let hostLastStateHash = "", hostLastTheftAt = 0, hostForceRender = false;
+let hostSpinKey = null, hostSpinLocalEnd = 0, hostLocalDeadline = 0;
 
 window.ADMIN = {
    nextRound: () => advanceRound(),
@@ -849,7 +850,7 @@ async function hostPoll(){
     const r=state.round;
     if(r.theft && r.theft.at !== hostLastTheftAt){ hostLastTheftAt=r.theft.at; showTheftOverlay(state); }
     if(r.subPhase==='PLACE' && hostLastStateHash===stateHash){
-      if(Date.now() > (r.deadline||0)){ await bokstavAutoResolve(); return; }
+      if(Date.now() > (r.deadline||0) && Date.now() > (r.spinEndsAt||0)){ await bokstavAutoResolve(); return; }
       const allReady = state.players.every(p=>(r.readyPlayers||[]).indexOf(p.id)!==-1);
       if(allReady){
         const anyBonus = state.players.some(p=>((r.bonusLeft||{})[p.id]||0) > 0);
@@ -860,7 +861,8 @@ async function hostPoll(){
     }
   }
 
-  if (stateHash === hostLastStateHash) return;
+  if (stateHash === hostLastStateHash && !hostForceRender) return;
+  hostForceRender = false;
   hostLastStateHash = stateHash;
 
   const isLobby = state.phase==='lobby';
@@ -941,7 +943,14 @@ function renderHostRound(state){
   } else if(r.type==='bokstav'){
     label.innerHTML=`<span class="msi">grid_on</span> Bokstavs-jakt`;
     const bonusPlayers = state.players.filter(p => (r.bonusLeft||{})[p.id] > 0);
-    const spinning = Date.now() < (r.spinEndsAt||0);
+    const spinKey = r.spins+':'+r.subPhase;
+    if(r.subPhase==='PLACE' && hostSpinKey!==spinKey){
+      hostSpinKey=spinKey;
+      hostSpinLocalEnd=Date.now()+4300;
+      hostLocalDeadline=hostSpinLocalEnd+BOKSTAV_TURN_MS;
+    }
+    if(r.subPhase!=='PLACE'){ hostSpinKey=null; hostSpinLocalEnd=0; }
+    const spinning = Date.now() < hostSpinLocalEnd;
 
     if(r.subPhase === 'SPIN'){
       const isBonus = r.spins >= r.maxSpins;
@@ -957,12 +966,17 @@ function renderHostRound(state){
       const waiting = state.players.filter(p => (r.readyPlayers||[]).indexOf(p.id)===-1);
       const head = spinning
         ? `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.6rem;">Hjulen snurrar...</div>`
-        : `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;">Eleverna placerar sina bokstäver ${deadlinePill(r.deadline)}</div>
+        : `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;">Eleverna placerar sina bokstäver ${deadlinePill(hostLocalDeadline)}</div>
            <div class="status-line">Väntar på: ${waiting.length ? waiting.map(p=>p.avatar).join(' ') : 'ingen - klart!'}</div>`;
       body.innerHTML = head + renderWheelGrid(state, who, r);
     }
     animateWheels(r.wheels, 'host-wheel-');
-    if(spinning) setTimeout(()=>{ hostRenderedRoundKey=null; hostPoll(); }, (r.spinEndsAt-Date.now())+150);
+    if(spinning){
+      clearTimeout(window._hostSpinTimer);
+      window._hostSpinTimer=setTimeout(()=>{
+        hostRenderedRoundKey=null; hostForceRender=true; hostPoll();
+      }, Math.max(200, hostSpinLocalEnd-Date.now()+150));
+    }
   }
 }
 
@@ -972,7 +986,7 @@ function renderWheelGrid(state, who, r){
     const drawn = (r.draws||{})[p.id];
     const ready = (r.readyPlayers||[]).indexOf(p.id)!==-1;
     const isThief = r.thiefId===p.id;
-    const spinning = Date.now() < (r.spinEndsAt||0);
+    const spinning = Date.now() < hostSpinLocalEnd;
     const wheelHTML = w
       ? window.buildWheelHTML(w.letters, 'host-wheel-'+p.id, w.prevRot||0, 'mini')
       : window.buildWheelHTML(['?','?','?','?','?','?'], 'host-wheel-'+p.id, 0, 'mini');
@@ -1339,6 +1353,7 @@ async function advanceRound(){
   hostRenderedRoundKey=null; document.getElementById('next-round-btn').disabled = false;
 }
 
+let playerForceRender=false, playerSpinKey=null, playerSpinLocalEnd=0, playerLocalDeadline=0;
 let playerCode=null, playerId=null, playerPollTimer=null, playerPollStop=true, playerRenderedRoundKey=null, playerLastStateHash = "", playerLastPhase = null;
 let playerSpellNote='';
 let wordOrderLocal=[], matchState=null, drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
@@ -1365,7 +1380,8 @@ async function playerPoll(){
   }
   if(state.phase==='active' && state.round && state.round.type==='draw' && state.round.drawerId!==playerId) redrawCanvas(document.getElementById('player-canvas'),state.round.strokes);
 
-  if (hash === playerLastStateHash) return; playerLastStateHash = hash;
+  if (hash === playerLastStateHash && !playerForceRender) return;
+  playerForceRender = false; playerLastStateHash = hash;
   [idle,roundView,endView].forEach(v=>v.classList.add('hidden'));
 
   if(state.phase==='lobby'){
@@ -1452,14 +1468,26 @@ function renderBokstavPlayer(state) {
   const r = state.round;
   const body = document.getElementById('round-content-player');
   const myGrid = bokstavGrid(r, playerId).slice();
-  const spinning = Date.now() < (r.spinEndsAt||0);
+  const spinKey = r.spins+':'+r.subPhase;
+  if(r.subPhase==='PLACE' && playerSpinKey!==spinKey){
+    playerSpinKey=spinKey;
+    playerSpinLocalEnd=Date.now()+4300;
+    playerLocalDeadline=playerSpinLocalEnd+BOKSTAV_TURN_MS;
+  }
+  if(r.subPhase!=='PLACE'){ playerSpinKey=null; playerSpinLocalEnd=0; }
+  const spinning = Date.now() < playerSpinLocalEnd;
   const myWheel = (r.wheels||{})[playerId];
   const myDraw = (r.draws||{})[playerId];
   const isReady = (r.readyPlayers||[]).indexOf(playerId)!==-1;
   const isThief = r.thiefId===playerId;
   const isVictim = r.victimId===playerId;
 
-  const rerenderAt = (ms)=>setTimeout(()=>{ playerRenderedRoundKey=null; playerPoll(); }, ms);
+  const rerenderAt = (ms)=>{
+    clearTimeout(window._playerSpinTimer);
+    window._playerSpinTimer=setTimeout(()=>{
+      playerRenderedRoundKey=null; playerForceRender=true; playerPoll();
+    }, Math.max(200, ms));
+  };
 
   if(r.subPhase==='SPIN'){
     const bonus=(r.bonusLeft||{})[playerId]||0;
@@ -1475,7 +1503,7 @@ function renderBokstavPlayer(state) {
     animateWheels({[playerId]: myWheel}, 'my-wh');
     const el=document.getElementById('my-wheel');
     if(el) requestAnimationFrame(()=>requestAnimationFrame(()=>{ el.style.transform='rotate('+myWheel.rot+'deg)'; }));
-    rerenderAt((r.spinEndsAt-Date.now())+200);
+    rerenderAt(playerSpinLocalEnd-Date.now()+200);
     return;
   }
 
@@ -1490,7 +1518,7 @@ function renderBokstavPlayer(state) {
         }), 1500);
         return;
       }
-      body.innerHTML = `<h2 style="font-size:1.25rem; color:var(--red);">🦹‍♂️ Du är tjuven! Välj vem du stjäl från ${deadlinePill(r.deadline)}</h2>
+      body.innerHTML = `<h2 style="font-size:1.25rem; color:var(--red);">🦹‍♂️ Du är tjuven! Välj vem du stjäl från ${deadlinePill(playerLocalDeadline)}</h2>
         <div style="display:flex;flex-direction:column;gap:.5rem;max-width:300px;margin:1rem auto;">
         ${victims.map(v=>`<div class="bokstav-target-player" data-victim="${v.id}">${v.avatar} <span style="flex:1;text-align:left;">${v.name}</span> <span class="msi">chevron_right</span></div>`).join('')}</div>`;
       document.querySelectorAll('[data-victim]').forEach(el=>el.addEventListener('click', ()=>{
@@ -1504,7 +1532,7 @@ function renderBokstavPlayer(state) {
     if(r.thiefStage==='PICK_LETTER'){
       const vGrid = bokstavGrid(r, r.victimId);
       const vPlayer = state.players.find(p=>p.id===r.victimId);
-      body.innerHTML = `<h2 style="font-size:1.15rem;">Stjäl en bokstav från ${vPlayer?vPlayer.name:'?'} ${deadlinePill(r.deadline)}</h2>
+      body.innerHTML = `<h2 style="font-size:1.15rem;">Stjäl en bokstav från ${vPlayer?vPlayer.name:'?'} ${deadlinePill(playerLocalDeadline)}</h2>
         <div class="bokstav-paper"><div class="bokstav-grid">${vGrid.map((l,i)=>
           `<div class="bokstav-cell ${l?'filled':'empty'}" ${l?`data-steal="${i}"`:''} style="${l?'background:var(--accent-light);border:2px solid var(--accent);':''}">${l}</div>`).join('')}</div></div>`;
       document.querySelectorAll('[data-steal]').forEach(cell=>cell.addEventListener('click', ()=>{
@@ -1517,7 +1545,7 @@ function renderBokstavPlayer(state) {
     }
     if(r.thiefStage==='PLACE'){
       const letter = r.draws[playerId];
-      body.innerHTML = `<h2 style="font-size:1.15rem;">Placera din stulna bokstav: <span style="color:var(--accent);font-size:2.2rem;">${letter}</span> ${deadlinePill(r.deadline)}</h2>
+      body.innerHTML = `<h2 style="font-size:1.15rem;">Placera din stulna bokstav: <span style="color:var(--accent);font-size:2.2rem;">${letter}</span> ${deadlinePill(playerLocalDeadline)}</h2>
         ${bokstavGridHTML(myGrid, true, letter)}`;
       bindCellClicks(idx=>window.bokstavThiefPlace(idx), letter);
       return;
@@ -1540,7 +1568,7 @@ function renderBokstavPlayer(state) {
     return;
   }
 
-  body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem;color:var(--accent);font-weight:800;">${myDraw}</span> ${deadlinePill(r.deadline)}</h2>
+  body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem;color:var(--accent);font-weight:800;">${myDraw}</span> ${deadlinePill(playerLocalDeadline)}</h2>
     ${bokstavGridHTML(myGrid, true, myDraw)}`;
   bindCellClicks(idx=>window.submitBokstavPlacement(idx), myDraw);
 }
