@@ -154,7 +154,22 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .wheel-cell .wc-state { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .85rem; min-height: 1.2em; }
 .wheel-cell.done .wc-state { color: var(--green); }
 .wheel-cell.waiting .wc-state { color: var(--muted); }
-.wheel-cell.thief { outline: 3px solid var(--red); outline-offset: 4px; border-radius: 14px; }
+.grid-board { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; justify-content: center; align-items: flex-start; margin: 1rem 0; }
+.grid-card { text-align: center; transition: transform .25s cubic-bezier(0.2,0.9,0.3,1); position: relative; z-index: 1; }
+.grid-card .gc-name { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.05rem; margin-top: .3rem; }
+.grid-card .gc-words { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .8rem; color: var(--green); max-width: 220px; margin: 0 auto; }
+.grid-card .bokstav-grid { width: 200px; }
+.grid-card .bokstav-cell { font-size: 1.1rem; }
+.grid-card .bokstav-cell.scored { background: #C9EFD4; color: #14663A; }
+.grid-card { cursor: default; }
+.grid-dim { position: fixed; inset: 0; background: rgba(20,24,34,.6); opacity: 0; pointer-events: none; transition: opacity .22s; z-index: 950; }
+.grid-dim.on { opacity: 1; }
+#grid-zoom { position: fixed; top: 50%; left: 50%; z-index: 960; pointer-events: none; opacity: 0; transform: translate(-50%,-50%) scale(.7); transition: opacity .22s, transform .28s cubic-bezier(0.2,0.9,0.3,1); text-align: center; }
+#grid-zoom.on { opacity: 1; transform: translate(-50%,-50%) scale(2.3); }
+#grid-zoom .bokstav-paper { background: #fff; }
+#host-roundend-view.wheel-board { position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; margin: 0; border-radius: 0; z-index: 900; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: auto; padding: 3vh 2vw; }
+#host-roundend-view.wheel-board .leaderboard-table { max-width: 720px; }
+.thief-announce { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: clamp(2rem, 5vw, 4rem); color: var(--red); margin-top: 1rem; animation: popIn .5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 #theft-overlay { position: fixed; inset: 0; z-index: 9000; background: rgba(20,24,34,.92); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Fredoka', sans-serif; font-weight: 700; gap: 1rem; animation: popIn .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 #theft-overlay .to-thief { font-size: 8rem; line-height: 1; }
 #theft-overlay .to-line { font-size: 2.6rem; }
@@ -746,7 +761,7 @@ function buildPlan(players, count=30){
 
 let hostCode=null, hostPollTimer=null, hostPollStop=true, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
 let hostLastStateHash = "", hostLastTheftAt = 0, hostForceRender = false;
-let hostSpinKey = null, hostSpinLocalEnd = 0, hostLocalDeadline = 0, hostAnimatedSpin = -1;
+let hostSpinKey = null, hostSpinLocalEnd = 0, hostLocalDeadline = 0, hostAnimatedSpin = -1, hostAutoSpinAt = -1;
 
 window.ADMIN = {
    nextRound: () => advanceRound(),
@@ -852,6 +867,10 @@ async function hostPoll(){
   if(state.phase==='active' && state.round && state.round.type==='bokstav'){
     const r=state.round;
     if(r.theft && r.theft.at !== hostLastTheftAt){ hostLastTheftAt=r.theft.at; showTheftOverlay(state); }
+    if(r.subPhase==='SPIN' && r.spins >= r.maxSpins && hostAutoSpinAt !== r.spins){
+      const anyBonus = state.players.some(p=>((r.bonusLeft||{})[p.id]||0) > 0);
+      if(anyBonus){ hostAutoSpinAt = r.spins; setTimeout(()=>window.hostSpinAllWheels(), 700); }
+    }
     if(r.subPhase==='PLACE' && hostLastStateHash===stateHash){
       const allReady = state.players.every(p=>(r.readyPlayers||[]).indexOf(p.id)!==-1)
         && !(r.thiefId && r.thiefStage && r.thiefStage!=='DONE');
@@ -968,11 +987,11 @@ function renderHostRound(state){
       const isBonus = r.spins >= r.maxSpins;
       const who = isBonus ? bonusPlayers : state.players;
       const label2 = isBonus
-        ? `🎁 Bonussnurr för ${who.map(p=>p.avatar+' '+p.name).join(', ')}`
-        : `Alla snurrar samtidigt (${r.spins}/${r.maxSpins})`;
+        ? `🎁 Bonussnurr: ${who.map(p=>p.avatar+' '+p.name).join(', ')}`
+        : `${r.spins}/${r.maxSpins}`;
       body.innerHTML = `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:.4rem;">${label2}</div>
         ${renderWheelGrid(state, who, r)}
-        <button class="primary-btn" onclick="hostSpinAllWheels()" style="font-size:1.3rem; padding:1rem 2rem;">🎲 Snurra alla hjul</button>`;
+        ${isBonus ? '' : `<button class="primary-btn" id="spin-all-btn" onclick="hostSpinAllWheels()" style="font-size:1.3rem; padding:1rem 2rem;">🎲 Snurra alla hjul</button>`}`;
     } else {
       const who = state.players.filter(p => r.draws && r.draws[p.id] !== undefined);
       const waiting = state.players.filter(p => (r.readyPlayers||[]).indexOf(p.id)===-1);
@@ -980,7 +999,11 @@ function renderHostRound(state){
         ? `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.6rem;">Hjulen snurrar...</div>`
         : `<div style="font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;">Eleverna placerar sina bokstäver ${deadlinePill(hostLocalDeadline)}</div>
            <div class="status-line">Väntar på: ${waiting.length ? waiting.map(p=>p.avatar).join(' ') : 'ingen - klart!'}</div>`;
-      body.innerHTML = head + renderWheelGrid(state, who, r);
+      const thiefPlayer = (!spinning && r.thiefId && r.thiefStage && r.thiefStage!=='DONE')
+        ? state.players.find(p=>p.id===r.thiefId) : null;
+      const announce = thiefPlayer
+        ? `<div class="thief-announce">🦹‍♂️ ${thiefPlayer.name} är tjuven!</div>` : '';
+      body.innerHTML = head + renderWheelGrid(state, who, r) + announce;
     }
     if(hostAnimatedSpin !== r.spins && r.subPhase==='PLACE'){
       hostAnimatedSpin = r.spins;
@@ -1003,7 +1026,7 @@ function renderWheelGrid(state, who, r){
     const w = (r.wheels||{})[p.id];
     const drawn = (r.draws||{})[p.id];
     const ready = (r.readyPlayers||[]).indexOf(p.id)!==-1;
-    const isThief = r.thiefId===p.id;
+    const isThief = false;
     const spinning = Date.now() < hostSpinLocalEnd;
     const fresh = hostAnimatedSpin !== r.spins && r.subPhase==='PLACE';
     const startRot = w ? (fresh ? (w.prevRot||0) : w.rot) : 0;
@@ -1047,7 +1070,7 @@ function showTheftOverlay(state){
 }
 
 window.hostSpinAllWheels = async function(){
-  document.querySelectorAll('.primary-btn').forEach(b=>b.disabled=true);
+  const spinBtn=document.getElementById('spin-all-btn'); if(spinBtn) spinBtn.disabled=true;
   AudioEngine.playTick();
   const state = await readRoom(hostCode, false);
   if(!state || !state.round || state.round.type!=='bokstav') return;
@@ -1180,7 +1203,7 @@ function animateWheels(wheels, prefix){
 }
 
 window.scoreBokstavGrid = function(grid) {
-   let pts = 0; const found = [];
+   let pts = 0; const found = []; const cells = [];
    const rows = [[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24]];
    const cols = [[0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24]];
    const allLines = [...rows, ...cols];
@@ -1190,10 +1213,14 @@ window.scoreBokstavGrid = function(grid) {
           if(lineScored) break;
           for(let i=0; i <= 5 - len; i++) {
              const sub = chars.substring(i, i+len).trim();
-             if(sub.length === len && BOKSTAV_DICT.has(sub)) { pts += (len * 100); found.push(sub); lineScored = true; break; }
+             if(sub.length === len && BOKSTAV_DICT.has(sub)) {
+                pts += (len * 100); found.push(sub);
+                for(let k=0;k<len;k++) cells.push(line[i+k]);
+                lineScored = true; break;
+             }
           }
       }
-   }); return {pts: pts, words: found};
+   }); return {pts: pts, words: found, cells: cells};
 }
 
 function renderPlayerAnswerSummary(r, playerId){
@@ -1245,7 +1272,7 @@ async function finalizeRound(state){
     if(r.type==='wordorder') reveal = r.correctOrder.join(' ');
     if(r.type==='sign') reveal = 'Rätt svar: '+r.correct;
     if(r.type==='match') reveal = 'Paren: '+r.pairs.map(p=>p.word+' '+p.emoji).join(', ');
-    if(r.type==='bokstav') reveal = 'Godkända ord gav poäng - läraren kan godkänna fler.';
+    if(r.type==='bokstav') reveal = '';
 
     s.lastRoundResult={type:r.type, reveal, rankBefore, rankAfter, pointsThisRound:pts, bokstavDetail: (typeof bokstavDetail!=='undefined' ? bokstavDetail : null)};
     const isLastRound = s.planIndex >= s.plan.length - 1; s.phase = isLastRound ? 'finished' : 'round-end'; 
@@ -1268,16 +1295,36 @@ function renderRoundEnd(state){
     return `<tr><td class="rank">#${i+1}</td><td>${p.avatar} ${p.name}</td><td>${arrow}</td><td class="gained">+${res.pointsThisRound[p.id]||0}</td><td class="answer-summary">${summary}</td></tr>`;
   }).join('');
   const oldBox=document.getElementById('bokstav-words-box'); if(oldBox) oldBox.remove();
-  if(state.round && state.round.type==='bokstav' && res && res.bokstavDetail){
-    const rows=[...state.players].sort((a,b)=>b.score-a.score).map(p=>{
-      const d=res.bokstavDetail[p.id];
-      const words=(d && d.words && d.words.length) ? d.words.map(w=>`<b>${w}</b>`).join(', ') : 'inga ord än';
-      return `<div class="bokstav-words">${p.avatar} ${p.name}: ${words}</div>`;
+  const endView=document.getElementById('host-roundend-view');
+  const isWheelRound = !!(state.round && state.round.type==='bokstav');
+  endView.classList.toggle('wheel-board', isWheelRound);
+  if(isWheelRound && res && res.bokstavDetail){
+    const cards=[...state.players].sort((a,b)=>b.score-a.score).map(p=>{
+      const d=res.bokstavDetail[p.id] || {};
+      const grid=((state.round.answers||{})[p.id]||{}).grid || Array(25).fill('');
+      const scored=new Set(d.cells||[]);
+      const cellsHTML=grid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'} ${scored.has(i)?'scored':''}">${l}</div>`).join('');
+      const words=(d.words||[]).join(' · ');
+      return `<div class="grid-card">
+        <div class="bokstav-paper"><div class="bokstav-grid">${cellsHTML}</div></div>
+        <div class="gc-name">${p.avatar} ${p.name} <span style="color:var(--accent-dark);">+${(res.pointsThisRound||{})[p.id]||0}</span></div>
+        <div class="gc-words">${words}</div>
+      </div>`;
     }).join('');
-    const old=document.getElementById('bokstav-words-box'); if(old) old.remove();
     const box=document.createElement('div');
-    box.id='bokstav-words-box'; box.style.margin='.6rem 0'; box.innerHTML=rows;
-    document.getElementById('roundend-table').insertAdjacentElement('afterend', box);
+    box.id='bokstav-words-box';
+    box.innerHTML=`<div class="grid-board">${cards}</div><div class="grid-dim"></div><div id="grid-zoom"></div>`;
+    document.getElementById('roundend-reveal').insertAdjacentElement('afterend', box);
+    const dim=box.querySelector('.grid-dim'); const zoom=box.querySelector('#grid-zoom');
+    box.querySelectorAll('.grid-card').forEach(card=>{
+      card.addEventListener('mouseenter', ()=>{
+        zoom.innerHTML=card.innerHTML;
+        dim.classList.add('on'); zoom.classList.add('on');
+      });
+      card.addEventListener('mouseleave', ()=>{
+        dim.classList.remove('on'); zoom.classList.remove('on');
+      });
+    });
   }
 
   const isBokstav = !!(state.round && state.round.type==='bokstav');
@@ -1289,7 +1336,8 @@ function renderRoundEnd(state){
     document.getElementById('tp-msg').textContent='';
     document.getElementById('tp-word').value='';
   }
-  document.getElementById('next-round-btn').classList.remove('hidden');
+  const nextBtn=document.getElementById('next-round-btn');
+  nextBtn.classList.remove('hidden'); nextBtn.disabled=false;
 }
 
 function tpMsg(text, color){
@@ -1315,7 +1363,13 @@ document.getElementById('tp-approve-word').addEventListener('click', async ()=>{
     if(s.extraWords.indexOf(clean)===-1) s.extraWords.push(clean);
     const pl=s.players.find(p=>p.id===pid);
     if(pl) pl.score+=pts;
-    if(s.lastRoundResult){ s.lastRoundResult.pointsThisRound[pid]=(s.lastRoundResult.pointsThisRound[pid]||0)+pts; }
+    if(s.lastRoundResult){
+      s.lastRoundResult.pointsThisRound[pid]=(s.lastRoundResult.pointsThisRound[pid]||0)+pts;
+      if(s.lastRoundResult.bokstavDetail && s.round && s.round.answers && s.round.answers[pid]){
+        const d=window.scoreBokstavGrid(s.round.answers[pid].grid||[]);
+        s.lastRoundResult.bokstavDetail[pid]={pts:d.pts, words:d.words, cells:d.cells};
+      }
+    }
     return s;
   });
   if(!ok) return tpMsg('Gick inte att spara, försök igen.', 'var(--red)');
@@ -1412,7 +1466,7 @@ async function playerPoll(){
     
     let key=state.round.type+':'+state.planIndex;
     if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId+':'+(state.round.readyPlayers||[]).length+':'+((state.round.draws||{})[playerId]);
-    else if(state.round.type==='draw') key += ':'+(state.round.revealedIndices||[]).length;
+    else if(state.round.type==='draw') key += ':'+(state.round.drawerId===playerId ? 'drawer' : (state.round.revealedIndices||[]).length);
     
     if(playerRenderedRoundKey!==key){ if(playerRenderedRoundKey && playerRenderedRoundKey.split(':')[1]!==String(state.planIndex)) playerSpellNote=''; playerRenderedRoundKey=key; renderPlayerRound(state); }
     
