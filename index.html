@@ -132,6 +132,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .leaderboard-table .delta-up{color:var(--green);}
 .leaderboard-table .delta-down{color:var(--red);}
 .leaderboard-table .gained{color:var(--accent-dark);font-family:'Fredoka',sans-serif;}
+.leaderboard-table .answer-summary {font-size:0.9rem; max-width:200px; color:var(--muted);}
 
 /* BOKSTAVS-JAKT CSS (PERFECT WHEEL & 5x5 GRID) */
 .wheel-container { position:relative; width: 300px; height: 300px; margin: 1rem auto; border-radius: 50%; overflow: hidden; border: 8px solid var(--ink); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
@@ -141,8 +142,8 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #fff; border: 6px solid var(--ink); border-radius: 50%; z-index: 2; }
 .bokstav-paper { background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 0.8rem; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); display: inline-block; position:relative; }
 .bokstav-paper::before { content: '📝'; position: absolute; top: -15px; right: -15px; font-size: 2rem; transform: rotate(15deg); }
-.bokstav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(360px, 85vw); }
-.bokstav-cell { background: #fff; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); cursor: pointer; text-transform: uppercase; transition: background 0.1s, transform 0.1s; }
+.bokstav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(340px, 85vw); }
+.bokstav-cell { background: #fff; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); cursor: pointer; text-transform: uppercase; transition: background 0.1s, transform 0.1s; }
 .bokstav-cell:active { transform: scale(0.92); }
 .bokstav-cell.empty { background: #fafafa; }
 .bokstav-cell.empty:hover { background: #f0f0f0; }
@@ -312,7 +313,7 @@ const Confetti = (function(){
   return { shoot, startPlayerLoop };
 })();
 
-// --- DATA DICTIONARIES (MASSIVELY EXPANDED) ---
+// --- DATA DICTIONARIES ---
 const AVATARS=["🦊","🐻","🐼","🐸","🦁","🐨","🐯","🐰","🐷","🐵","🐶","🐱","🐹","🐭","🦄","🐙","🐬","🦋","🐢","🐞"];
 const DRAW_CATEGORIES={
   mat:{name:"Mat",emoji:"🍎",words:["äpple","bröd","mjölk","ägg","fisk","kaffe","banan","ost","tomat","potatis"]},
@@ -324,92 +325,30 @@ const DRAW_CATEGORIES={
   transport:{name:"Transport",emoji:"🚗",words:["bil","buss","tåg","cykel","flygplan","båt","helikopter"]},
   skola:{name:"Skola",emoji:"🏫",words:["bok","penna","dator","tavla","sax","suddgummi","väska","papper"]},
   natur:{name:"Natur",emoji:"🌳",words:["träd","blomma","berg","sjö","skog","stjärna","måne","sten"]},
-  leksaker:{name:"Leksaker",emoji:"🧸",words:["boll","docka","nalle","pussel","drake","klossar","bil"]},
-  frukt:{name:"Frukt",emoji:"🍉",words:["päron","apelsin","vindruva","citron","melon","kiwi","persika"]},
-  gronsaker:{name:"Grönsaker",emoji:"🥕",words:["morot","gurka","lök","paprika","sallad","svamp"]},
-  yrken:{name:"Yrken",emoji:"👮",words:["lärare","läkare","polis","kock","brandman","frisör"]},
-  musik:{name:"Musik",emoji:"🎸",words:["gitarr","piano","trumma","flöjt","fiol","sångare"]},
-  sport:{name:"Sport",emoji:"⚽",words:["fotboll","ishockey","tennis","simning","gymnastik","skidor"]},
-  farger:{name:"Färger",emoji:"🔴",words:["röd","blå","grön","gul","svart","vit","rosa","lila"]},
-  verktyg:{name:"Verktyg",emoji:"🔨",words:["hammare","spik","såg","skruv","tång","yxa"]},
-  insekter:{name:"Insekter",emoji:"🐛",words:["fluga","mygga","bi","fjäril","spindel","myra"]},
-  kanslor:{name:"Känslor",emoji:"😂",words:["glad","ledsen","arg","rädd","trött","pigg"]},
-  rum:{name:"Rum",emoji:"🛁",words:["kök","badrum","sovrum","vardagsrum","hall","vind"]},
-  former:{name:"Former",emoji:"🔺",words:["cirkel","kvadrat","triangel","stjärna","hjärta"]},
-  husdjur:{name:"Husdjur",emoji:"🐹",words:["kanin","marsvin","hamster","papegoja","akvariefisk"]},
-  vildadjur:{name:"Vilda djur",emoji:"🐘",words:["lejon","elefant","apa","tiger","björn","varg"]},
-  faglar:{name:"Fåglar",emoji:"🦉",words:["uggla","örn","svan","pingvin","papegoja"]},
-  havsdjur:{name:"Havsdjur",emoji:"🐋",words:["val","haj","bläckfisk","krabba","säl"]},
-  matratt:{name:"Maträtt",emoji:"🍕",words:["pizza","pasta","hamburgare","sallad","soppa","pannkaka"]},
-  dryck:{name:"Dryck",emoji:"🧃",words:["vatten","saft","te","juice","läsk"]},
-  badrum:{name:"Badrum",emoji:"🪥",words:["tandborste","tvål","handduk","spegel","dusch"]},
-  sjukdom:{name:"Sjukdom",emoji:"🤒",words:["hosta","feber","snuva","plåster","medicin"]},
-  hogtider:{name:"Högtider",emoji:"🎄",words:["jul","påsk","midsommar","nyår","halloween"]}
+  leksaker:{name:"Leksaker",emoji:"🧸",words:["boll","docka","nalle","pussel","drake","klossar","bil"]}
 };
 const SENTENCES=[
   ["Jag","heter","Ali"],["Hon","bor","här"],["Vi","äter","mat"],["Han","dricker","kaffe"],["Barnet","sover"],
   ["Jag","mår","bra"],["Katten","sover"],["Vi","går","hem"],["Han","är","glad"],["Hon","har","en","bok"],
   ["Hunden","springer","snabbt"],["Jag","vill","ha","vatten"],["Hon","lagar","god","mat"],["Barnen","leker","ute"],
-  ["Vi","pratar","svenska"],["Han","kör","en","bil"],["Solen","skiner","idag"],["Det","regnar","mycket","nu"],
-  ["Jag","är","mycket","trött"],["Vi","ses","imorgon","bitti"],["Pojken","kastar","en","boll"],["Mamma","dricker","varmt","te"],
-  ["Flickan","läser","en","bok"],["Vi","leker","på","gården"],["Jag","har","en","röd","bil"],["Katten","sover","i","sängen"],
-  ["Han","tittar","på","tv"],["Hon","cyklar","till","skolan"],["Min","vän","är","här"],["Vi","äter","glass","nu"],
-  ["Pappa","lagar","mat","ikväll"],["Jag","gillar","att","spela","fotboll"],["Hunden","skäller","på","katten"],
-  ["Vi","åker","buss","till","stan"],["Bilen","är","mycket","stor"],["Blomman","är","vackert","röd"],
-  ["Solen","är","varm","och","gul"],["Månen","lyser","på","natten"],["Trädet","är","högt","och","grönt"],
-  ["Jag","tvättar","mina","händer"],["Hon","borstar","sina","tänder"],["Vi","ritar","en","teckning"],
-  ["Läraren","skriver","på","tavlan"],["Pojken","springer","snabbt","hem"],["Klockan","är","tolv","nu"],
-  ["Jag","öppnar","en","dörr"],["Han","stänger","ett","fönster"],["Vi","sitter","vid","ett","bord"],
-  ["Fågeln","flyger","högt","upp"],["Fisken","simmar","i","vatten"],["Snön","faller","från","himlen"]
+  ["Vi","pratar","svenska"],["Han","kör","en","bil"],["Solen","skiner","idag"],["Det","regnar","mycket","nu"]
 ];
 const STATEMENTS=[
   {text:"Solen är gul.",isTrue:true}, {text:"En hund är ett fordon.",isTrue:false}, {text:"Mjölk är vit.",isTrue:true},
   {text:"En banan är blå.",isTrue:false}, {text:"Vintern är kall.",isTrue:true}, {text:"Bröd är mat.",isTrue:true},
   {text:"En katt kan flyga.",isTrue:false}, {text:"ICA är en matbutik.",isTrue:true}, {text:"Gräset är rött.",isTrue:false},
-  {text:"En fisk kan simma.",isTrue:true}, {text:"Is är varmt.",isTrue:false}, {text:"Vatten är torrt.",isTrue:false},
-  {text:"Bilar har hjul.",isTrue:true}, {text:"Grisar kan flyga.",isTrue:false}, {text:"Eld är kallt.",isTrue:false},
-  {text:"Månen lyser på natten.",isTrue:true}, {text:"Cyklar har fyra hjul.",isTrue:false}, {text:"Båtar åker på vatten.",isTrue:true},
-  {text:"Flygplan åker på räls.",isTrue:false}, {text:"Sverige är ett land.",isTrue:true}, {text:"Snö är svart.",isTrue:false},
-  {text:"Man äter med en gaffel.",isTrue:true}, {text:"Man dricker från en tallrik.",isTrue:false}, {text:"En vecka har sju dagar.",isTrue:true},
-  {text:"En månad har fem dagar.",isTrue:false}, {text:"Man sover i en säng.",isTrue:true}, {text:"Man badar i en ugn.",isTrue:false},
-  {text:"Hästar är djur.",isTrue:true}, {text:"Träd är djur.",isTrue:false}, {text:"Kaffe är en dryck.",isTrue:true},
-  {text:"Stenar är mjuka.",isTrue:false}, {text:"Moln finns på himlen.",isTrue:true}, {text:"Äpplen växer på marken.",isTrue:false},
-  {text:"Päron är en frukt.",isTrue:true}, {text:"Morötter är blåa.",isTrue:false}, {text:"Sommaren är varm.",isTrue:true},
-  {text:"Hösten kommer före sommaren.",isTrue:false}, {text:"En triangel har tre hörn.",isTrue:true}, {text:"Katter skäller.",isTrue:false},
-  {text:"Hundar skäller.",isTrue:true}, {text:"Människor har fyra ben.",isTrue:false}, {text:"Människor har två armar.",isTrue:true},
-  {text:"Blod är blått.",isTrue:false}, {text:"Gräs är grönt.",isTrue:true}, {text:"Himlen är oftast blå.",isTrue:true},
-  {text:"Citroner är söta.",isTrue:false}, {text:"Socker är sött.",isTrue:true}, {text:"Salt är sött.",isTrue:false},
-  {text:"En sax används för att klippa.",isTrue:true}, {text:"En sked används för att klippa.",isTrue:false}, {text:"Stockholm är Sveriges huvudstad.",isTrue:true},
-  {text:"En bok har sidor.",isTrue:true}, {text:"En dator kan inte visa bilder.",isTrue:false}, {text:"Svalor är fåglar.",isTrue:true},
-  {text:"Pingviner kan flyga.",isTrue:false}, {text:"Lejon bor i skogen i Sverige.",isTrue:false}, {text:"Björnar sover på vintern.",isTrue:true},
-  {text:"Man använder skor på händerna.",isTrue:false}, {text:"Man har mössa på huvudet.",isTrue:true}, {text:"Man läser en tv.",isTrue:false},
-  {text:"Man tittar på tv.",isTrue:true}, {text:"Man kan köpa mat i en affär.",isTrue:true}, {text:"Posten säljer mjölk.",isTrue:false}
+  {text:"En fisk kan simma.",isTrue:true}, {text:"Is är varmt.",isTrue:false}, {text:"Vatten är torrt.",isTrue:false}
 ];
 const SIGNS=[
   {icon:"storefront",title:"ICA Affär",lines:["Öppet: Mån–Fre 9–18","Lördag 10–15"],question:"Är affären öppen på söndag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
   {icon:"receipt_long",title:"Kvitto",lines:["Mjölk .......... 15 kr","Bröd .......... 25 kr","Totalt ......... 40 kr"],question:"Vad kostar mjölken?",choices:["15 kr","25 kr","40 kr"],correct:"15 kr"},
-  {icon:"directions_bus",title:"Busshållplats",lines:["Buss 4 → Centrum","Avgång var 10:e minut"],question:"Hur ofta kommer buss 4?",choices:["Var 10:e minut","Var timme","En gång om dagen"],correct:"Var 10:e minut"},
-  {icon:"local_parking",title:"Parkering",lines:["Max 2 timmar","Kl 08-18"],question:"Hur länge får man stå?",choices:["1 timme","2 timmar","3 timmar"],correct:"2 timmar"},
-  {icon:"local_hospital",title:"Sjukhus",lines:["Akutmottagning","Öppet dygnet runt"],question:"När är akuten öppen?",choices:["Bara dagtid","Dygnet runt","Stängt helger"],correct:"Dygnet runt"},
-  {icon:"restaurant",title:"Restaurang",lines:["Dagens lunch 110 kr","Kaffe ingår"],question:"Ingår kaffe i lunchen?",choices:["Ja","Nej","Kanske"],correct:"Ja"},
-  {icon:"warning",title:"Varning",lines:["Halt golv!","Gå försiktigt"],question:"Vad är farligt?",choices:["Halt golv","Branden","Hundar"],correct:"Halt golv"},
-  {icon:"school",title:"Skola",lines:["Kör sakta!","Max 30 km/h"],question:"Hur snabbt får man köra?",choices:["30 km/h","50 km/h","70 km/h"],correct:"30 km/h"},
-  {icon:"wc",title:"Toalett",lines:["Kostnad 5 kr","Endast kortbetalning"],question:"Kan man betala med mynt?",choices:["Ja","Nej","Gratis"],correct:"Nej"},
-  {icon:"directions_railway",title:"Tågstation",lines:["Tåg mot Malmö","Spår 3","Avgång 14:15"],question:"Vilket spår går tåget från?",choices:["Spår 1","Spår 2","Spår 3"],correct:"Spår 3"},
-  {icon:"local_pharmacy",title:"Apotek",lines:["Hämta ut medicin","Öppet 10-19"],question:"Kan du hämta medicin kl 20?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
-  {icon:"flight",title:"Flygplats",lines:["Gate 12","Boarding kl 07:30"],question:"Vilken gate gäller?",choices:["Gate 10","Gate 11","Gate 12"],correct:"Gate 12"},
-  {icon:"shopping_cart",title:"Supermarket",lines:["Köp 3 betala för 2","På alla frukter"],question:"Gäller det på grönsaker?",choices:["Ja","Nej","Bara på fredagar"],correct:"Nej"},
-  {icon:"local_library",title:"Bibliotek",lines:["Tystnad vänligen!","Lånetid 4 veckor"],question:"Hur länge får man låna?",choices:["1 vecka","2 veckor","4 veckor"],correct:"4 veckor"}
+  {icon:"directions_bus",title:"Busshållplats",lines:["Buss 4 → Centrum","Avgång var 10:e minut"],question:"Hur ofta kommer buss 4?",choices:["Var 10:e minut","Var timme","En gång om dagen"],correct:"Var 10:e minut"}
 ];
 const MATCH_PAIRS_POOL=[
   {word:"äpple",emoji:"🍎"},{word:"bröd",emoji:"🍞"},{word:"mjölk",emoji:"🥛"},{word:"hund",emoji:"🐶"},{word:"katt",emoji:"🐱"},
-  {word:"sol",emoji:"☀️"},{word:"regn",emoji:"🌧️"},{word:"hand",emoji:"✋"},{word:"öga",emoji:"👁️"},{word:"bok",emoji:"📖"},
-  {word:"hus",emoji:"🏠"},{word:"bil",emoji:"🚗"},{word:"träd",emoji:"🌳"},{word:"blomma",emoji:"🌸"},{word:"cykel",emoji:"🚲"},
-  {word:"tåg",emoji:"🚂"},{word:"skor",emoji:"👟"},{word:"klocka",emoji:"⏰"},{word:"nyckel",emoji:"🔑"},{word:"dator",emoji:"💻"}
+  {word:"sol",emoji:"☀️"},{word:"regn",emoji:"🌧️"},{word:"hand",emoji:"✋"},{word:"öga",emoji:"👁️"},{word:"bok",emoji:"📖"}
 ];
 const BOKSTAV_LETTERS = ['S','T','A','R','N','E','L','D','K','M','B','F','G','H','O','P','Ö','Ä','Å','I','U','V','J','Y','C'];
-
-// Pre-build validation dictionary for Bokstavs-jakt
 const BOKSTAV_DICT = new Set(["EN","ETT","JAG","VI","DU","NI","DE","HAN","HON","DEN","DET","SE","GÅ","BO","ÄR","HAR","VAR","KAN",
   "VILL","FÅ","TA","GE","GÖR","SOL","KO","IS","TÅG","BOK","BIL","KATT","HUND","MAT","HEM","BRA","DAG","NATT","MÅNE","SKO",
   "BEN","ARM","FOT","TÅ","HÅR","ÖGA","ÖRA","MUN","BÅT","FLY","FISK","ÄGG","OST","RIS","GUL","RÖD","BLÅ","VIT","GRÅ","SUR",
@@ -540,7 +479,7 @@ const AudioEngine=(function(){
 
 /* ================= ROUND BUILDERS ================= */
 function buildRound(type,drawerId){
-  if(type==='draw'){ const cat=DRAW_CATEGORIES[pickRandom(Object.keys(DRAW_CATEGORIES))]; const word=pickRandom(cat.words); return {type:'draw',drawerId,word,wordLength:word.length,emoji:cat.emoji,strokes:[],correctPlayerIds:[]}; }
+  if(type==='draw'){ const cat=DRAW_CATEGORIES[pickRandom(Object.keys(DRAW_CATEGORIES))]; const word=pickRandom(cat.words); return {type:'draw',drawerId,word,wordLength:word.length,emoji:cat.emoji,strokes:[],correctPlayerIds:[],revealedIndices:[]}; }
   if(type==='truefalse'){ const s=pickRandom(STATEMENTS); return {type:'truefalse',statement:s.text,isTrue:s.isTrue}; }
   if(type==='wordorder'){ const words=pickRandom(SENTENCES); return {type:'wordorder',correctOrder:words,scrambled:shuffleNotEqual(words)}; }
   if(type==='sign'){ const s=pickRandom(SIGNS); return {type:'sign',icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct}; }
@@ -559,6 +498,28 @@ function buildPlan(players, count=20){
 /* ================= HOST LOGIC ================= */
 let hostCode=null, hostPollTimer=null, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
 let hostLastStateHash = "";
+
+// Admin Commands
+window.ADMIN = {
+   nextRound: () => advanceRound(),
+   winRound: () => updateRoom(hostCode, s => { if(s.round) s.round.startedAt = 0; return s; }),
+   forceThief: () => updateRoom(hostCode, s => {
+       if(s.round && s.round.type === 'bokstav' && s.round.subPhase === 'SPIN_LETTER') {
+           s.round.wheelLetters[0] = '🦹‍♂️';
+           console.log("🦹‍♂️ Вор поставлен на 1-й слот. Крути колесо!");
+       } else { console.log("Сначала дождись этапа вращения колеса в Bokstavs-jakt!"); }
+       return s;
+   }),
+   skipToBokstav: () => updateRoom(hostCode, s => {
+       const idx = s.plan.findIndex((p, i) => i > s.planIndex && p.type === 'bokstav');
+       if(idx !== -1) {
+           s.planIndex = idx - 1;
+           console.log("✅ Следующий раунд будет Охота на буквы! Нажми Nästa runda.");
+       } else { console.log("В текущем плане больше нет Bokstavs-jakt."); }
+       return s;
+   })
+};
+console.log("%c🎓 Admin Commands Available: ADMIN.forceThief(), ADMIN.skipToBokstav(), ADMIN.winRound()", "color: #2B7DE0; font-size: 14px; font-weight: bold;");
 
 document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   AudioEngine.startMusic(); AudioEngine.preloadAudio(); 
@@ -581,6 +542,23 @@ document.getElementById('cancel-room-btn').addEventListener('click', async ()=>{
 
 async function hostPoll(){
   const state=await readRoom(hostCode); if(!state) return;
+  
+  // DYNAMIC DRAW HINTS (Every 15s)
+  if(state.phase==='active' && state.round && state.round.type==='draw'){
+      const elapsed = (Date.now() - state.round.startedAt) / 1000;
+      const targetReveals = Math.min(Math.floor(elapsed / 15), state.round.wordLength - 2); 
+      if ((state.round.revealedIndices||[]).length < targetReveals && state.round.wordLength > 2) {
+          await updateRoom(hostCode, s => {
+              if(s.phase !== 'active' || s.round.type !== 'draw') return s;
+              s.round.revealedIndices = s.round.revealedIndices || [];
+              const unrev = Array.from({length:s.round.wordLength}, (_,i)=>i).filter(i=>!s.round.revealedIndices.includes(i));
+              if(unrev.length > 0) s.round.revealedIndices.push(pickRandom(unrev));
+              return s;
+          });
+          return; // State changed, wait for next poll
+      }
+  }
+
   const stateHash = JSON.stringify(state);
   
   if(state.phase==='active' && state.round && state.round.type!=='bokstav'){
@@ -643,7 +621,8 @@ async function hostPoll(){
       document.getElementById('host-timer-bar-wrap').classList.toggle('hidden', state.round.type==='bokstav');
 
       let key=state.round.type+':'+state.planIndex;
-      if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins;
+      if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId;
+      else if(state.round.type==='draw') key += ':'+(state.round.revealedIndices||[]).length;
       
       if(hostRenderedRoundKey!==key){
         hostRenderedRoundKey=key; hostLastTickSecond=null;
@@ -679,7 +658,10 @@ function renderMiniLB(el,state){ const sorted=[...state.players].sort((a,b)=>b.s
 function renderHostRound(state){
   const r=state.round; const label=document.getElementById('round-type-label'); const body=document.getElementById('round-content-host');
   if(r.type==='draw'){
-    label.innerHTML=`<span class="msi">brush</span> Rita & Gissa`; body.innerHTML=`<div class="word-hint">${'_ '.repeat(r.wordLength)}</div><canvas class="draw-canvas" id="host-canvas" width="560" height="340"></canvas>`; redrawCanvas(document.getElementById('host-canvas'),r.strokes);
+    label.innerHTML=`<span class="msi">brush</span> Rita & Gissa`; 
+    const hints = r.word.split('').map((c,i) => (r.revealedIndices||[]).includes(i) ? c.toUpperCase() : '_').join(' ');
+    body.innerHTML=`<div class="word-hint" style="letter-spacing: .25em;">${hints}</div><canvas class="draw-canvas" id="host-canvas" width="560" height="340"></canvas>`; 
+    redrawCanvas(document.getElementById('host-canvas'),r.strokes);
   } else if(r.type==='truefalse'){
     label.innerHTML=`<span class="msi">quiz</span> Rätt eller fel`; body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
   } else if(r.type==='wordorder'){
@@ -722,7 +704,9 @@ window.hostSpinWheel = async function(type) {
        const num = 6; const targetIdx = Math.floor(Math.random() * num);
        const result = state.round.wheelLetters[targetIdx];
        const sliceAngle = 360 / num;
-       const newRot = state.round.letterWheelRot + (360 * 5) + (360 - (targetIdx * sliceAngle)) - (state.round.letterWheelRot % 360);
+       const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.7); // Randomize stop position within slice
+       const targetDeg = (360 - (targetIdx * sliceAngle)) - (sliceAngle/2) + randomOffset;
+       const newRot = state.round.letterWheelRot + (360 * 5) - (state.round.letterWheelRot % 360) + targetDeg;
        document.getElementById('host-wheel-letter').style.transform = `rotate(${newRot}deg)`;
        
        setTimeout(async () => {
@@ -738,7 +722,9 @@ window.hostSpinWheel = async function(type) {
        const num = state.players.length; const targetIdx = Math.floor(Math.random() * num);
        const thief = state.players[targetIdx];
        const sliceAngle = 360 / num;
-       const newRot = state.round.playerWheelRot + (360 * 5) + (360 - (targetIdx * sliceAngle)) - (state.round.playerWheelRot % 360);
+       const randomOffset = (Math.random() - 0.5) * (sliceAngle * 0.75);
+       const targetDeg = (360 - (targetIdx * sliceAngle)) - (sliceAngle/2) + randomOffset;
+       const newRot = state.round.playerWheelRot + (360 * 5) - (state.round.playerWheelRot % 360) + targetDeg;
        document.getElementById('host-wheel-player').style.transform = `rotate(${newRot}deg)`;
        
        setTimeout(async () => {
@@ -766,6 +752,26 @@ window.scoreBokstavGrid = function(grid) {
           }
       }
    }); return pts;
+}
+
+function renderPlayerAnswerSummary(r, playerId){
+  if(!r) return '–';
+  const a = (r.answers||{})[playerId];
+  if(r.type==='draw' && r.drawerId===playerId) return '<span style="color:var(--muted);">ritade</span>';
+  if(!a) return '<span style="color:var(--muted);">–</span>';
+  if(r.type==='wordorder'){
+    const submitted = a.value || [];
+    return submitted.map((w,i)=>{
+      const ok = r.correctOrder[i]===w;
+      return `<span style="display:inline-block;margin:1px;padding:.1em .4em;border-radius:6px;font-size:.78rem;background:${ok?'#E7F5EA':'#FBE1E0'};color:${ok?'var(--green)':'var(--red)'};">${w}</span>`;
+    }).join('');
+  }
+  if(r.type==='truefalse') return a.value ? 'Rätt' : 'Fel';
+  if(r.type==='sign') return a.value;
+  if(r.type==='match') return a.correct ? 'Klar ✓' : '–';
+  if(r.type==='draw') return a.value ? `"${a.value}"` : '–';
+  if(r.type==='bokstav') return a.grid ? 'Klar ✓' : '–';
+  return '–';
 }
 
 async function finalizeRound(state){
@@ -813,7 +819,8 @@ function renderRoundEnd(state){
   table.innerHTML = [...state.players].sort((a,b)=>b.score-a.score).map((p,i)=>{
     const b=res.rankBefore.indexOf(p.id), a=res.rankAfter.indexOf(p.id);
     let arrow = b>a ? `<span class="delta-up">▲${b-a}</span>` : (b<a ? `<span class="delta-down">▼${a-b}</span>` : '–');
-    return `<tr><td class="rank">#${i+1}</td><td>${p.avatar} ${p.name}</td><td>${arrow}</td><td class="gained">+${res.pointsThisRound[p.id]||0}</td></tr>`;
+    const summary = renderPlayerAnswerSummary(state.round, p.id);
+    return `<tr><td class="rank">#${i+1}</td><td>${p.avatar} ${p.name}</td><td>${arrow}</td><td class="gained">+${res.pointsThisRound[p.id]||0}</td><td class="answer-summary">${summary}</td></tr>`;
   }).join('');
   document.getElementById('next-round-btn').classList.remove('hidden');
 }
@@ -884,7 +891,9 @@ async function playerPoll(){
     roundView.classList.remove('hidden'); renderMiniLB(document.getElementById('player-mini-lb'),state);
     
     let key=state.round.type+':'+state.planIndex;
-    if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins;
+    if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId+':'+(state.round.readyPlayers||[]).length;
+    else if(state.round.type==='draw') key += ':'+(state.round.revealedIndices||[]).length;
+    
     if(playerRenderedRoundKey!==key){ playerRenderedRoundKey=key; renderPlayerRound(state); }
     
     if(state.round.type==='draw' && state.round.drawerId!==playerId){
@@ -913,7 +922,8 @@ function renderPlayerRound(state){
         <div class="brush-row"><div class="swatch active" style="background:#233246" data-color="#233246"></div><div class="swatch" style="background:#D9534F" data-color="#D9534F"></div><div class="swatch" style="background:#2B7DE0" data-color="#2B7DE0"></div><div class="swatch" style="background:#2E9E52" data-color="#2E9E52"></div><div class="swatch" style="background:#FFC72C" data-color="#FFC72C"></div><button class="tool-btn active" id="thin-btn">Tunn</button><button class="tool-btn" id="thick-btn">Tjock</button><button class="tool-btn" id="eraser-btn"><span class="msi">ink_eraser</span>Sudda</button><button class="tool-btn" id="clear-btn">Rensa</button></div>`;
       setupCanvasDrawing();
     } else {
-      body.innerHTML=`<div class="word-hint">${'_ '.repeat(r.wordLength)}</div><canvas class="draw-canvas" id="player-canvas" width="560" height="340"></canvas><input id="guess-input" placeholder="Skriv din gissning..."><button class="primary-btn" id="guess-submit-btn">Gissa</button><div class="status-line" id="player-guess-status"></div>`;
+      const hints = r.word.split('').map((c,i)=>(r.revealedIndices||[]).includes(i)?c.toUpperCase():'_').join(' ');
+      body.innerHTML=`<div class="word-hint" style="letter-spacing: .25em;">${hints}</div><canvas class="draw-canvas" id="player-canvas" width="560" height="340"></canvas><input id="guess-input" placeholder="Skriv din gissning..."><button class="primary-btn" id="guess-submit-btn">Gissa</button><div class="status-line" id="player-guess-status"></div>`;
       redrawCanvas(document.getElementById('player-canvas'),r.strokes); document.getElementById('guess-submit-btn').addEventListener('click', submitGuess); document.getElementById('guess-input').addEventListener('keydown', e=>{ if(e.key==='Enter') submitGuess(); });
     }
   } else if(r.type==='truefalse'){
@@ -945,7 +955,7 @@ function renderBokstavPlayer(state) {
        if(isReady) {
            body.innerHTML = `<h2 style="font-size:1.4rem; color:var(--green);">Klar! ✓</h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map(l=>`<div class="bokstav-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
        } else {
-           body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem; color:var(--accent); font-weight:800;">${r.drawnLetter}</span></h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" onclick="${l?'':'submitBokstavPlacement('+i+')'}">${l}</div>`).join('')}</div></div>`;
+           body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem; color:var(--accent); font-weight:800;">${r.drawnLetter}</span></h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" onclick="${l?'':'window.submitBokstavPlacement('+i+')'}">${l}</div>`).join('')}</div></div>`;
        }
    } else if (r.subPhase === 'THIEF_ACTION') {
        if(playerId === r.thiefId) {
@@ -955,13 +965,13 @@ function renderBokstavPlayer(state) {
                    body.innerHTML = `<h2>Ingen att stjäla från! Du får en slumpmässig.</h2>`;
                    setTimeout(() => { updateRoom(playerCode, s => { if(s.round.thiefStage !== 'PLACE'){ s.round.drawnLetter = pickRandom(BOKSTAV_LETTERS.filter(l=>l!=='🦹‍♂️')); s.round.thiefStage = 'PLACE'; } return s;}); }, 2000);
                } else {
-                   body.innerHTML = `<h2 style="font-size:1.3rem; color:var(--red);">🦹‍♂️ Välj en spelare att stjäla från!</h2><div style="display:flex; flex-direction:column; gap:0.5rem; max-width:300px; margin: 1rem auto;">${validVictims.map(v=>`<div class="bokstav-target-player" onclick="bokstavPickVictim('${v.id}')">${v.avatar} <span style="flex:1; text-align:left;">${v.name}</span> <span class="msi">chevron_right</span></div>`).join('')}</div>`;
+                   body.innerHTML = `<h2 style="font-size:1.3rem; color:var(--red);">🦹‍♂️ Välj en spelare att stjäla från!</h2><div style="display:flex; flex-direction:column; gap:0.5rem; max-width:300px; margin: 1rem auto;">${validVictims.map(v=>`<div class="bokstav-target-player" onclick="window.bokstavPickVictim('${v.id}')">${v.avatar} <span style="flex:1; text-align:left;">${v.name}</span> <span class="msi">chevron_right</span></div>`).join('')}</div>`;
                }
            } else if (r.thiefStage === 'PICK_LETTER') {
                const vGrid = r.answers[r.victimId].grid; const vPlayer = state.players.find(p=>p.id===r.victimId);
-               body.innerHTML = `<h2>Stjäl från ${vPlayer.name}! Klicka på en bokstav.</h2><div class="bokstav-paper"><div class="bokstav-grid">${vGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" style="${l?'background:var(--accent-light); border:2px solid var(--accent);':''}" onclick="${l?'bokstavStealLetter('+i+')':''}">${l}</div>`).join('')}</div></div>`;
+               body.innerHTML = `<h2>Stjäl från ${vPlayer.name}! Klicka på en bokstav.</h2><div class="bokstav-paper"><div class="bokstav-grid">${vGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" style="${l?'background:var(--accent-light); border:2px solid var(--accent);':''}" onclick="${l?'window.bokstavStealLetter('+i+')':''}">${l}</div>`).join('')}</div></div>`;
            } else if (r.thiefStage === 'PLACE') {
-               body.innerHTML = `<h2>Placera stulen bokstav: <span style="color:var(--accent); font-size:2.4rem;">${r.drawnLetter}</span></h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" onclick="${l?'':'bokstavThiefPlace('+i+')'}">${l}</div>`).join('')}</div></div>`;
+               body.innerHTML = `<h2>Placera stulen bokstav: <span style="color:var(--accent); font-size:2.4rem;">${r.drawnLetter}</span></h2><div class="bokstav-paper"><div class="bokstav-grid">${myGrid.map((l,i)=>`<div class="bokstav-cell ${l?'filled':'empty'}" onclick="${l?'':'window.bokstavThiefPlace('+i+')'}">${l}</div>`).join('')}</div></div>`;
            }
        } else if (playerId === r.victimId) {
            const thiefPlayer = state.players.find(p=>p.id===r.thiefId);
