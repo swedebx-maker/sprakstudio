@@ -13,7 +13,7 @@
   --yellow:#FFC72C; --yellow-dark:#8A6200; --yellow-border:#E8B000;
   --bg:#F3F6FA; --card:#FFFFFF; --border:#DCE6F2;
   --ink:#233246; --muted:#7C8CA0;
-  --green:#2E9E52; --red:#D9534F;
+  --green:#2E9E52; --red:#D9534F; --purple:#8A2387;
 }
 *{box-sizing:border-box;}
 html { font-size: 19px; } 
@@ -133,108 +133,42 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .leaderboard-table .delta-down{color:var(--red);}
 .leaderboard-table .gained{color:var(--accent-dark);font-family:'Fredoka',sans-serif;}
 
+/* SPINGO (Bokstavs-jakt) STYLES */
+.wheel-container { position:relative; width: 280px; height: 280px; margin: 1rem auto; border-radius: 50%; overflow: hidden; border: 8px solid var(--ink); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+.wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; transition: transform 3.5s cubic-bezier(0.2, 0.9, 0.3, 1); background: conic-gradient(from 0deg, #FFC72C 0deg 60deg, #2B7DE0 60deg 120deg, #2E9E52 120deg 180deg, #D9534F 180deg 240deg, #8A2387 240deg 300deg, #FF8C42 300deg 360deg); }
+.wheel-segment { position: absolute; width: 50%; height: 50%; transform-origin: 100% 100%; display: flex; align-items: flex-end; justify-content: flex-end; padding-right: 25px; padding-bottom: 25px; font-family: 'Fredoka', sans-serif; font-size: 2.5rem; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+.wheel-pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 35px solid var(--ink); z-index: 5; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
+.wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #fff; border: 6px solid var(--ink); border-radius: 50%; z-index: 2; }
+.spingo-paper { background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 1rem; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); display: inline-block; position:relative; }
+.spingo-paper::before { content: '📝'; position: absolute; top: -15px; right: -15px; font-size: 2rem; transform: rotate(15deg); }
+.spingo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(320px, 80vw); }
+.spingo-cell { background: #fff; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); cursor: pointer; text-transform: uppercase; transition: background 0.1s, transform 0.1s; }
+.spingo-cell:active { transform: scale(0.95); }
+.spingo-cell.empty { background: #fafafa; }
+.spingo-cell.empty:hover { background: #f0f0f0; }
+.spingo-cell.filled { background: #fff; cursor: default; }
+.spingo-cell.highlight { background: var(--accent-light); color: var(--accent-dark); }
+.spingo-target-player { background: #fff; border: 2px solid var(--border); border-radius: 12px; padding: 0.8rem; display: flex; align-items: center; gap: 0.8rem; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.5rem; cursor: pointer; }
+.spingo-target-player:active { background: var(--accent-light); border-color: var(--accent); }
+
 /* EPIC FULLSCREEN PODIUM STYLES (WITH BEAT EFFECTS) */
-#host-finished-view {
-  position: fixed !important;
-  top: 0; left: 0;
-  width: 100vw !important;
-  height: 100vh !important;
-  max-width: 100% !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  background: linear-gradient(135deg, #ffffff, #f0f4f8);
-  border: none;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  transition: box-shadow 0.1s ease-out; /* Для плавного радужного бита */
-}
-#host-finished-view::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: url('jarven.png') center/cover no-repeat;
-  opacity: 0.15;
-  z-index: 0;
-  pointer-events: none;
-}
-#host-finished-view > * {
-  position: relative;
-  z-index: 1; 
-}
-
-/* Огромный пьедестал (сдвинут чуть ниже) */
-.podium{
-  display:flex;
-  align-items:flex-end;
-  justify-content:center;
-  gap:2.5rem;
-  margin: 15vh 0 4vh; 
-  transform: scale(1.4); 
-  transform-origin: center bottom;
-}
-.podium-slot{
-  border-radius:16px 16px 0 0;padding:1rem;text-align:center;
-  font-family:'Fredoka',sans-serif;font-weight:700;color:var(--ink);
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-  position: relative;
-  width: 150px;
-  animation: podiumRise 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; /* both держит скрытым до старта */
-}
-@keyframes podiumRise {
-  0% { transform: translateY(200px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
-.podium-slot .podium-avatar { 
-  font-size: 3.8rem; 
-  margin-top: -65px; 
-  margin-bottom: 5px; 
-  position:relative; 
-  z-index:2; 
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25));
-}
-.podium-slot .podium-name { 
-  background: rgba(255,255,255,0.95); 
-  color: #233246;
-  padding: 0.3rem 0.6rem; 
-  border-radius: 10px; 
-  font-size: 1.15rem; 
-  display:inline-block; 
-  margin-top:0.5rem; 
-  width:100%; 
-  overflow:hidden; 
-  text-overflow:ellipsis;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.podium-slot .podium-score { 
-  color: rgba(255,255,255,1); 
-  font-size: 1.6rem; 
-  margin-top: 0.6rem;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
+#host-finished-view { position: fixed !important; top: 0; left: 0; width: 100vw !important; height: 100vh !important; max-width: 100% !important; border-radius: 0 !important; margin: 0 !important; background: linear-gradient(135deg, #ffffff, #f0f4f8); border: none; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: box-shadow 0.1s ease-out; }
+#host-finished-view::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: url('jarven.png') center/cover no-repeat; opacity: 0.15; z-index: 0; pointer-events: none; }
+#host-finished-view > * { position: relative; z-index: 1; }
+.podium{ display:flex; align-items:flex-end; justify-content:center; gap:2.5rem; margin: 15vh 0 4vh; transform: scale(1.4); transform-origin: center bottom; }
+.podium-slot{ border-radius:16px 16px 0 0;padding:1rem;text-align:center; font-family:'Fredoka',sans-serif;font-weight:700;color:var(--ink); box-shadow: 0 -4px 20px rgba(0,0,0,0.15); position: relative; width: 150px; animation: podiumRise 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+@keyframes podiumRise { 0% { transform: translateY(200px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+.podium-slot .podium-avatar { font-size: 3.8rem; margin-top: -65px; margin-bottom: 5px; position:relative; z-index:2; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.25)); }
+.podium-slot .podium-name { background: rgba(255,255,255,0.95); color: #233246; padding: 0.3rem 0.6rem; border-radius: 10px; font-size: 1.15rem; display:inline-block; margin-top:0.5rem; width:100%; overflow:hidden; text-overflow:ellipsis; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.podium-slot .podium-score { color: rgba(255,255,255,1); font-size: 1.6rem; margin-top: 0.6rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
 .podium-slot.p1{height:270px;background:linear-gradient(180deg, #FFD000, #FF7B00); color:#fff;}
 .podium-slot.p2{height:210px;background:linear-gradient(180deg, #00B4D8, #0077B6);}
 .podium-slot.p3{height:160px;background:linear-gradient(180deg, #52B788, #2D6A4F);}
-
-.crown { 
-  position:absolute; 
-  top:-95px; 
-  left:50%; 
-  transform:translateX(-50%); 
-  font-size:4.8rem; 
-  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); 
-  animation: crownDrop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; 
-}
+.crown { position:absolute; top:-95px; left:50%; transform:translateX(-50%); font-size:4.8rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); animation: crownDrop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
 @keyframes crownDrop { 0% { transform: translate(-50%, -60px) scale(0); opacity:0;} 100% { transform: translate(-50%, 0) scale(1); opacity:1;} }
-
 .player-idle{text-align:center;}
 .player-idle .big-emoji{font-size:3.2rem;color:var(--accent); animation: pulse 1.3s infinite ease-in-out;}
 @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
-
 #confetti-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
 </style>
 </head>
@@ -286,7 +220,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
     <div class="round-card">
       <div class="round-type-label" id="round-type-label"></div>
       <div class="status-line" id="round-counter" style="margin-bottom:.6em;"></div>
-      <div class="timer-bar-wrap"><div class="timer-bar" id="host-timer-bar" style="width:100%;"></div></div>
+      <div class="timer-bar-wrap" id="host-timer-bar-wrap"><div class="timer-bar" id="host-timer-bar" style="width:100%;"></div></div>
       <div id="round-content-host"></div>
     </div>
   </div>
@@ -341,407 +275,288 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 const Confetti = (function(){
   let canvas, ctx, particles = [], animating = false;
   const colors = ['#2B7DE0', '#FFC72C', '#2E9E52', '#D9534F', '#FF8C42', '#8A2387'];
-  
-  function init() {
-    canvas = document.getElementById('confetti-canvas');
-    ctx = canvas.getContext('2d');
-    resize();
-    window.addEventListener('resize', resize);
-  }
+  function init() { canvas = document.getElementById('confetti-canvas'); ctx = canvas.getContext('2d'); resize(); window.addEventListener('resize', resize); }
   function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-  
   function shoot(amount = 150) {
     if(!canvas) init();
     for(let i=0; i<amount; i++) {
-      particles.push({
-        x: canvas.width / 2, y: canvas.height + 10,
-        vx: (Math.random() - 0.5) * (canvas.width / 40),
-        vy: (Math.random() - 1) * 20 - 5,
-        size: Math.random() * 8 + 4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        tilt: Math.random() * 10,
-        tiltAngleInc: (Math.random() * 0.07) + 0.05,
-        tiltAngle: 0
-      });
+      particles.push({ x: canvas.width/2, y: canvas.height+10, vx: (Math.random()-0.5)*(canvas.width/40), vy: (Math.random()-1)*20-5, size: Math.random()*8+4, color: colors[Math.floor(Math.random()*colors.length)], tilt: Math.random()*10, tiltAngleInc: (Math.random()*0.07)+0.05, tiltAngle: 0 });
     }
     if(!animating) { animating = true; render(); }
   }
-
-  function startPlayerLoop() {
-    shoot(100);
-    setInterval(() => shoot(20), 800); 
-  }
-  
+  function startPlayerLoop() { shoot(100); setInterval(() => shoot(20), 800); }
   function render() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let active = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height); let active = false;
     particles.forEach((p) => {
-      p.tiltAngle += p.tiltAngleInc;
-      p.y += (Math.cos(p.tiltAngle) + 1 + p.size / 2) / 2;
-      p.x += Math.sin(p.tiltAngle) * 2 + p.vx;
-      p.vy += 0.2; 
-      p.y += p.vy;
-      
-      ctx.beginPath();
-      ctx.lineWidth = p.size;
-      ctx.strokeStyle = p.color;
-      ctx.moveTo(p.x + p.tilt + p.size, p.y);
-      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.size);
-      ctx.stroke();
-      
+      p.tiltAngle += p.tiltAngleInc; p.y += (Math.cos(p.tiltAngle)+1+p.size/2)/2; p.x += Math.sin(p.tiltAngle)*2+p.vx; p.vy += 0.2; p.y += p.vy;
+      ctx.beginPath(); ctx.lineWidth = p.size; ctx.strokeStyle = p.color; ctx.moveTo(p.x+p.tilt+p.size, p.y); ctx.lineTo(p.x+p.tilt, p.y+p.tilt+p.size); ctx.stroke();
       if(p.y <= canvas.height + 20) active = true;
     });
-    
-    if(active) requestAnimationFrame(render);
-    else { animating = false; particles = []; }
+    if(active) requestAnimationFrame(render); else { animating = false; particles = []; }
   }
-  
   return { shoot, startPlayerLoop };
 })();
 
-const AVATARS=["🦊","🐻","🐼","🐸","🦁","🐨","🐯","🐰","🐷","🐵"];
+// --- DATA DICTIONARIES (MASSIVELY EXPANDED) ---
+const AVATARS=["🦊","🐻","🐼","🐸","🦁","🐨","🐯","🐰","🐷","🐵","🐶","🐱","🐹","🐭","🦄","🐙","🐬","🦋","🐢","🐞"];
 const DRAW_CATEGORIES={
   mat:{name:"Mat",emoji:"🍎",words:["äpple","bröd","mjölk","ägg","fisk","kaffe","banan","ost","tomat","potatis"]},
-  djur:{name:"Djur",emoji:"🐶",words:["hund","katt","häst","ko","gris","fågel","anka","get"]},
+  djur:{name:"Djur",emoji:"🐶",words:["hund","katt","häst","ko","gris","fågel","anka","get","får","mus"]},
   hem:{name:"Hem",emoji:"🏠",words:["stol","bord","säng","dörr","lampa","soffa","fönster","nyckel","klocka"]},
-  kropp:{name:"Kropp",emoji:"🧍",words:["hand","fot","öga","öra","mun","hår","arm","ben","huvud"]},
-  vader:{name:"Väder",emoji:"☀️",words:["sol","regn","snö","moln","vind"]},
-  klader:{name:"Kläder",emoji:"👕",words:["tröja","byxor","sko","mössa","jacka","klänning"]},
-  transport:{name:"Transport",emoji:"🚗",words:["bil","buss","tåg","cykel","flygplan","båt"]},
-  skola:{name:"Skola",emoji:"🏫",words:["bok","penna","dator","tavla","sax","suddgummi"]},
-  natur:{name:"Natur",emoji:"🌳",words:["träd","blomma","berg","sjö","skog","stjärna"]},
-  leksaker:{name:"Leksaker",emoji:"🧸",words:["boll","docka","nalle","pussel","drake"]}
+  kropp:{name:"Kropp",emoji:"🧍",words:["hand","fot","öga","öra","mun","hår","arm","ben","huvud","näsa"]},
+  vader:{name:"Väder",emoji:"☀️",words:["sol","regn","snö","moln","vind","åska","blixt","is"]},
+  klader:{name:"Kläder",emoji:"👕",words:["tröja","byxor","sko","mössa","jacka","klänning","strumpa","halsduk"]},
+  transport:{name:"Transport",emoji:"🚗",words:["bil","buss","tåg","cykel","flygplan","båt","helikopter"]},
+  skola:{name:"Skola",emoji:"🏫",words:["bok","penna","dator","tavla","sax","suddgummi","väska","papper"]},
+  natur:{name:"Natur",emoji:"🌳",words:["träd","blomma","berg","sjö","skog","stjärna","måne","sten"]},
+  leksaker:{name:"Leksaker",emoji:"🧸",words:["boll","docka","nalle","pussel","drake","klossar","bil"]},
+  frukt:{name:"Frukt",emoji:"🍉",words:["päron","apelsin","vindruva","citron","melon","kiwi","persika"]},
+  gronsaker:{name:"Grönsaker",emoji:"🥕",words:["morot","gurka","lök","paprika","sallad","svamp"]},
+  yrken:{name:"Yrken",emoji:"👮",words:["lärare","läkare","polis","kock","brandman","frisör"]},
+  musik:{name:"Musik",emoji:"🎸",words:["gitarr","piano","trumma","flöjt","fiol","sångare"]},
+  sport:{name:"Sport",emoji:"⚽",words:["fotboll","ishockey","tennis","simning","gymnastik","skidor"]},
+  farger:{name:"Färger",emoji:"🔴",words:["röd","blå","grön","gul","svart","vit","rosa","lila"]},
+  verktyg:{name:"Verktyg",emoji:"🔨",words:["hammare","spik","såg","skruv","tång","yxa"]},
+  insekter:{name:"Insekter",emoji:"🐛",words:["fluga","mygga","bi","fjäril","spindel","myra"]},
+  kanslor:{name:"Känslor",emoji:"😂",words:["glad","ledsen","arg","rädd","trött","pigg"]},
+  rum:{name:"Rum",emoji:"🛁",words:["kök","badrum","sovrum","vardagsrum","hall","vind"]},
+  former:{name:"Former",emoji:"🔺",words:["cirkel","kvadrat","triangel","stjärna","hjärta"]},
+  husdjur:{name:"Husdjur",emoji:"🐹",words:["kanin","marsvin","hamster","papegoja","akvariefisk"]},
+  vildadjur:{name:"Vilda djur",emoji:"🐘",words:["lejon","elefant","apa","tiger","björn","varg"]},
+  faglar:{name:"Fåglar",emoji:"🦉",words:["uggla","örn","svan","pingvin","papegoja"]},
+  havsdjur:{name:"Havsdjur",emoji:"🐋",words:["val","haj","bläckfisk","krabba","säl"]},
+  matratt:{name:"Maträtt",emoji:"🍕",words:["pizza","pasta","hamburgare","sallad","soppa","pannkaka"]},
+  dryck:{name:"Dryck",emoji:"🧃",words:["vatten","saft","te","juice","läsk"]},
+  badrum:{name:"Badrum",emoji:"🪥",words:["tandborste","tvål","handduk","spegel","dusch"]},
+  sjukdom:{name:"Sjukdom",emoji:"🤒",words:["hosta","feber","snuva","plåster","medicin"]},
+  hogtider:{name:"Högtider",emoji:"🎄",words:["jul","påsk","midsommar","nyår","halloween"]}
 };
 const SENTENCES=[
-  ["Jag","heter","Ali"],["Hon","bor","här"],["Vi","äter","mat"],
-  ["Han","dricker","kaffe"],["Barnet","sover"],["Jag","mår","bra"],
-  ["Katten","sover"],["Vi","går","hem"],["Han","är","glad"]
+  ["Jag","heter","Ali"],["Hon","bor","här"],["Vi","äter","mat"],["Han","dricker","kaffe"],["Barnet","sover"],
+  ["Jag","mår","bra"],["Katten","sover"],["Vi","går","hem"],["Han","är","glad"],["Hon","har","en","bok"],
+  ["Hunden","springer","snabbt"],["Jag","vill","ha","vatten"],["Hon","lagar","god","mat"],["Barnen","leker","ute"],
+  ["Vi","pratar","svenska"],["Han","kör","en","bil"],["Solen","skiner","idag"],["Det","regnar","mycket","nu"],
+  ["Jag","är","mycket","trött"],["Vi","ses","imorgon","bitti"],["Pojken","kastar","en","boll"],["Mamma","dricker","varmt","te"],
+  ["Flickan","läser","en","bok"],["Vi","leker","på","gården"],["Jag","har","en","röd","bil"],["Katten","sover","i","sängen"],
+  ["Han","tittar","på","tv"],["Hon","cyklar","till","skolan"],["Min","vän","är","här"],["Vi","äter","glass","nu"],
+  ["Pappa","lagar","mat","ikväll"],["Jag","gillar","att","spela","fotboll"],["Hunden","skäller","på","katten"],
+  ["Vi","åker","buss","till","stan"],["Bilen","är","mycket","stor"],["Blomman","är","vackert","röd"],
+  ["Solen","är","varm","och","gul"],["Månen","lyser","på","natten"],["Trädet","är","högt","och","grönt"],
+  ["Jag","tvättar","mina","händer"],["Hon","borstar","sina","tänder"],["Vi","ritar","en","teckning"],
+  ["Läraren","skriver","på","tavlan"],["Pojken","springer","snabbt","hem"],["Klockan","är","tolv","nu"],
+  ["Jag","öppnar","en","dörr"],["Han","stänger","ett","fönster"],["Vi","sitter","vid","ett","bord"],
+  ["Fågeln","flyger","högt","upp"],["Fisken","simmar","i","vatten"],["Snön","faller","från","himlen"]
 ];
 const STATEMENTS=[
-  {text:"Solen är gul.",isTrue:true}, {text:"En hund är ett fordon.",isTrue:false},
-  {text:"Mjölk är vit.",isTrue:true}, {text:"En banan är blå.",isTrue:false}
+  {text:"Solen är gul.",isTrue:true}, {text:"En hund är ett fordon.",isTrue:false}, {text:"Mjölk är vit.",isTrue:true},
+  {text:"En banan är blå.",isTrue:false}, {text:"Vintern är kall.",isTrue:true}, {text:"Bröd är mat.",isTrue:true},
+  {text:"En katt kan flyga.",isTrue:false}, {text:"ICA är en matbutik.",isTrue:true}, {text:"Gräset är rött.",isTrue:false},
+  {text:"En fisk kan simma.",isTrue:true}, {text:"Is är varmt.",isTrue:false}, {text:"Vatten är torrt.",isTrue:false},
+  {text:"Bilar har hjul.",isTrue:true}, {text:"Grisar kan flyga.",isTrue:false}, {text:"Eld är kallt.",isTrue:false},
+  {text:"Månen lyser på natten.",isTrue:true}, {text:"Cyklar har fyra hjul.",isTrue:false}, {text:"Båtar åker på vatten.",isTrue:true},
+  {text:"Flygplan åker på räls.",isTrue:false}, {text:"Sverige är ett land.",isTrue:true}, {text:"Snö är svart.",isTrue:false},
+  {text:"Man äter med en gaffel.",isTrue:true}, {text:"Man dricker från en tallrik.",isTrue:false}, {text:"En vecka har sju dagar.",isTrue:true},
+  {text:"En månad har fem dagar.",isTrue:false}, {text:"Man sover i en säng.",isTrue:true}, {text:"Man badar i en ugn.",isTrue:false},
+  {text:"Hästar är djur.",isTrue:true}, {text:"Träd är djur.",isTrue:false}, {text:"Kaffe är en dryck.",isTrue:true},
+  {text:"Stenar är mjuka.",isTrue:false}, {text:"Moln finns på himlen.",isTrue:true}, {text:"Äpplen växer på marken.",isTrue:false},
+  {text:"Päron är en frukt.",isTrue:true}, {text:"Morötter är blåa.",isTrue:false}, {text:"Sommaren är varm.",isTrue:true},
+  {text:"Hösten kommer före sommaren.",isTrue:false}, {text:"En triangel har tre hörn.",isTrue:true}, {text:"Katter skäller.",isTrue:false},
+  {text:"Hundar skäller.",isTrue:true}, {text:"Människor har fyra ben.",isTrue:false}, {text:"Människor har två armar.",isTrue:true},
+  {text:"Blod är blått.",isTrue:false}, {text:"Gräs är grönt.",isTrue:true}, {text:"Himlen är oftast blå.",isTrue:true},
+  {text:"Citroner är söta.",isTrue:false}, {text:"Socker är sött.",isTrue:true}, {text:"Salt är sött.",isTrue:false},
+  {text:"En sax används för att klippa.",isTrue:true}, {text:"En sked används för att klippa.",isTrue:false}, {text:"Stockholm är Sveriges huvudstad.",isTrue:true},
+  {text:"En bok har sidor.",isTrue:true}, {text:"En dator kan inte visa bilder.",isTrue:false}, {text:"Svalor är fåglar.",isTrue:true},
+  {text:"Pingviner kan flyga.",isTrue:false}, {text:"Lejon bor i skogen i Sverige.",isTrue:false}, {text:"Björnar sover på vintern.",isTrue:true},
+  {text:"Man använder skor på händerna.",isTrue:false}, {text:"Man har mössa på huvudet.",isTrue:true}, {text:"Man läser en tv.",isTrue:false},
+  {text:"Man tittar på tv.",isTrue:true}, {text:"Man kan köpa mat i en affär.",isTrue:true}, {text:"Posten säljer mjölk.",isTrue:false}
 ];
 const SIGNS=[
-  {icon:"storefront",title:"ICA Affär",lines:["Öppet: Mån–Fre 9–18","Lördag 10–15"],
-   question:"Är affären öppen på söndag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"}
+  {icon:"storefront",title:"ICA Affär",lines:["Öppet: Mån–Fre 9–18","Lördag 10–15"],question:"Är affären öppen på söndag?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
+  {icon:"receipt_long",title:"Kvitto",lines:["Mjölk .......... 15 kr","Bröd .......... 25 kr","Totalt ......... 40 kr"],question:"Vad kostar mjölken?",choices:["15 kr","25 kr","40 kr"],correct:"15 kr"},
+  {icon:"directions_bus",title:"Busshållplats",lines:["Buss 4 → Centrum","Avgång var 10:e minut"],question:"Hur ofta kommer buss 4?",choices:["Var 10:e minut","Var timme","En gång om dagen"],correct:"Var 10:e minut"},
+  {icon:"local_parking",title:"Parkering",lines:["Max 2 timmar","Kl 08-18"],question:"Hur länge får man stå?",choices:["1 timme","2 timmar","3 timmar"],correct:"2 timmar"},
+  {icon:"local_hospital",title:"Sjukhus",lines:["Akutmottagning","Öppet dygnet runt"],question:"När är akuten öppen?",choices:["Bara dagtid","Dygnet runt","Stängt helger"],correct:"Dygnet runt"},
+  {icon:"restaurant",title:"Restaurang",lines:["Dagens lunch 110 kr","Kaffe ingår"],question:"Ingår kaffe i lunchen?",choices:["Ja","Nej","Kanske"],correct:"Ja"},
+  {icon:"warning",title:"Varning",lines:["Halt golv!","Gå försiktigt"],question:"Vad är farligt?",choices:["Halt golv","Branden","Hundar"],correct:"Halt golv"},
+  {icon:"school",title:"Skola",lines:["Kör sakta!","Max 30 km/h"],question:"Hur snabbt får man köra?",choices:["30 km/h","50 km/h","70 km/h"],correct:"30 km/h"},
+  {icon:"wc",title:"Toalett",lines:["Kostnad 5 kr","Endast kortbetalning"],question:"Kan man betala med mynt?",choices:["Ja","Nej","Gratis"],correct:"Nej"},
+  {icon:"directions_railway",title:"Tågstation",lines:["Tåg mot Malmö","Spår 3","Avgång 14:15"],question:"Vilket spår går tåget från?",choices:["Spår 1","Spår 2","Spår 3"],correct:"Spår 3"},
+  {icon:"local_pharmacy",title:"Apotek",lines:["Hämta ut medicin","Öppet 10-19"],question:"Kan du hämta medicin kl 20?",choices:["Ja","Nej","Vet inte"],correct:"Nej"},
+  {icon:"flight",title:"Flygplats",lines:["Gate 12","Boarding kl 07:30"],question:"Vilken gate gäller?",choices:["Gate 10","Gate 11","Gate 12"],correct:"Gate 12"},
+  {icon:"shopping_cart",title:"Supermarket",lines:["Köp 3 betala för 2","På alla frukter"],question:"Gäller det på grönsaker?",choices:["Ja","Nej","Bara på fredagar"],correct:"Nej"},
+  {icon:"local_library",title:"Bibliotek",lines:["Tystnad vänligen!","Lånetid 4 veckor"],question:"Hur länge får man låna?",choices:["1 vecka","2 veckor","4 veckor"],correct:"4 veckor"}
 ];
 const MATCH_PAIRS_POOL=[
-  {word:"äpple",emoji:"🍎"},{word:"bröd",emoji:"🍞"},{word:"mjölk",emoji:"🥛"},
-  {word:"hund",emoji:"🐶"},{word:"katt",emoji:"🐱"},{word:"sol",emoji:"☀️"}
+  {word:"äpple",emoji:"🍎"},{word:"bröd",emoji:"🍞"},{word:"mjölk",emoji:"🥛"},{word:"hund",emoji:"🐶"},{word:"katt",emoji:"🐱"},
+  {word:"sol",emoji:"☀️"},{word:"regn",emoji:"🌧️"},{word:"hand",emoji:"✋"},{word:"öga",emoji:"👁️"},{word:"bok",emoji:"📖"},
+  {word:"hus",emoji:"🏠"},{word:"bil",emoji:"🚗"},{word:"träd",emoji:"🌳"},{word:"blomma",emoji:"🌸"},{word:"cykel",emoji:"🚲"},
+  {word:"tåg",emoji:"🚂"},{word:"skor",emoji:"👟"},{word:"klocka",emoji:"⏰"},{word:"nyckel",emoji:"🔑"},{word:"dator",emoji:"💻"}
 ];
-const ROUND_DURATIONS={draw:90,truefalse:15,wordorder:40,sign:20,match:45};
-const NON_DRAW_TYPES=["truefalse","wordorder","sign","match"];
+const SPINGO_LETTERS = ['S','T','A','R','N','E','L','D','K','M','B','F','G','H','O','P','Ö','Ä','Å','I','U','V','J','Y','C'];
 
-async function readRoom(code){
-  try{const r=await fetch('/api/room?code='+encodeURIComponent(code));if(!r.ok)return null;
-    const j=await r.json();return j.value||null;}catch(e){return null;}
-}
-async function writeRoom(code,state){
-  try{const r=await fetch('/api/room',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({code,state})});return r.ok;}catch(e){return false;}
-}
-async function updateRoom(code,mutateFn,retries=5){
-  for(let i=0;i<retries;i++){
-    const cur=await readRoom(code); if(!cur) return false;
-    const next=mutateFn(JSON.parse(JSON.stringify(cur))); if(!next) return false;
-    if(await writeRoom(code,next)) return true;
-  }
-  return false;
-}
+// Pre-build validation dictionary for Spingo
+const SPINGO_DICT = new Set(["EN","ETT","JAG","VI","DU","NI","DE","HAN","HON","DEN","DET","SE","GÅ","BO","ÄR","HAR","VAR","KAN",
+  "VILL","FÅ","TA","GE","GÖR","SOL","KO","IS","TÅG","BOK","BIL","KATT","HUND","MAT","HEM","BRA","DAG","NATT","MÅNE","SKO",
+  "BEN","ARM","FOT","TÅ","HÅR","ÖGA","ÖRA","MUN","BÅT","FLY","FISK","ÄGG","OST","RIS","GUL","RÖD","BLÅ","VIT","GRÅ","SUR",
+  "SÖT","KALL","VARM","STOR","SMÅ","GÅR","STÅR","LEKER","SOVER","ÄTER","BORD","STOL","SÄNG","DÖRR","TAKA","GOLV","SAX","SUDD",
+  "TRÄD","SKOG","BERG","STEN","SAND","SNÖ","REGN","MOLN","VIND","ÅSKA"]);
+// Dynamically add all words from categories and sentences
+Object.values(DRAW_CATEGORIES).forEach(cat => cat.words.forEach(w => SPINGO_DICT.add(w.toUpperCase())));
+SENTENCES.forEach(arr => arr.forEach(w => SPINGO_DICT.add(w.toUpperCase())));
+
+const ROUND_DURATIONS={draw:90, truefalse:15, wordorder:40, sign:20, match:45, spingo:30};
+const NON_DRAW_TYPES=["truefalse","wordorder","sign","match","spingo"];
+
+async function readRoom(code){ try{const r=await fetch('/api/room?code='+encodeURIComponent(code));if(!r.ok)return null;const j=await r.json();return j.value||null;}catch(e){return null;} }
+async function writeRoom(code,state){ try{const r=await fetch('/api/room',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code,state})});return r.ok;}catch(e){return false;} }
+async function updateRoom(code,mutateFn,retries=5){ for(let i=0;i<retries;i++){const cur=await readRoom(code); if(!cur) return false; const next=mutateFn(JSON.parse(JSON.stringify(cur))); if(!next) return false; if(await writeRoom(code,next)) return true;} return false; }
+
 function randomCode(){const L="ABCDEFGHJKLMNPQRSTUVWXYZ";let c="";for(let i=0;i<4;i++)c+=L[Math.floor(Math.random()*L.length)];return c;}
 function newId(){return Math.random().toString(36).slice(2,10);}
 function pickRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-function shuffleNotEqual(arr){
-  if(arr.length<2) return arr.slice();
-  let s; do{ s=shuffle(arr); }while(JSON.stringify(s)===JSON.stringify(arr)); return s;
-}
-function calcScore(timeLeftFraction,combo){
-  const base=200+Math.round(800*Math.max(0,Math.min(1,timeLeftFraction)));
-  const mult=1+0.1*Math.min(combo,5); return Math.round(base*mult);
-}
+function shuffleNotEqual(arr){ if(arr.length<2) return arr.slice(); let s; do{ s=shuffle(arr); }while(JSON.stringify(s)===JSON.stringify(arr)); return s; }
+function calcScore(timeLeftFraction,combo){ const base=200+Math.round(800*Math.max(0,Math.min(1,timeLeftFraction))); const mult=1+0.1*Math.min(combo,5); return Math.round(base*mult); }
 function normalizeSwedish(s){ return s.toLowerCase().trim().replace(/å|ä/g,'a').replace(/ö/g,'o'); }
-function similarity(a,b){
-  const m=a.length,n=b.length; if(m===0) return n===0?1:0; if(n===0) return 0;
-  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
-  for(let i=0;i<=m;i++) dp[i][0]=i; for(let j=0;j<=n;j++) dp[0][j]=j;
-  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
-    dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
-  const maxLen=Math.max(m,n); return maxLen===0?1:1-dp[m][n]/maxLen;
-}
-function show(id){
-  ['role-screen','host-create-screen','host-board-screen','player-join-screen','player-game-screen']
-    .forEach(s=>document.getElementById(s).classList.toggle('hidden',s!==id));
-}
+function similarity(a,b){ const m=a.length,n=b.length; if(m===0) return n===0?1:0; if(n===0) return 0; const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0)); for(let i=0;i<=m;i++) dp[i][0]=i; for(let j=0;j<=n;j++) dp[0][j]=j; for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); const maxLen=Math.max(m,n); return maxLen===0?1:1-dp[m][n]/maxLen; }
+
+function show(id){ ['role-screen','host-create-screen','host-board-screen','player-join-screen','player-game-screen'].forEach(s=>document.getElementById(s).classList.toggle('hidden',s!==id)); }
 
 document.getElementById('host-role-btn').addEventListener('click',()=>show('host-create-screen'));
 document.getElementById('player-role-btn').addEventListener('click',()=>show('player-join-screen'));
-
 const urlCode=new URLSearchParams(location.search).get('code');
 if(urlCode){ show('player-join-screen'); document.getElementById('join-code').value=urlCode.toUpperCase(); }
 
 /* ================= 16-BIT AUDIO ENGINE & DUCKING ================= */
 const AudioEngine=(function(){
   let ctx=null, musicOn=true, masterGain=null, musicGain=null, sfxGain=null, sfxFilter=null;
-  
-  let bgSource = null;
-  let bgBuffer = null;
-  
+  let bgSource = null, bgBuffer = null, bg2Source = null, bg2Buffer = null;
   let finaleBuffers = [];
   const FINALE_URLS = ['audio/sound1.mp3', 'audio/sound2.mp3', 'audio/sound3.mp3', 'audio/sound4.mp3'];
-
-  // Для анализатора (Beat Detection)
-  let analyser = null;
-  let dataArray = null;
-  let finaleStartTime = 0;
-  let beatThreshold = 100;
-  let lastBeatTime = 0;
-  let hasDoneGrandBurst = false;
+  const VOL_MAIN = 0.60, VOL_DUCK_TIMER = 0.06, VOL_DUCK_LB = 0.03, VOL_BG2 = 0.30;
+  let analyser = null, dataArray = null, finaleStartTime = 0, beatThreshold = 100, lastBeatTime = 0, hasDoneGrandBurst = false;
   
   function ensureCtx(){
     if(!ctx){
       ctx=new (window.AudioContext||window.webkitAudioContext)();
       masterGain=ctx.createGain(); masterGain.gain.value=0.9; masterGain.connect(ctx.destination);
-      
-      musicGain=ctx.createGain(); musicGain.gain.value=0.35; musicGain.connect(masterGain); // Базовая громкость
-      
-      // Настраиваем SFX как в 16-бит консолях (Lowpass фильтр срезает резкость)
-      sfxFilter = ctx.createBiquadFilter();
-      sfxFilter.type = 'lowpass';
-      sfxFilter.frequency.value = 3500;
-      
-      sfxGain=ctx.createGain(); sfxGain.gain.value=0.6; 
-      sfxGain.connect(sfxFilter);
-      sfxFilter.connect(masterGain);
-      
-      // Анализатор
-      analyser = ctx.createAnalyser();
-      analyser.fftSize = 128;
-      masterGain.connect(analyser);
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      musicGain=ctx.createGain(); musicGain.gain.value=VOL_MAIN; musicGain.connect(masterGain); 
+      sfxFilter = ctx.createBiquadFilter(); sfxFilter.type = 'lowpass'; sfxFilter.frequency.value = 3500;
+      sfxGain=ctx.createGain(); sfxGain.gain.value=0.6; sfxGain.connect(sfxFilter); sfxFilter.connect(masterGain);
+      analyser = ctx.createAnalyser(); analyser.fftSize = 128; masterGain.connect(analyser); dataArray = new Uint8Array(analyser.frequencyBinCount);
     }
     if(ctx.state==='suspended') ctx.resume();
   }
 
   async function preloadAudio() {
     ensureCtx();
-    try {
-      const res = await fetch('audio/background.mp3');
-      bgBuffer = await ctx.decodeAudioData(await res.arrayBuffer());
-    } catch(e) { console.warn('Kunde inte ladda background.mp3'); }
-    
-    for (const url of FINALE_URLS) {
-      try {
-        const res = await fetch(url);
-        const audioBuf = await ctx.decodeAudioData(await res.arrayBuffer());
-        finaleBuffers.push(audioBuf);
-      } catch(e) { console.warn('Kunde inte ladda ' + url); }
-    }
+    try { bgBuffer = await ctx.decodeAudioData(await (await fetch('audio/background.mp3')).arrayBuffer()); } catch(e){}
+    try { bg2Buffer = await ctx.decodeAudioData(await (await fetch('audio/background2.mp3')).arrayBuffer()); } catch(e){}
+    for (const url of FINALE_URLS) { try { finaleBuffers.push(await ctx.decodeAudioData(await (await fetch(url)).arrayBuffer())); } catch(e){} }
   }
 
   function startMusic(){ 
-    ensureCtx(); 
-    if(!musicOn) return;
-    if(bgSource) return; 
-    
-    if(bgBuffer) {
-      bgSource = ctx.createBufferSource();
-      bgSource.buffer = bgBuffer;
-      bgSource.loop = true;
-      bgSource.connect(musicGain);
-      bgSource.start(0);
-    } else {
-      preloadAudio().then(() => { if(musicOn && !bgSource) startMusic(); });
-    }
+    ensureCtx(); if(!musicOn || bgSource) return; 
+    musicGain.gain.cancelScheduledValues(ctx.currentTime); musicGain.gain.setValueAtTime(VOL_MAIN, ctx.currentTime);
+    if(bgBuffer) { bgSource = ctx.createBufferSource(); bgSource.buffer = bgBuffer; bgSource.loop = true; bgSource.connect(musicGain); bgSource.start(0); }
+    else { preloadAudio().then(() => { if(musicOn && !bgSource) startMusic(); }); }
   }
 
-  function stopMusic(){ 
-    if(bgSource){ bgSource.stop(); bgSource.disconnect(); bgSource=null; }
-  }
-
-  // УМНОЕ ЗАТУХАНИЕ (DUCKING)
+  function stopMusic(){ if(bgSource){ bgSource.stop(); bgSource.disconnect(); bgSource=null; } if(bg2Source){ bg2Source.stop(); bg2Source.disconnect(); bg2Source=null; } }
   function setMusicVolume(vol, duration = 1.0) {
-    if(!ctx || !musicGain) return;
-    const now = ctx.currentTime;
-    musicGain.gain.cancelScheduledValues(now);
-    musicGain.gain.setValueAtTime(musicGain.gain.value, now);
-    musicGain.gain.linearRampToValueAtTime(vol, now + duration);
+    if(!ctx || !musicGain) return; const now = ctx.currentTime;
+    musicGain.gain.cancelScheduledValues(now); musicGain.gain.setValueAtTime(musicGain.gain.value, now); musicGain.gain.linearRampToValueAtTime(vol, now + duration);
   }
 
   function renderBeatVisuals() {
     if(hostLastPhase !== 'finished' || !analyser) return;
     requestAnimationFrame(renderBeatVisuals);
-
-    const now = Date.now();
-    const elapsed = now - finaleStartTime;
-    if(elapsed < 3000) return; // Ждём 1-е место
-
-    if(!hasDoneGrandBurst) {
-      hasDoneGrandBurst = true;
-      Confetti.shoot(400); 
-    }
-
+    const now = Date.now(); if(now - finaleStartTime < 3000) return; 
+    if(!hasDoneGrandBurst) { hasDoneGrandBurst = true; Confetti.shoot(400); }
     analyser.getByteFrequencyData(dataArray);
-    let sum = 0;
-    for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+    let sum = 0; for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
     let avg = sum / dataArray.length;
-
     const container = document.getElementById('host-finished-view');
     if(container) {
       const intensity = Math.max(0, avg - 30); 
       container.style.boxShadow = `inset 0 0 ${intensity * 1.5}px ${intensity * 0.8}px hsla(${(now/15)%360}, 100%, 50%, 0.6)`;
     }
-
-    if (avg > beatThreshold && now - lastBeatTime > 350) {
-      Confetti.shoot(30);
-      lastBeatTime = now;
-      beatThreshold = avg + 15;
-    }
+    if (avg > beatThreshold && now - lastBeatTime > 350) { Confetti.shoot(30); lastBeatTime = now; beatThreshold = avg + 15; }
     beatThreshold = Math.max(70, beatThreshold - 0.5);
   }
 
-  // 16-BIT SYNTHESIS HELPER (Два осциллятора, легкий расстрой для плотности)
   function play16Bit(freq, startOffset, dur, type, vol) {
-     if(!ctx) return;
-     const t = ctx.currentTime + startOffset;
-     const osc1 = ctx.createOscillator();
-     const osc2 = ctx.createOscillator();
-     const g = ctx.createGain();
-     
-     osc1.type = type;
-     osc2.type = type;
-     osc1.frequency.value = freq;
-     osc2.frequency.value = freq * 1.006; // Detune для 16-bit хоруса
-     
-     g.gain.setValueAtTime(0, t);
-     g.gain.linearRampToValueAtTime(vol, t + 0.02);
-     g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-     
-     osc1.connect(g);
-     osc2.connect(g);
-     g.connect(sfxGain);
-     
-     osc1.start(t); osc1.stop(t + dur + 0.1);
-     osc2.start(t); osc2.stop(t + dur + 0.1);
+     if(!ctx) return; const t = ctx.currentTime + startOffset;
+     const osc1 = ctx.createOscillator(); const osc2 = ctx.createOscillator(); const g = ctx.createGain();
+     osc1.type = type; osc2.type = type; osc1.frequency.value = freq; osc2.frequency.value = freq * 1.006; 
+     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+     osc1.connect(g); osc2.connect(g); g.connect(sfxGain);
+     osc1.start(t); osc1.stop(t + dur + 0.1); osc2.start(t); osc2.stop(t + dur + 0.1);
   }
 
   return {
-    ensureCtx, preloadAudio, startMusic, stopMusic, setMusicVolume,
+    ensureCtx, preloadAudio, startMusic, stopMusic, setMusicVolume, VOL_MAIN, VOL_DUCK_TIMER, VOL_DUCK_LB,
     toggleMusic(){ musicOn=!musicOn; if(musicOn) this.startMusic(); else this.stopMusic(); return musicOn; },
-    
     playHostFinaleSequence(){
-      ensureCtx();
-      if(!musicOn) return;
-      this.setMusicVolume(0, 2.5);
-      setTimeout(()=>this.stopMusic(), 3000);
-      
+      ensureCtx(); if(!musicOn) return;
+      this.setMusicVolume(0, 2.5); setTimeout(()=>this.stopMusic(), 3000);
       if(finaleBuffers.length > 0) {
-        const buf = pickRandom(finaleBuffers);
-        const src = ctx.createBufferSource();
-        src.buffer = buf;
-        const finalGain = ctx.createGain();
-        finalGain.gain.setValueAtTime(0, ctx.currentTime);
-        finalGain.gain.linearRampToValueAtTime(1, ctx.currentTime + 2.5);
-        src.connect(finalGain);
-        finalGain.connect(masterGain);
-        src.start(0);
-        
-        finaleStartTime = Date.now();
-        hasDoneGrandBurst = false;
-        requestAnimationFrame(renderBeatVisuals);
+        const buf = pickRandom(finaleBuffers); const src = ctx.createBufferSource(); src.buffer = buf;
+        const finalGain = ctx.createGain(); finalGain.gain.setValueAtTime(0, ctx.currentTime); finalGain.gain.linearRampToValueAtTime(1, ctx.currentTime + 2.5);
+        src.connect(finalGain); finalGain.connect(masterGain); src.start(0);
+        src.onended = () => {
+          if(hostLastPhase !== 'finished' || !musicOn || !bg2Buffer) return;
+          bg2Source = ctx.createBufferSource(); bg2Source.buffer = bg2Buffer; bg2Source.loop = true;
+          musicGain.gain.cancelScheduledValues(ctx.currentTime); musicGain.gain.setValueAtTime(0, ctx.currentTime); musicGain.gain.linearRampToValueAtTime(VOL_BG2, ctx.currentTime + 2.0); 
+          bg2Source.connect(musicGain); bg2Source.start(0);
+        };
+        finaleStartTime = Date.now(); hasDoneGrandBurst = false; requestAnimationFrame(renderBeatVisuals);
       }
     },
-
-    // СОЧНЫЕ 16-БИТНЫЕ ЗВУКИ
-    playVictory(){ 
-      ensureCtx(); 
-      [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f,i) => play16Bit(f, i*0.12, 0.5, 'square', 0.25)); 
-    },
-    playCorrect(){ 
-      ensureCtx(); 
-      play16Bit(523.25, 0.0, 0.2, 'square', 0.2); 
-      play16Bit(659.25, 0.1, 0.3, 'square', 0.2); 
-    },
-    playWrong(){ 
-      ensureCtx(); 
-      const t = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(200, t);
-      osc.frequency.exponentialRampToValueAtTime(70, t + 0.4); // Классическое падение тона
-      g.gain.setValueAtTime(0.3, t);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-      osc.connect(g); g.connect(sfxGain);
-      osc.start(t); osc.stop(t + 0.5);
-    },
-    playAlmost(){ 
-      ensureCtx(); 
-      play16Bit(392, 0.0, 0.2, 'triangle', 0.3); 
-      play16Bit(440, 0.12, 0.3, 'triangle', 0.3); 
-    },
-    playTick(){ 
-      ensureCtx(); 
-      // Короткий плотный тик
-      play16Bit(880, 0, 0.1, 'square', 0.15); 
-      play16Bit(1760, 0, 0.05, 'triangle', 0.1); 
-    },
-    playReveal(){ 
-      ensureCtx(); 
-      [523.25, 659.25, 783.99].forEach((f,i) => play16Bit(f, i*0.09, 0.4, 'triangle', 0.35)); 
-    },
-    playJoin(){ 
-      ensureCtx(); 
-      play16Bit(440, 0.0, 0.1, 'sine', 0.3); 
-      play16Bit(660, 0.08, 0.2, 'sine', 0.3); 
-    }
+    playVictory(){ ensureCtx(); [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f,i) => play16Bit(f, i*0.12, 0.5, 'square', 0.25)); },
+    playCorrect(){ ensureCtx(); play16Bit(523.25, 0.0, 0.2, 'square', 0.2); play16Bit(659.25, 0.1, 0.3, 'square', 0.2); },
+    playWrong(){ ensureCtx(); const t = ctx.currentTime; const osc = ctx.createOscillator(); const g = ctx.createGain(); osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, t); osc.frequency.exponentialRampToValueAtTime(70, t + 0.4); g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.4); osc.connect(g); g.connect(sfxGain); osc.start(t); osc.stop(t + 0.5); },
+    playAlmost(){ ensureCtx(); play16Bit(392, 0.0, 0.2, 'triangle', 0.3); play16Bit(440, 0.12, 0.3, 'triangle', 0.3); },
+    playTick(){ ensureCtx(); play16Bit(880, 0, 0.1, 'square', 0.15); play16Bit(1760, 0, 0.05, 'triangle', 0.1); },
+    playReveal(){ ensureCtx(); [523.25, 659.25, 783.99].forEach((f,i) => play16Bit(f, i*0.09, 0.4, 'triangle', 0.35)); },
+    playJoin(){ ensureCtx(); play16Bit(440, 0.0, 0.1, 'sine', 0.3); play16Bit(660, 0.08, 0.2, 'sine', 0.3); },
+    playPop(){ ensureCtx(); play16Bit(700, 0.0, 0.05, 'sine', 0.3); play16Bit(1000, 0.02, 0.08, 'square', 0.2); }
   };
 })();
 
 /* ================= ROUND BUILDERS ================= */
 function buildRound(type,drawerId){
-  if(type==='draw'){
-    const cat=DRAW_CATEGORIES[pickRandom(Object.keys(DRAW_CATEGORIES))];
-    const word=pickRandom(cat.words);
-    return {type:'draw',drawerId,word,wordLength:word.length,emoji:cat.emoji,strokes:[],correctPlayerIds:[]};
-  }
+  if(type==='draw'){ const cat=DRAW_CATEGORIES[pickRandom(Object.keys(DRAW_CATEGORIES))]; const word=pickRandom(cat.words); return {type:'draw',drawerId,word,wordLength:word.length,emoji:cat.emoji,strokes:[],correctPlayerIds:[]}; }
   if(type==='truefalse'){ const s=pickRandom(STATEMENTS); return {type:'truefalse',statement:s.text,isTrue:s.isTrue}; }
   if(type==='wordorder'){ const words=pickRandom(SENTENCES); return {type:'wordorder',correctOrder:words,scrambled:shuffleNotEqual(words)}; }
   if(type==='sign'){ const s=pickRandom(SIGNS); return {type:'sign',icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct}; }
   if(type==='match'){ return {type:'match',pairs:shuffle(MATCH_PAIRS_POOL).slice(0,6)}; }
+  if(type==='spingo'){ return {type:'spingo',spins:0,maxSpins:16,currentAction:null,wheelLetters:shuffle(SPINGO_LETTERS).slice(0,6)}; }
 }
-function buildPlan(players, count){
+function buildPlan(players, count=20){
   const plan=[]; let i=0;
-  while(plan.length<(count||20)){
+  while(plan.length<count){
     plan.push({type:'draw',drawerId:players[i%players.length].id});
-    if(plan.length<(count||20)) plan.push({type:pickRandom(NON_DRAW_TYPES)}); i++;
+    if(plan.length<count) plan.push({type:pickRandom(NON_DRAW_TYPES)}); i++;
   }
-  return plan.slice(0,count||20);
+  return plan.slice(0,count);
 }
 
 /* ================= HOST LOGIC ================= */
 let hostCode=null, hostPollTimer=null, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
-let hostLastStateHash = "";
+let hostLastStateHash = ""; let spingoHostState = { spinCount: 0 };
 
 document.getElementById('create-room-btn').addEventListener('click', async ()=>{
-  AudioEngine.startMusic();
-  AudioEngine.preloadAudio(); 
-  
+  AudioEngine.startMusic(); AudioEngine.preloadAudio(); 
   hostCode=randomCode();
-  const initial={code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null};
-  await writeRoom(hostCode,initial);
-  document.getElementById('lobby-code-big').textContent=hostCode;
-  document.getElementById('host-room-code').textContent='KOD: '+hostCode;
+  await writeRoom(hostCode,{code:hostCode,phase:'lobby',players:[],plan:[],planIndex:-1,round:null,lastRoundResult:null});
+  document.getElementById('lobby-code-big').textContent=hostCode; document.getElementById('host-room-code').textContent='KOD: '+hostCode;
   document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+hostCode);
-  
-  show('host-board-screen');
-  hostPollTimer=setInterval(hostPoll, 600); 
-  hostPoll();
+  show('host-board-screen'); hostPollTimer=setInterval(hostPoll, 600); hostPoll();
 });
 
 document.getElementById('mute-btn').addEventListener('click', (e)=>{
-  const on=AudioEngine.toggleMusic();
-  e.currentTarget.querySelector('.msi').textContent = on ? 'volume_up' : 'volume_off';
+  const on=AudioEngine.toggleMusic(); e.currentTarget.querySelector('.msi').textContent = on ? 'volume_up' : 'volume_off';
 });
 
 document.getElementById('cancel-room-btn').addEventListener('click', async ()=>{
@@ -754,36 +569,30 @@ async function hostPoll(){
   const state=await readRoom(hostCode); if(!state) return;
   const stateHash = JSON.stringify(state);
   
-  // DUCKING LOGIC & TIMERS (Всегда проверяем время)
-  if(state.phase==='active' && state.round){
+  if(state.phase==='active' && state.round && state.round.type!=='spingo'){
     const dur=ROUND_DURATIONS[state.round.type];
     const elapsed=(Date.now()-state.round.startedAt)/1000;
     const timeLeft=Math.max(0,dur-elapsed);
     document.getElementById('host-timer-bar').style.width=(100*timeLeft/dur)+'%';
-    
     const ceilLeft=Math.ceil(timeLeft);
-    
-    // Музыка приглушается, когда время кончается (последние 5 сек)
-    if(ceilLeft === 5 && hostLastTickSecond !== 5) {
-      AudioEngine.setMusicVolume(0.12, 1.0); 
-    }
-    
-    if(ceilLeft<=5 && ceilLeft>=1 && ceilLeft!==hostLastTickSecond){ 
-      hostLastTickSecond=ceilLeft; 
-      AudioEngine.playTick(); 
-    }
+    if(ceilLeft === 5 && hostLastTickSecond !== 5) AudioEngine.setMusicVolume(AudioEngine.VOL_DUCK_TIMER, 1.0); 
+    if(ceilLeft<=5 && ceilLeft>=1 && ceilLeft!==hostLastTickSecond){ hostLastTickSecond=ceilLeft; AudioEngine.playTick(); }
     
     const doneEarly = state.round.type==='draw'
       ? (state.round.correctPlayerIds||[]).length >= (state.players.length-1) && state.players.length>1
       : Object.keys(state.round.answers||{}).length >= state.players.length;
-      
-    if((timeLeft<=0 || doneEarly) && hostLastStateHash === stateHash){ 
-        await finalizeRound(state); 
-        return; 
-    }
+    if((timeLeft<=0 || doneEarly) && hostLastStateHash === stateHash){ await finalizeRound(state); return; }
   }
 
-  // DOM Updates Only when state changes
+  // Spingo host auto-finalize when everyone is ready
+  if(state.phase==='active' && state.round && state.round.type==='spingo' && state.round.currentAction){
+     const readyCount = state.round.readyPlayers ? state.round.readyPlayers.length : 0;
+     if(readyCount >= state.players.length && hostLastStateHash === stateHash) {
+         if(state.round.spins >= state.round.maxSpins) { await finalizeRound(state); return; }
+         else { document.getElementById('spingo-spin-btn').disabled = false; }
+     }
+  }
+
   if (stateHash === hostLastStateHash) return;
   hostLastStateHash = stateHash;
 
@@ -804,35 +613,28 @@ async function hostPoll(){
   hostLastPlayerCount=state.players.length;
 
   if(state.phase==='active'){
-    // Возвращаем громкость, если раунд активен
-    if (hostLastPhase !== 'active') AudioEngine.setMusicVolume(0.35, 1.0);
-    
+    if (hostLastPhase !== 'active') AudioEngine.setMusicVolume(AudioEngine.VOL_MAIN, 1.0);
     if(state.round) {
       renderMiniLB(document.getElementById('host-mini-lb'),state);
       document.getElementById('round-counter').textContent='Runda '+(state.planIndex+1)+' / '+state.plan.length;
-      
-      const key=state.round.type+':'+state.planIndex;
+      document.getElementById('host-timer-bar-wrap').classList.toggle('hidden', state.round.type==='spingo');
+
+      const key=state.round.type+':'+state.planIndex+(state.round.type==='spingo'?':'+state.round.spins:'');
       if(hostRenderedRoundKey!==key){
         hostRenderedRoundKey=key; hostLastTickSecond=null;
         renderHostRound(state);
-      } else if(state.round.type==='draw'){ 
-        redrawCanvas(document.getElementById('host-canvas'),state.round.strokes); 
-      }
+      } else if(state.round.type==='draw'){ redrawCanvas(document.getElementById('host-canvas'),state.round.strokes); }
     }
   }
 
   if(state.phase==='round-end' && hostLastPhase!=='round-end'){
-    // Приглушаем музыку для Топа
-    AudioEngine.setMusicVolume(0.1, 0.5);
-    renderRoundEnd(state);
-    AudioEngine.playReveal();
+    AudioEngine.setMusicVolume(AudioEngine.VOL_DUCK_LB, 0.5);
+    renderRoundEnd(state); AudioEngine.playReveal();
   }
   
   if(state.phase==='finished' && hostLastPhase!=='finished'){
-    renderPodium(state);
-    AudioEngine.playHostFinaleSequence(); 
+    renderPodium(state); AudioEngine.playHostFinaleSequence(); 
   }
-  
   hostLastPhase=state.phase;
 }
 
@@ -840,54 +642,104 @@ function renderAvatars(wrap,state){
   wrap.innerHTML='';
   state.players.forEach(p=>{
     const isDrawer = state.round && state.round.type==='draw' && state.round.drawerId===p.id && state.phase==='active';
+    const isSpingoReady = state.round && state.round.type==='spingo' && state.round.readyPlayers && state.round.readyPlayers.includes(p.id);
     const pill=document.createElement('div');
-    pill.className='avatar-pill'+(isDrawer?' is-drawer':'');
+    pill.className='avatar-pill'+(isDrawer?' is-drawer':'')+(isSpingoReady?' is-drawer':''); // re-use drawer class for green ready state
     pill.innerHTML=`${p.avatar} ${p.name} <span class="score">${p.score}</span>`;
     wrap.appendChild(pill);
   });
 }
-function renderMiniLB(el,state){
-  const sorted=[...state.players].sort((a,b)=>b.score-a.score).slice(0,4);
-  el.innerHTML=sorted.map(p=>`<div><span>${p.avatar} ${p.name}</span><span class="lb-score">${p.score}</span></div>`).join('');
-}
+function renderMiniLB(el,state){ const sorted=[...state.players].sort((a,b)=>b.score-a.score).slice(0,4); el.innerHTML=sorted.map(p=>`<div><span>${p.avatar} ${p.name}</span><span class="lb-score">${p.score}</span></div>`).join(''); }
 
 function renderHostRound(state){
-  const r=state.round;
-  const label=document.getElementById('round-type-label');
-  const body=document.getElementById('round-content-host');
+  const r=state.round; const label=document.getElementById('round-type-label'); const body=document.getElementById('round-content-host');
   if(r.type==='draw'){
-    label.innerHTML=`<span class="msi">brush</span> Rita & Gissa`;
-    body.innerHTML=`<div class="word-hint">${'_ '.repeat(r.wordLength)}</div><canvas class="draw-canvas" id="host-canvas" width="560" height="340"></canvas>`;
-    redrawCanvas(document.getElementById('host-canvas'),r.strokes);
+    label.innerHTML=`<span class="msi">brush</span> Rita & Gissa`; body.innerHTML=`<div class="word-hint">${'_ '.repeat(r.wordLength)}</div><canvas class="draw-canvas" id="host-canvas" width="560" height="340"></canvas>`; redrawCanvas(document.getElementById('host-canvas'),r.strokes);
   } else if(r.type==='truefalse'){
     label.innerHTML=`<span class="msi">quiz</span> Rätt eller fel`; body.innerHTML=`<div class="statement-text">"${r.statement}"</div>`;
   } else if(r.type==='wordorder'){
-    label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`;
-    body.innerHTML=`<div class="drag-row">${r.scrambled.map((w,i)=>`<span class="drag-chip jiggle-soft" style="animation-delay:${(i*0.07).toFixed(2)}s;">${w}</span>`).join('')}</div>`;
+    label.innerHTML=`<span class="msi">drag_indicator</span> Bygg meningen`; body.innerHTML=`<div class="drag-row">${r.scrambled.map((w,i)=>`<span class="drag-chip jiggle-soft" style="animation-delay:${(i*0.07).toFixed(2)}s;">${w}</span>`).join('')}</div>`;
   } else if(r.type==='sign'){
-    label.innerHTML=`<span class="msi">signpost</span> Vad säger skylten?`;
-    body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div>`;
+    label.innerHTML=`<span class="msi">signpost</span> Vad säger skylten?`; body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.15rem;">${r.question}</div>`;
   } else if(r.type==='match'){
-    label.innerHTML=`<span class="msi">join_inner</span> Para ihop`;
-    body.innerHTML=`<div style="font-size:2.2rem;">${r.pairs.map(p=>p.emoji).join('   ')}</div>`;
+    label.innerHTML=`<span class="msi">join_inner</span> Para ihop`; body.innerHTML=`<div style="font-size:2.2rem;">${r.pairs.map(p=>p.emoji).join('   ')}</div>`;
+  } else if(r.type==='spingo'){
+    label.innerHTML=`<span class="msi">grid_on</span> Bokstavs-jakt (Spingo)`;
+    const segments = r.wheelLetters.map((l,i) => { const rot = i * 60; return `<div class="wheel-segment" style="transform: rotate(${rot}deg) skewY(-30deg);"><span style="transform: skewY(30deg) rotate(30deg);">${l}</span></div>`; }).join('');
+    
+    let wheelHTML = `<div class="wheel-container"><div class="wheel-pointer"></div><div class="wheel-center"></div><div class="wheel" id="host-wheel">${segments}</div></div>`;
+    let btnHTML = `<button class="primary-btn" id="spingo-spin-btn" style="font-size:1.3rem; padding: 1rem 2rem;">🎲 Snurra hjulet (${r.spins}/${r.maxSpins})</button>`;
+    
+    if(r.currentAction) {
+       let actionHTML = r.currentAction === 'STEAL' ? `<span style="font-size:3rem;">🦹‍♂️ Tjuv!</span>` : `<span style="font-size:4rem;">${r.currentAction}</span>`;
+       body.innerHTML = `${wheelHTML}<div style="margin: 1rem 0;">${actionHTML}</div><p class="sub">Eleverna placerar bokstaven...</p>`;
+    } else {
+       body.innerHTML = `${wheelHTML} ${btnHTML}`;
+       document.getElementById('spingo-spin-btn').addEventListener('click', () => hostSpinWheel(state));
+    }
   }
 }
-function renderSignHTML(r){
-  return `<div class="sign-box"><div class="sign-title"><span class="msi">${r.icon}</span>${r.title}</div>
-    ${r.lines.map(l=>`<div class="sign-line">${l}</div>`).join('')}</div>`;
-}
+function renderSignHTML(r){ return `<div class="sign-box"><div class="sign-title"><span class="msi">${r.icon}</span>${r.title}</div>${r.lines.map(l=>`<div class="sign-line">${l}</div>`).join('')}</div>`; }
 function redrawCanvas(canvas,strokes){
-  if(!canvas) return; const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  (strokes||[]).forEach(s=>{
-    if(!s.points||s.points.length<1) return;
-    ctx.globalCompositeOperation = s.mode==='eraser' ? 'destination-out' : 'source-over';
-    ctx.beginPath(); ctx.strokeStyle=s.color; ctx.lineWidth=s.size; ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.moveTo(s.points[0].x*canvas.width,s.points[0].y*canvas.height);
-    for(let i=1;i<s.points.length;i++) ctx.lineTo(s.points[i].x*canvas.width,s.points[i].y*canvas.height);
-    ctx.stroke();
-  });
+  if(!canvas) return; const ctx=canvas.getContext('2d'); ctx.clearRect(0,0,canvas.width,canvas.height);
+  (strokes||[]).forEach(s=>{ if(!s.points||s.points.length<1) return; ctx.globalCompositeOperation = s.mode==='eraser' ? 'destination-out' : 'source-over'; ctx.beginPath(); ctx.strokeStyle=s.color; ctx.lineWidth=s.size; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.moveTo(s.points[0].x*canvas.width,s.points[0].y*canvas.height); for(let i=1;i<s.points.length;i++) ctx.lineTo(s.points[i].x*canvas.width,s.points[i].y*canvas.height); ctx.stroke(); });
   ctx.globalCompositeOperation='source-over';
+}
+
+async function hostSpinWheel(state) {
+  const btn = document.getElementById('spingo-spin-btn'); if(btn) btn.disabled = true;
+  const wheel = document.getElementById('host-wheel');
+  AudioEngine.playTick(); // Spin sound start
+  
+  // Decide what to land on
+  let wheelItems = [...state.round.wheelLetters];
+  if(state.round.spins > 0 && Math.random() < 0.15) wheelItems[0] = 'STEAL'; // 15% chance to replace slot 0 with STEAL
+  
+  const targetIndex = Math.floor(Math.random() * 6);
+  const selectedAction = targetIndex === 0 && wheelItems[0]==='STEAL' ? 'STEAL' : state.round.wheelLetters[targetIndex];
+  
+  // Visual spin
+  const extraSpins = 5;
+  const segmentDegree = 360 / 6;
+  const stopAngle = (extraSpins * 360) + (360 - (targetIndex * segmentDegree)) - (segmentDegree/2);
+  
+  if(wheel) { wheel.style.transform = `rotate(${stopAngle}deg)`; }
+  
+  setTimeout(async () => {
+    AudioEngine.playReveal();
+    await updateRoom(hostCode, s => {
+      s.round.spins += 1;
+      s.round.currentAction = selectedAction;
+      s.round.readyPlayers = [];
+      return s;
+    });
+  }, 3500);
+}
+
+// Spingo Score Calculation
+function scoreSpingoGrid(grid) {
+   let pts = 0;
+   // Grid is 4x4: indices 0-15
+   const rows = [[0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15]];
+   const cols = [[0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15]];
+   const allLines = [...rows, ...cols];
+   
+   allLines.forEach(line => {
+      const chars = line.map(idx => grid[idx] || ' ').join('');
+      // check substrings of length 4, 3, 2
+      let lineScored = false;
+      for(let len = 4; len >= 2; len--) {
+          if(lineScored) break;
+          for(let i=0; i <= 4 - len; i++) {
+             const sub = chars.substring(i, i+len).trim();
+             if(sub.length === len && SPINGO_DICT.has(sub)) {
+                 pts += (len * 100); // 4 letters = 400, 3 = 300, 2 = 200
+                 lineScored = true; break;
+             }
+          }
+      }
+   });
+   return pts;
 }
 
 async function finalizeRound(state){
@@ -900,6 +752,12 @@ async function finalizeRound(state){
       const drawer=s.players.find(p=>p.id===r.drawerId);
       if(drawer){ drawer.score += 50*(r.correctPlayerIds||[]).length; drawer.combo = (r.correctPlayerIds||[]).length>0 ? (drawer.combo||0)+1 : 0; }
       s.players.forEach(p=>{ if(p.id!==r.drawerId && !(r.correctPlayerIds||[]).includes(p.id)) p.combo=0; });
+    } else if(r.type==='spingo'){
+      s.players.forEach(p=>{
+         const grid = (r.answers[p.id] && r.answers[p.id].grid) ? r.answers[p.id].grid : Array(16).fill('');
+         const earned = scoreSpingoGrid(grid);
+         p.score += earned;
+      });
     } else {
       s.players.forEach(p=>{ if(!(r.answers||{})[p.id]?.correct) p.combo=0; });
     }
@@ -911,11 +769,10 @@ async function finalizeRound(state){
     if(r.type==='wordorder') reveal = r.correctOrder.join(' ');
     if(r.type==='sign') reveal = 'Rätt svar: '+r.correct;
     if(r.type==='match') reveal = 'Paren: '+r.pairs.map(p=>p.word+' '+p.emoji).join(', ');
+    if(r.type==='spingo') reveal = 'Kolla era papper för poäng!';
 
     s.lastRoundResult={type:r.type, reveal, rankBefore, rankAfter, pointsThisRound:pts};
-    
-    const isLastRound = s.planIndex >= s.plan.length - 1;
-    s.phase = isLastRound ? 'finished' : 'round-end'; 
+    const isLastRound = s.planIndex >= s.plan.length - 1; s.phase = isLastRound ? 'finished' : 'round-end'; 
     return s;
   });
 }
@@ -931,394 +788,264 @@ function renderRoundEnd(state){
   table.innerHTML = [...state.players].sort((a,b)=>b.score-a.score).map((p,i)=>{
     const b=res.rankBefore.indexOf(p.id), a=res.rankAfter.indexOf(p.id);
     let arrow = b>a ? `<span class="delta-up">▲${b-a}</span>` : (b<a ? `<span class="delta-down">▼${a-b}</span>` : '–');
-    return `<tr><td class="rank">#${i+1}</td><td>${p.avatar} ${p.name}</td><td>${arrow}</td>
-      <td class="gained">+${res.pointsThisRound[p.id]||0}</td></tr>`;
+    return `<tr><td class="rank">#${i+1}</td><td>${p.avatar} ${p.name}</td><td>${arrow}</td><td class="gained">+${res.pointsThisRound[p.id]||0}</td></tr>`;
   }).join('');
-  
   document.getElementById('next-round-btn').classList.remove('hidden');
 }
 
 function renderPodium(state){
-  const sorted=[...state.players].sort((a,b)=>b.score-a.score);
-  const el=document.getElementById('podium');
-  
+  const sorted=[...state.players].sort((a,b)=>b.score-a.score); const el=document.getElementById('podium');
   const slots=[[1,'p2'],[0,'p1'],[2,'p3']]; 
-  
   el.innerHTML = slots.filter(([idx])=>sorted[idx]).map(([idx,cls])=>{
-    const p=sorted[idx];
-    const isFirst = cls === 'p1';
-    let delay = cls==='p3' ? '0.5s' : (cls==='p2' ? '1.5s' : '3.0s'); 
-    
-    return `
-      <div class="podium-slot ${cls}" style="animation-delay: ${delay};">
-        ${isFirst ? `<div class="crown" style="animation-delay: 3.6s;">👑</div>` : ''}
-        <div class="podium-avatar">${p.avatar}</div>
-        <div class="podium-name">${p.name}</div>
-        <div class="podium-score">${p.score}</div>
-      </div>`;
+    const p=sorted[idx]; const isFirst = cls === 'p1'; let delay = cls==='p3' ? '0.5s' : (cls==='p2' ? '1.5s' : '3.0s'); 
+    return `<div class="podium-slot ${cls}" style="animation-delay: ${delay};">${isFirst ? `<div class="crown" style="animation-delay: 3.6s;">👑</div>` : ''}<div class="podium-avatar">${p.avatar}</div><div class="podium-name">${p.name}</div><div class="podium-score">${p.score}</div></div>`;
   }).join('');
 }
 
 document.getElementById('start-game-btn').addEventListener('click', async ()=>{
-  document.getElementById('start-game-btn').disabled = true;
-  const state=await readRoom(hostCode);
-  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,20); s.planIndex=-1; return s; });
-  await advanceRound();
+  document.getElementById('start-game-btn').disabled = true; const state=await readRoom(hostCode);
+  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,20); s.planIndex=-1; return s; }); await advanceRound();
 });
 document.getElementById('next-round-btn').addEventListener('click', advanceRound);
 document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
-  await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,20)); return s; });
-  await advanceRound();
-  
-  document.getElementById('host-finished-view').style.boxShadow = 'none';
-  document.getElementById('host-finished-view').classList.add('hidden');
-  document.getElementById('host-round-view').classList.remove('hidden');
-  
-  // Возвращаем BGM на место
-  AudioEngine.startMusic();
-  AudioEngine.setMusicVolume(0.35, 1.0);
+  await updateRoom(hostCode, s=>{ s.plan=s.plan.concat(buildPlan(s.players,20)); return s; }); await advanceRound();
+  document.getElementById('host-finished-view').style.boxShadow = 'none'; document.getElementById('host-finished-view').classList.add('hidden'); document.getElementById('host-round-view').classList.remove('hidden');
+  AudioEngine.stopMusic(); AudioEngine.startMusic(); AudioEngine.setMusicVolume(AudioEngine.VOL_MAIN, 1.0);
 });
 
 async function advanceRound(){
   document.getElementById('next-round-btn').disabled = true;
   await updateRoom(hostCode, s=>{
     const idx=s.planIndex+1; if(idx>=s.plan.length) return s;
-    const r=buildRound(s.plan[idx].type, s.plan[idx].drawerId);
-    r.startedAt=Date.now(); r.answers={};
+    const r=buildRound(s.plan[idx].type, s.plan[idx].drawerId); r.startedAt=Date.now(); r.answers={};
     const snap={}; s.players.forEach(p=>snap[p.id]=p.score); r.scoreSnapshot=snap;
+    if(r.type==='spingo') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(16).fill('')}; }); }
     s.round=r; s.planIndex=idx; s.phase='active'; return s;
   });
-  hostRenderedRoundKey=null;
-  document.getElementById('next-round-btn').disabled = false;
+  hostRenderedRoundKey=null; document.getElementById('next-round-btn').disabled = false;
 }
 
 /* ================= PLAYER LOGIC ================= */
-let playerCode=null, playerId=null, playerPollTimer=null, playerRenderedRoundKey=null;
-let playerLastStateHash = "";
-let wordOrderLocal=[], matchState=null;
-let drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
-let playerLastPhase = null;
+let playerCode=null, playerId=null, playerPollTimer=null, playerRenderedRoundKey=null, playerLastStateHash = "", playerLastPhase = null;
+let wordOrderLocal=[], matchState=null, drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
 
 document.getElementById('join-btn').addEventListener('click', async ()=>{
-  AudioEngine.ensureCtx();
-  const code=document.getElementById('join-code').value.trim().toUpperCase();
-  const name=document.getElementById('join-name').value.trim();
-  const err=document.getElementById('join-error'); err.textContent='';
-  if(!code||!name){ err.textContent='Fyll i kod och namn!'; return; }
-  
+  AudioEngine.ensureCtx(); const code=document.getElementById('join-code').value.trim().toUpperCase(); const name=document.getElementById('join-name').value.trim();
+  const err=document.getElementById('join-error'); err.textContent=''; if(!code||!name){ err.textContent='Fyll i kod och namn!'; return; }
   document.getElementById('join-btn').disabled = true;
-  const existing=await readRoom(code);
-  if(!existing){ err.textContent='Rummet finns inte.'; document.getElementById('join-btn').disabled = false; return; }
-  
+  const existing=await readRoom(code); if(!existing){ err.textContent='Rummet finns inte.'; document.getElementById('join-btn').disabled = false; return; }
   playerId=newId(); const avatar=pickRandom(AVATARS);
   const ok=await updateRoom(code, s=>{ s.players.push({id:playerId,name,avatar,score:0,combo:0}); return s; });
   if(!ok){ err.textContent='Gick inte, försök igen.'; document.getElementById('join-btn').disabled = false; return; }
-  
-  AudioEngine.playJoin();
-  playerCode=code; document.getElementById('player-name-tag').textContent=avatar+' '+name;
-  show('player-game-screen');
-  playerPollTimer=setInterval(playerPoll, 600);
-  playerPoll();
+  AudioEngine.playJoin(); playerCode=code; document.getElementById('player-name-tag').textContent=avatar+' '+name;
+  show('player-game-screen'); playerPollTimer=setInterval(playerPoll, 600); playerPoll();
 });
 
 async function playerPoll(){
-  const state=await readRoom(playerCode); if(!state) return;
-  const hash = JSON.stringify(state);
-
-  const idle=document.getElementById('player-idle-view');
-  const roundView=document.getElementById('player-round-view');
-  const endView=document.getElementById('player-roundend-view');
-
+  const state=await readRoom(playerCode); if(!state) return; const hash = JSON.stringify(state);
+  const idle=document.getElementById('player-idle-view'); const roundView=document.getElementById('player-round-view'); const endView=document.getElementById('player-roundend-view');
+  
   if(state.phase==='cancelled'){
-    [roundView,endView].forEach(v=>v.classList.add('hidden')); idle.classList.remove('hidden');
-    document.getElementById('player-status-text').textContent='Läraren avslutade rummet.';
-    clearInterval(playerPollTimer); return;
+    [roundView,endView].forEach(v=>v.classList.add('hidden')); idle.classList.remove('hidden'); document.getElementById('player-status-text').textContent='Läraren avslutade rummet.'; clearInterval(playerPollTimer); return;
   }
+  if(state.phase==='active' && state.round && state.round.type==='draw' && state.round.drawerId!==playerId) redrawCanvas(document.getElementById('player-canvas'),state.round.strokes);
 
-  if(state.phase==='active' && state.round && state.round.type==='draw' && state.round.drawerId!==playerId){
-    redrawCanvas(document.getElementById('player-canvas'),state.round.strokes);
-  }
-
-  if (hash === playerLastStateHash) return;
-  playerLastStateHash = hash;
-
+  if (hash === playerLastStateHash) return; playerLastStateHash = hash;
   [idle,roundView,endView].forEach(v=>v.classList.add('hidden'));
 
   if(state.phase==='lobby'){
-    idle.classList.remove('hidden');
-    document.getElementById('player-status-text').textContent='Väntar på läraren...';
+    idle.classList.remove('hidden'); document.getElementById('player-status-text').textContent='Väntar på läraren...';
   } else if(state.phase==='active' && state.round){
-    roundView.classList.remove('hidden');
-    renderMiniLB(document.getElementById('player-mini-lb'),state);
+    roundView.classList.remove('hidden'); renderMiniLB(document.getElementById('player-mini-lb'),state);
     
-    const key=state.round.type+':'+state.planIndex;
+    const key=state.round.type+':'+state.planIndex+(state.round.type==='spingo'?':'+state.round.spins:'');
     if(playerRenderedRoundKey!==key){ playerRenderedRoundKey=key; renderPlayerRound(state); }
     
     if(state.round.type==='draw' && state.round.drawerId!==playerId){
       const gs=document.getElementById('player-guess-status');
-      if(gs && (state.round.correctPlayerIds||[]).includes(playerId)){
-        gs.textContent='Rätt! Väntar...'; gs.className='status-line right';
-        document.getElementById('guess-input').disabled=true;
-        document.getElementById('guess-submit-btn').disabled=true;
-      }
+      if(gs && (state.round.correctPlayerIds||[]).includes(playerId)){ gs.textContent='Rätt! Väntar...'; gs.className='status-line right'; document.getElementById('guess-input').disabled=true; document.getElementById('guess-submit-btn').disabled=true; }
     }
   } else if(state.phase==='round-end'){
-    endView.classList.remove('hidden');
-    const res=state.lastRoundResult;
-    const gained = res ? (res.pointsThisRound[playerId]||0) : 0;
-    const t=document.getElementById('roundend-player-text');
-    t.className='result-flash '+(gained>0?'correct':'wrong');
-    t.textContent = gained>0 ? ('+'+gained+' poäng!') : (res ? res.reveal : '');
-    document.getElementById('roundend-player-sub').textContent = 'Väntar på läraren...';
-    document.getElementById('roundend-player-icon').textContent = gained>0 ? 'star' : 'mood_bad';
+    endView.classList.remove('hidden'); const res=state.lastRoundResult; const gained = res ? (res.pointsThisRound[playerId]||0) : 0;
+    const t=document.getElementById('roundend-player-text'); t.className='result-flash '+(gained>0?'correct':'wrong'); t.textContent = gained>0 ? ('+'+gained+' poäng!') : (res ? res.reveal : '');
+    document.getElementById('roundend-player-sub').textContent = 'Väntar på läraren...'; document.getElementById('roundend-player-icon').textContent = gained>0 ? 'star' : 'mood_bad';
   } else if(state.phase==='finished'){
-    endView.classList.remove('hidden');
-    document.getElementById('roundend-player-text').className='result-flash correct';
-    document.getElementById('roundend-player-text').textContent='Spelet är slut! 🏆';
-    document.getElementById('roundend-player-sub').textContent = 'Kolla på tavlan!';
-    document.getElementById('roundend-player-icon').textContent = 'emoji_events';
-    
-    if (playerLastPhase !== 'finished') {
-        Confetti.startPlayerLoop(); 
-        AudioEngine.playVictory();  
-    }
+    endView.classList.remove('hidden'); document.getElementById('roundend-player-text').className='result-flash correct'; document.getElementById('roundend-player-text').textContent='Spelet är slut! 🏆';
+    document.getElementById('roundend-player-sub').textContent = 'Kolla på tavlan!'; document.getElementById('roundend-player-icon').textContent = 'emoji_events';
+    if (playerLastPhase !== 'finished') { Confetti.startPlayerLoop(); AudioEngine.playVictory(); }
   }
-
   playerLastPhase = state.phase;
 }
 
 function renderPlayerRound(state){
-  const r=state.round;
-  const body=document.getElementById('round-content-player');
-  const isDrawer = r.type==='draw' && r.drawerId===playerId;
+  const r=state.round; const body=document.getElementById('round-content-player'); const isDrawer = r.type==='draw' && r.drawerId===playerId;
 
   if(r.type==='draw'){
     if(isDrawer){
       drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
-      body.innerHTML=`<div class="round-type-label"><span class="msi">brush</span> Du ritar: ${r.word}</div>
-        <canvas class="draw-canvas" id="player-canvas" width="560" height="340"></canvas>
-        <div class="brush-row">
-          <div class="swatch active" style="background:#233246" data-color="#233246"></div>
-          <div class="swatch" style="background:#D9534F" data-color="#D9534F"></div>
-          <div class="swatch" style="background:#2B7DE0" data-color="#2B7DE0"></div>
-          <div class="swatch" style="background:#2E9E52" data-color="#2E9E52"></div>
-          <div class="swatch" style="background:#FFC72C" data-color="#FFC72C"></div>
-          <button class="tool-btn active" id="thin-btn">Tunn</button>
-          <button class="tool-btn" id="thick-btn">Tjock</button>
-          <button class="tool-btn" id="eraser-btn"><span class="msi">ink_eraser</span>Sudda</button>
-          <button class="tool-btn" id="clear-btn">Rensa</button>
-        </div>`;
+      body.innerHTML=`<div class="round-type-label"><span class="msi">brush</span> Du ritar: ${r.word}</div><canvas class="draw-canvas" id="player-canvas" width="560" height="340"></canvas>
+        <div class="brush-row"><div class="swatch active" style="background:#233246" data-color="#233246"></div><div class="swatch" style="background:#D9534F" data-color="#D9534F"></div><div class="swatch" style="background:#2B7DE0" data-color="#2B7DE0"></div><div class="swatch" style="background:#2E9E52" data-color="#2E9E52"></div><div class="swatch" style="background:#FFC72C" data-color="#FFC72C"></div><button class="tool-btn active" id="thin-btn">Tunn</button><button class="tool-btn" id="thick-btn">Tjock</button><button class="tool-btn" id="eraser-btn"><span class="msi">ink_eraser</span>Sudda</button><button class="tool-btn" id="clear-btn">Rensa</button></div>`;
       setupCanvasDrawing();
     } else {
-      body.innerHTML=`<div class="word-hint">${'_ '.repeat(r.wordLength)}</div>
-        <canvas class="draw-canvas" id="player-canvas" width="560" height="340"></canvas>
-        <input id="guess-input" placeholder="Skriv din gissning...">
-        <button class="primary-btn" id="guess-submit-btn">Gissa</button>
-        <div class="status-line" id="player-guess-status"></div>`;
-      redrawCanvas(document.getElementById('player-canvas'),r.strokes);
-      document.getElementById('guess-submit-btn').addEventListener('click', submitGuess);
-      document.getElementById('guess-input').addEventListener('keydown', e=>{ if(e.key==='Enter') submitGuess(); });
+      body.innerHTML=`<div class="word-hint">${'_ '.repeat(r.wordLength)}</div><canvas class="draw-canvas" id="player-canvas" width="560" height="340"></canvas><input id="guess-input" placeholder="Skriv din gissning..."><button class="primary-btn" id="guess-submit-btn">Gissa</button><div class="status-line" id="player-guess-status"></div>`;
+      redrawCanvas(document.getElementById('player-canvas'),r.strokes); document.getElementById('guess-submit-btn').addEventListener('click', submitGuess); document.getElementById('guess-input').addEventListener('keydown', e=>{ if(e.key==='Enter') submitGuess(); });
     }
   } else if(r.type==='truefalse'){
-    body.innerHTML=`<div class="statement-text">"${r.statement}"</div>
-      <div class="tf-row">
-        <button class="tf-btn true" id="tf-true-btn">Rätt</button>
-        <button class="tf-btn false" id="tf-false-btn">Fel</button>
-      </div>
-      <div class="status-line" id="tf-status"></div>`;
-    document.getElementById('tf-true-btn').addEventListener('click', ()=>submitAnswer(true));
-    document.getElementById('tf-false-btn').addEventListener('click', ()=>submitAnswer(false));
+    body.innerHTML=`<div class="statement-text">"${r.statement}"</div><div class="tf-row"><button class="tf-btn true" id="tf-true-btn">Rätt</button><button class="tf-btn false" id="tf-false-btn">Fel</button></div><div class="status-line" id="tf-status"></div>`;
+    document.getElementById('tf-true-btn').addEventListener('click', ()=>submitAnswer(true)); document.getElementById('tf-false-btn').addEventListener('click', ()=>submitAnswer(false));
   } else if(r.type==='wordorder'){
-    wordOrderLocal = r.scrambled.slice();
-    body.innerHTML=`<h2 style="font-size:1.05rem;">Dra orden i rätt ordning</h2>
-      <div class="drag-row" id="drag-row"></div>
-      <button class="primary-btn" id="wo-submit-btn">Skicka</button>
-      <div class="status-line" id="wo-status"></div>`;
-    renderDragChips(document.getElementById('drag-row'), wordOrderLocal);
-    document.getElementById('wo-submit-btn').addEventListener('click', ()=>submitAnswer(wordOrderLocal.slice()));
+    wordOrderLocal = r.scrambled.slice(); body.innerHTML=`<h2 style="font-size:1.05rem;">Dra orden i rätt ordning</h2><div class="drag-row" id="drag-row"></div><button class="primary-btn" id="wo-submit-btn">Skicka</button><div class="status-line" id="wo-status"></div>`;
+    renderDragChips(document.getElementById('drag-row'), wordOrderLocal); document.getElementById('wo-submit-btn').addEventListener('click', ()=>submitAnswer(wordOrderLocal.slice()));
   } else if(r.type==='sign'){
     body.innerHTML = renderSignHTML(r) + `<div class="statement-text" style="font-size:1.05rem;">${r.question}</div><div class="choice-col" id="sign-choices"></div><div class="status-line" id="sign-status"></div>`;
-    const wrap=document.getElementById('sign-choices');
-    r.choices.forEach(c=>{
-      const btn=document.createElement('button'); btn.className='choice-btn'; btn.textContent=c;
-      btn.addEventListener('click', ()=>submitAnswer(c)); wrap.appendChild(btn);
-    });
+    const wrap=document.getElementById('sign-choices'); r.choices.forEach(c=>{ const btn=document.createElement('button'); btn.className='choice-btn'; btn.textContent=c; btn.addEventListener('click', ()=>submitAnswer(c)); wrap.appendChild(btn); });
   } else if(r.type==='match'){
     matchState={pairs:r.pairs, matchedWords:[], selectedWord:null, selectedEmoji:null, shuffledWords:shuffle(r.pairs.map(p=>p.word)), shuffledEmojis:shuffle(r.pairs.map(p=>p.emoji))};
-    body.innerHTML=`<h2 style="font-size:1.05rem;">Para ihop</h2><div class="match-columns"><div class="match-col" id="match-words"></div><div class="match-col" id="match-emojis"></div></div><div class="status-line" id="match-status"></div>`;
-    renderMatchColumns();
+    body.innerHTML=`<h2 style="font-size:1.05rem;">Para ihop</h2><div class="match-columns"><div class="match-col" id="match-words"></div><div class="match-col" id="match-emojis"></div></div><div class="status-line" id="match-status"></div>`; renderMatchColumns();
+  } else if(r.type==='spingo'){
+    renderSpingoPlayer(state);
   }
 }
 
-function renderDragChips(container, order){
-  container.innerHTML='';
-  order.forEach((w)=>{
-    const el=document.createElement('div'); el.className='drag-chip jiggle'; el.textContent=w;
-    el.style.animationDelay=(Math.random()*0.2).toFixed(2)+'s';
-    container.appendChild(el); attachDragHandlers(el, container, order);
-  });
+// SPINGO PLAYER UI LOGIC
+function renderSpingoPlayer(state) {
+   const r = state.round; const body = document.getElementById('round-content-player');
+   const myGrid = (r.answers && r.answers[playerId] && r.answers[playerId].grid) ? r.answers[playerId].grid : Array(16).fill('');
+   const pendingStolen = (r.answers && r.answers[playerId]) ? r.answers[playerId].pendingStolen : null;
+   const isReady = r.readyPlayers && r.readyPlayers.includes(playerId);
+
+   if(!r.currentAction) {
+       body.innerHTML = `<h2 style="font-size:1.4rem;">Väntar på snurr... 🎲</h2><div class="spingo-paper"><div class="spingo-grid">${myGrid.map(l=>`<div class="spingo-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
+       return;
+   }
+
+   if(isReady) {
+       body.innerHTML = `<h2 style="font-size:1.4rem; color:var(--green);">Klar! ✓</h2><div class="spingo-paper"><div class="spingo-grid">${myGrid.map(l=>`<div class="spingo-cell ${l?'filled':'empty'}">${l}</div>`).join('')}</div></div>`;
+       return;
+   }
+
+   if(r.currentAction === 'STEAL' && !pendingStolen) {
+       // Steal mode: select opponent
+       const targets = state.players.filter(p => p.id !== playerId && r.answers && r.answers[p.id] && r.answers[p.id].grid && r.answers[p.id].grid.some(cell=>cell!==''));
+       if(targets.length === 0) {
+           // Nobody has letters, fallback to giving a random letter
+           submitSpingoSteal(null);
+           body.innerHTML = `<h2>Hämtar bokstav...</h2>`;
+       } else {
+           body.innerHTML = `<h2 style="font-size:1.2rem; color:var(--red);">🦹‍♂️ Välj en spelare att stjäla från!</h2><div id="spingo-targets" style="text-align:left; max-width:300px; margin: 0 auto;"></div>`;
+           const tw = document.getElementById('spingo-targets');
+           targets.forEach(t => {
+               const btn = document.createElement('div'); btn.className='spingo-target-player'; btn.innerHTML=`${t.avatar} ${t.name}`;
+               btn.onclick = () => submitSpingoSteal(t.id); tw.appendChild(btn);
+           });
+       }
+   } else {
+       // Placement mode
+       const letterToPlace = pendingStolen || r.currentAction;
+       body.innerHTML = `<h2 style="font-size:1.2rem;">Placera: <span style="font-size:2rem; color:var(--accent);">${letterToPlace}</span></h2><div class="spingo-paper"><div class="spingo-grid" id="my-spingo-grid"></div></div>`;
+       const gridWrap = document.getElementById('my-spingo-grid');
+       myGrid.forEach((l, i) => {
+           const cell = document.createElement('div'); cell.className=`spingo-cell ${l?'filled':'empty'}`; cell.textContent = l;
+           if(!l) cell.onclick = () => submitSpingoPlacement(i, letterToPlace);
+           gridWrap.appendChild(cell);
+       });
+   }
 }
+
+async function submitSpingoSteal(targetId) {
+    AudioEngine.playPop();
+    await updateRoom(playerCode, s => {
+        if(!s.round.answers[playerId]) s.round.answers[playerId] = {grid: Array(16).fill('')};
+        if(!targetId) { s.round.answers[playerId].pendingStolen = pickRandom(SPINGO_LETTERS); return s; }
+        const tGrid = s.round.answers[targetId].grid;
+        const filled = tGrid.map((v,i)=>v!==''?i:-1).filter(i=>i!==-1);
+        if(filled.length > 0) {
+            const idx = filled[Math.floor(Math.random()*filled.length)];
+            s.round.answers[playerId].pendingStolen = tGrid[idx];
+            s.round.answers[targetId].grid[idx] = ''; // Steal it!
+        } else {
+            s.round.answers[playerId].pendingStolen = pickRandom(SPINGO_LETTERS);
+        }
+        return s;
+    });
+}
+
+async function submitSpingoPlacement(index, letter) {
+    AudioEngine.playPop();
+    await updateRoom(playerCode, s => {
+        if(!s.round.answers[playerId]) s.round.answers[playerId] = {grid: Array(16).fill('')};
+        s.round.answers[playerId].grid[index] = letter;
+        s.round.answers[playerId].pendingStolen = null;
+        if(!s.round.readyPlayers) s.round.readyPlayers = [];
+        if(!s.round.readyPlayers.includes(playerId)) s.round.readyPlayers.push(playerId);
+        return s;
+    });
+}
+
+function renderDragChips(container, order){ container.innerHTML=''; order.forEach((w)=>{ const el=document.createElement('div'); el.className='drag-chip jiggle'; el.textContent=w; el.style.animationDelay=(Math.random()*0.2).toFixed(2)+'s'; container.appendChild(el); attachDragHandlers(el, container, order); }); }
 function attachDragHandlers(el, container, order){
-  let dragging=false;
-  function getX(e){ return e.touches ? e.touches[0].clientX : e.clientX; }
-  function onDown(e){
-    e.preventDefault(); dragging=true; el.classList.add('dragging'); el.classList.remove('jiggle');
-    document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp);
-    document.addEventListener('touchmove', onMove, {passive:false}); document.addEventListener('touchend', onUp);
-  }
-  function onMove(e){
-    if(!dragging) return; e.preventDefault(); const x=getX(e);
-    const children=[...container.children].filter(c=>c!==el); let insertBefore=null;
-    for(const child of children){ const rect=child.getBoundingClientRect(); if(x < rect.left+rect.width/2){ insertBefore=child; break; } }
-    if(insertBefore) container.insertBefore(el, insertBefore); else container.appendChild(el);
-  }
-  function onUp(){
-    if(!dragging) return; dragging=false; el.classList.remove('dragging'); el.classList.add('jiggle');
-    document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp);
-    document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp);
-    order.length=0; order.push(...[...container.children].map(c=>c.textContent));
-  }
+  let dragging=false; function getX(e){ return e.touches ? e.touches[0].clientX : e.clientX; }
+  function onDown(e){ e.preventDefault(); dragging=true; el.classList.add('dragging'); el.classList.remove('jiggle'); document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp); document.addEventListener('touchmove', onMove, {passive:false}); document.addEventListener('touchend', onUp); }
+  function onMove(e){ if(!dragging) return; e.preventDefault(); const x=getX(e); const children=[...container.children].filter(c=>c!==el); let insertBefore=null; for(const child of children){ const rect=child.getBoundingClientRect(); if(x < rect.left+rect.width/2){ insertBefore=child; break; } } if(insertBefore) container.insertBefore(el, insertBefore); else container.appendChild(el); }
+  function onUp(){ if(!dragging) return; dragging=false; el.classList.remove('dragging'); el.classList.add('jiggle'); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); document.removeEventListener('touchmove', onMove); document.removeEventListener('touchend', onUp); order.length=0; order.push(...[...container.children].map(c=>c.textContent)); }
   el.addEventListener('mousedown', onDown); el.addEventListener('touchstart', onDown, {passive:false});
 }
 
 function renderMatchColumns(){
-  const wordsWrap=document.getElementById('match-words'); const emojisWrap=document.getElementById('match-emojis');
-  wordsWrap.innerHTML=''; emojisWrap.innerHTML='';
-  matchState.shuffledWords.forEach(w=>{
-    const el=document.createElement('div'); el.className='match-tile'+(matchState.matchedWords.includes(w)?' matched':'');
-    el.textContent=w; el.addEventListener('click', ()=> {
-      if(el.classList.contains('matched')) return;
-      document.querySelectorAll('#match-words .match-tile').forEach(t=>t.classList.remove('selected'));
-      matchState.selectedWord=w; el.classList.add('selected'); tryMatch();
-    }); wordsWrap.appendChild(el);
-  });
-  matchState.shuffledEmojis.forEach(em=>{
-    const el=document.createElement('div'); const pair=matchState.pairs.find(p=>p.emoji===em);
-    el.className='match-tile'+(matchState.matchedWords.includes(pair.word)?' matched':'');
-    el.textContent=em; el.addEventListener('click', ()=> {
-      if(el.classList.contains('matched')) return;
-      document.querySelectorAll('#match-emojis .match-tile').forEach(t=>t.classList.remove('selected'));
-      matchState.selectedEmoji=em; el.classList.add('selected'); tryMatch();
-    }); emojisWrap.appendChild(el);
-  });
+  const wordsWrap=document.getElementById('match-words'); const emojisWrap=document.getElementById('match-emojis'); wordsWrap.innerHTML=''; emojisWrap.innerHTML='';
+  matchState.shuffledWords.forEach(w=>{ const el=document.createElement('div'); el.className='match-tile'+(matchState.matchedWords.includes(w)?' matched':''); el.textContent=w; el.addEventListener('click', ()=> { if(el.classList.contains('matched')) return; document.querySelectorAll('#match-words .match-tile').forEach(t=>t.classList.remove('selected')); matchState.selectedWord=w; el.classList.add('selected'); tryMatch(); }); wordsWrap.appendChild(el); });
+  matchState.shuffledEmojis.forEach(em=>{ const el=document.createElement('div'); const pair=matchState.pairs.find(p=>p.emoji===em); el.className='match-tile'+(matchState.matchedWords.includes(pair.word)?' matched':''); el.textContent=em; el.addEventListener('click', ()=> { if(el.classList.contains('matched')) return; document.querySelectorAll('#match-emojis .match-tile').forEach(t=>t.classList.remove('selected')); matchState.selectedEmoji=em; el.classList.add('selected'); tryMatch(); }); emojisWrap.appendChild(el); });
 }
 function tryMatch(){
-  if(!matchState.selectedWord || !matchState.selectedEmoji) return;
-  const pair=matchState.pairs.find(p=>p.word===matchState.selectedWord);
-  if(pair.emoji===matchState.selectedEmoji){
-    matchState.matchedWords.push(matchState.selectedWord);
-    matchState.selectedWord=null; matchState.selectedEmoji=null;
-    renderMatchColumns();
-    if(matchState.matchedWords.length===matchState.pairs.length){ document.getElementById('match-status').textContent='Klart!'; submitAnswer(true); }
-  } else {
-    document.getElementById('match-status').textContent='Fel par, försök igen';
-    setTimeout(()=>{
-      matchState.selectedWord=null; matchState.selectedEmoji=null;
-      document.querySelectorAll('.match-tile.selected').forEach(t=>t.classList.remove('selected'));
-    },450);
-  }
+  if(!matchState.selectedWord || !matchState.selectedEmoji) return; const pair=matchState.pairs.find(p=>p.word===matchState.selectedWord);
+  if(pair.emoji===matchState.selectedEmoji){ matchState.matchedWords.push(matchState.selectedWord); matchState.selectedWord=null; matchState.selectedEmoji=null; renderMatchColumns(); if(matchState.matchedWords.length===matchState.pairs.length){ document.getElementById('match-status').textContent='Klart!'; submitAnswer(true); } } 
+  else { document.getElementById('match-status').textContent='Fel par, försök igen'; setTimeout(()=>{ matchState.selectedWord=null; matchState.selectedEmoji=null; document.querySelectorAll('.match-tile.selected').forEach(t=>t.classList.remove('selected')); },450); }
 }
 
 function setupCanvasDrawing(){
   const canvas=document.getElementById('player-canvas'); let drawing=false;
-  function getPos(e){
-    const rect=canvas.getBoundingClientRect();
-    const clientX=e.touches?e.touches[0].clientX:e.clientX; const clientY=e.touches?e.touches[0].clientY:e.clientY;
-    return {x:(clientX-rect.left)/rect.width, y:(clientY-rect.top)/rect.height};
-  }
-  function start(e){ e.preventDefault(); drawing=true;
-    drawState.currentStroke={points:[getPos(e)],color:drawState.color,size:drawState.tool==='eraser'?22:drawState.size,mode:drawState.tool};
-    drawState.strokes.push(drawState.currentStroke); redrawCanvas(canvas,drawState.strokes);
-  }
-  function move(e){ if(!drawing) return; e.preventDefault();
-    drawState.currentStroke.points.push(getPos(e)); redrawCanvas(canvas,drawState.strokes);
-    const now=Date.now(); if(now-drawState.lastSync>350){ drawState.lastSync=now; syncStrokes(); }
-  }
+  function getPos(e){ const rect=canvas.getBoundingClientRect(); const clientX=e.touches?e.touches[0].clientX:e.clientX; const clientY=e.touches?e.touches[0].clientY:e.clientY; return {x:(clientX-rect.left)/rect.width, y:(clientY-rect.top)/rect.height}; }
+  function start(e){ e.preventDefault(); drawing=true; drawState.currentStroke={points:[getPos(e)],color:drawState.color,size:drawState.tool==='eraser'?22:drawState.size,mode:drawState.tool}; drawState.strokes.push(drawState.currentStroke); redrawCanvas(canvas,drawState.strokes); }
+  function move(e){ if(!drawing) return; e.preventDefault(); drawState.currentStroke.points.push(getPos(e)); redrawCanvas(canvas,drawState.strokes); const now=Date.now(); if(now-drawState.lastSync>350){ drawState.lastSync=now; syncStrokes(); } }
   function end(e){ if(!drawing) return; drawing=false; syncStrokes(); }
-  
-  canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move);
-  canvas.addEventListener('mouseup',end); canvas.addEventListener('mouseleave',end);
-  canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false});
-  canvas.addEventListener('touchend',end,{passive:false});
-
+  canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); canvas.addEventListener('mouseup',end); canvas.addEventListener('mouseleave',end); canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',end,{passive:false});
   function setActiveTool(btn){ document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
-  document.querySelectorAll('.swatch').forEach(sw=>{
-    sw.addEventListener('click', ()=>{
-      document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active')); sw.classList.add('active');
-      drawState.color=sw.dataset.color; drawState.tool='pen'; document.getElementById('eraser-btn').classList.remove('active');
-    });
-  });
-  document.getElementById('thin-btn').addEventListener('click', (e)=>{ drawState.size=4; drawState.tool='pen'; setActiveTool(e.target); });
-  document.getElementById('thick-btn').addEventListener('click', (e)=>{ drawState.size=10; drawState.tool='pen'; setActiveTool(e.target); });
-  document.getElementById('eraser-btn').addEventListener('click', (e)=>{ drawState.tool='eraser'; setActiveTool(e.currentTarget); });
-  document.getElementById('clear-btn').addEventListener('click', ()=>{ drawState.strokes=[]; redrawCanvas(canvas,[]); syncStrokes(); });
+  document.querySelectorAll('.swatch').forEach(sw=>{ sw.addEventListener('click', ()=>{ document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active')); sw.classList.add('active'); drawState.color=sw.dataset.color; drawState.tool='pen'; document.getElementById('eraser-btn').classList.remove('active'); }); });
+  document.getElementById('thin-btn').addEventListener('click', (e)=>{ drawState.size=4; drawState.tool='pen'; setActiveTool(e.target); }); document.getElementById('thick-btn').addEventListener('click', (e)=>{ drawState.size=10; drawState.tool='pen'; setActiveTool(e.target); }); document.getElementById('eraser-btn').addEventListener('click', (e)=>{ drawState.tool='eraser'; setActiveTool(e.currentTarget); }); document.getElementById('clear-btn').addEventListener('click', ()=>{ drawState.strokes=[]; redrawCanvas(canvas,[]); syncStrokes(); });
 }
-
-async function syncStrokes(){
-  await updateRoom(playerCode, s=>{
-    if(s.phase==='active' && s.round && s.round.type==='draw' && s.round.drawerId===playerId) s.round.strokes=drawState.strokes;
-    return s;
-  });
-}
+async function syncStrokes(){ await updateRoom(playerCode, s=>{ if(s.phase==='active' && s.round && s.round.type==='draw' && s.round.drawerId===playerId) s.round.strokes=drawState.strokes; return s; }); }
 
 async function submitGuess(){
-  const input=document.getElementById('guess-input'); const btn=document.getElementById('guess-submit-btn');
-  const status=document.getElementById('player-guess-status'); const val=input.value.trim(); if(!val) return;
+  const input=document.getElementById('guess-input'); const btn=document.getElementById('guess-submit-btn'); const status=document.getElementById('player-guess-status'); const val=input.value.trim(); if(!val) return;
   btn.disabled=true; let resultInfo=null;
-  
   await updateRoom(playerCode, s=>{
-    if(s.phase!=='active' || !s.round || s.round.type!=='draw') return s;
-    const r=s.round;
-    if((r.correctPlayerIds||[]).includes(playerId)){ resultInfo={correct:true}; return s; }
-    
+    if(s.phase!=='active' || !s.round || s.round.type!=='draw') return s; const r=s.round; if((r.correctPlayerIds||[]).includes(playerId)){ resultInfo={correct:true}; return s; }
     const isCorrect = normalizeSwedish(val)===normalizeSwedish(r.word);
     if(isCorrect){
-      const player=s.players.find(p=>p.id===playerId);
-      const pts=calcScore(Math.max(0,ROUND_DURATIONS.draw-(Date.now()-r.startedAt)/1000)/ROUND_DURATIONS.draw, player.combo||0);
-      player.score+=pts; player.combo=(player.combo||0)+1;
-      r.correctPlayerIds=(r.correctPlayerIds||[]).concat(playerId);
-      r.answers=r.answers||{}; r.answers[playerId]={value:val,correct:true,points:pts};
-      resultInfo={correct:true};
-    } else {
-      resultInfo={correct:false, sim:Math.round(similarity(normalizeSwedish(val),normalizeSwedish(r.word))*100)};
-    }
+      const player=s.players.find(p=>p.id===playerId); const pts=calcScore(Math.max(0,ROUND_DURATIONS.draw-(Date.now()-r.startedAt)/1000)/ROUND_DURATIONS.draw, player.combo||0);
+      player.score+=pts; player.combo=(player.combo||0)+1; r.correctPlayerIds=(r.correctPlayerIds||[]).concat(playerId); r.answers=r.answers||{}; r.answers[playerId]={value:val,correct:true,points:pts}; resultInfo={correct:true};
+    } else { resultInfo={correct:false, sim:Math.round(similarity(normalizeSwedish(val),normalizeSwedish(r.word))*100)}; }
     return s;
   });
-  
   btn.disabled=false;
-  if(resultInfo.correct){
-    status.textContent='Rätt! Väntar...'; status.className='status-line right'; input.disabled=true; btn.disabled=true; AudioEngine.playCorrect();
-  } else if(resultInfo.sim>=60){
-    status.textContent='Nästan rätt! ('+resultInfo.sim+'%) Försök igen'; status.className='status-line almost'; input.value=''; input.focus(); AudioEngine.playAlmost();
-  } else {
-    status.textContent='Fel, försök igen'; status.className='status-line wrong'; input.value=''; input.focus(); AudioEngine.playWrong();
-  }
+  if(resultInfo.correct){ status.textContent='Rätt! Väntar...'; status.className='status-line right'; input.disabled=true; btn.disabled=true; AudioEngine.playCorrect(); } 
+  else if(resultInfo.sim>=60){ status.textContent='Nästan rätt! ('+resultInfo.sim+'%) Försök igen'; status.className='status-line almost'; input.value=''; input.focus(); AudioEngine.playAlmost(); } 
+  else { status.textContent='Fel, försök igen'; status.className='status-line wrong'; input.value=''; input.focus(); AudioEngine.playWrong(); }
 }
 
 async function submitAnswer(value){
-  document.querySelectorAll('.tf-btn,.choice-btn, .primary-btn').forEach(b=>b.disabled=true);
-  let wasCorrect=null;
+  document.querySelectorAll('.tf-btn,.choice-btn, .primary-btn').forEach(b=>b.disabled=true); let wasCorrect=null;
   await updateRoom(playerCode, s=>{
-    if(s.phase!=='active' || !s.round) return s;
-    const r=s.round; r.answers=r.answers||{}; if(r.answers[playerId]) return s;
-    
+    if(s.phase!=='active' || !s.round) return s; const r=s.round; r.answers=r.answers||{}; if(r.answers[playerId]) return s;
     let correct=false;
-    if(r.type==='truefalse') correct = value===r.isTrue;
-    else if(r.type==='wordorder') correct = JSON.stringify(value)===JSON.stringify(r.correctOrder);
-    else if(r.type==='sign') correct = value===r.correct;
-    else if(r.type==='match') correct = value===true;
-    
+    if(r.type==='truefalse') correct = value===r.isTrue; else if(r.type==='wordorder') correct = JSON.stringify(value)===JSON.stringify(r.correctOrder); else if(r.type==='sign') correct = value===r.correct; else if(r.type==='match') correct = value===true;
     const player=s.players.find(p=>p.id===playerId);
     if(correct){
       const pts=calcScore(Math.max(0,ROUND_DURATIONS[r.type]-(Date.now()-r.startedAt)/1000)/ROUND_DURATIONS[r.type], player.combo||0);
-      player.score+=pts; player.combo=(player.combo||0)+1;
-      r.answers[playerId]={value,correct:true,points:pts}; wasCorrect=true;
-    } else {
-      r.answers[playerId]={value,correct:false,points:0}; wasCorrect=false;
-    }
+      player.score+=pts; player.combo=(player.combo||0)+1; r.answers[playerId]={value,correct:true,points:pts}; wasCorrect=true;
+    } else { r.answers[playerId]={value,correct:false,points:0}; wasCorrect=false; }
     return s;
   });
-  
   if(wasCorrect===true) AudioEngine.playCorrect(); else if(wasCorrect===false) AudioEngine.playWrong();
   const st=document.getElementById('tf-status')||document.getElementById('wo-status')||document.getElementById('sign-status')||document.getElementById('match-status');
   if(st){ st.textContent='Skickat! Väntar på övriga...'; st.className='status-line'; }
