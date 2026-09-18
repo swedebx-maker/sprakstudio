@@ -250,7 +250,6 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .podium-slot .podium-name{ width:auto !important; min-width:100%; white-space:nowrap; overflow:visible !important; text-overflow:clip !important; }
 .crown{ top:-128px !important; font-size:4rem !important; z-index:3; }
 :root{--z:1.2;}
-/* Smartboard: hela gränssnittet 20% större (som webbläsarzoom) */
 html.host-zoom{zoom:var(--z);}
 html.host-zoom #app{min-height:calc(100vh / var(--z));}
 html.host-zoom .board-wrap{width:min(1320px, calc(95vw / var(--z)));}
@@ -380,6 +379,12 @@ html.host-zoom #host-roundend-view.wheel-board{width:auto !important;}
 </div>
 
 <script>
+function logEvent(event, data){
+  try{
+    fetch('/api/log',{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,
+      body:JSON.stringify(Object.assign({event},data||{}))}).catch(()=>{});
+  }catch(e){}
+}
 function setHostZoom(on){ document.documentElement.classList.toggle('host-zoom', !!on); window.dispatchEvent(new Event('resize')); }
 const THIEF_TOKEN='🦹‍♂️';
 const THIEF_SVG='<svg class="thief-ico" viewBox="0 0 64 64" aria-label="tjuv"><path fill="currentColor" fill-rule="evenodd" d="M4 28C4 21 13 18 22 20c5 1 7 4 10 4s5-3 10-4c9-2 18 1 18 8 0 9-6 16-16 16-6 0-9-6-12-6s-6 6-12 6C10 44 4 37 4 28ZM12 30a7 4.5 0 1 0 14 0a7 4.5 0 1 0-14 0ZM38 30a7 4.5 0 1 0 14 0a7 4.5 0 1 0-14 0Z"/></svg>';
@@ -545,7 +550,6 @@ const BOKSTAV_WORDS = ""
   + "vårt våt yrke yta zebra ägg älg ännu äpple är ärta äta äter ätit åka åker år åra åska åt åtta öga öl öppna öra "
   + "örn över ";
 const BOKSTAV_DICT = new Set();
-// Enbokstavsord som räknas: bara ö (ö = остров)
 const SINGLE_LETTER_WORDS = new Set(['Ö']);
 function addBokstavWord(w){
   if(!w) return false;
@@ -860,6 +864,7 @@ document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   document.getElementById('lobby-code-big').textContent=hostCode; document.getElementById('host-room-code').textContent='KOD: '+hostCode;
   document.getElementById('lobby-qr').src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent('https://sprakstudio.vercel.app/?code='+hostCode);
   isHost=true; saveSession({role:'host', code:hostCode});
+  logEvent('room_created',{code:hostCode});
   show('host-board-screen'); startHostPolling(); startHostHeartbeat();
 });
 
@@ -889,14 +894,12 @@ document.addEventListener('visibilitychange', ()=>{
 
 let plannedRounds=12;
 const ROUNDS_MIN=2, ROUNDS_MAX=60, ROUNDS_STEP=1;
-// Ungefärlig tid per rundtyp (sekunder): själva spelet
 const EST_ROUND_SEC={draw:70, truefalse:13, wordorder:32, sign:18, match:38, bokstav:360};
-// Per runda: lärarens förklaring (~32 s) + klick "Nästa runda", animationer, laddning (~4 s)
 const EST_OVERHEAD_SEC=36;
 function estimateMinutes(n){
   const draws=Math.ceil(n/2), others=Math.floor(n/2);
   const avgOther=NON_DRAW_TYPES.reduce((a,t)=>a+EST_ROUND_SEC[t],0)/NON_DRAW_TYPES.length;
-  const total=draws*EST_ROUND_SEC.draw + others*avgOther + n*EST_OVERHEAD_SEC + 60; // +60 s start & pallen
+  const total=draws*EST_ROUND_SEC.draw + others*avgOther + n*EST_OVERHEAD_SEC + 60;
   return Math.max(1, Math.round(total/60));
 }
 function renderRoundsPill(){
@@ -922,6 +925,7 @@ document.getElementById('mute-btn').addEventListener('click', (e)=>{
 document.getElementById('cancel-room-btn').addEventListener('click', async ()=>{
   if(!confirm('Avbryta rummet? Alla elever kopplas bort.')) return;
   await updateRoom(hostCode, s=>{ s.phase='cancelled'; return s; });
+  logEvent('room_cancelled',{code:hostCode});
   stopHostPolling(); clearSession(); isHost=false; setHostZoom(false); show('role-screen');
 });
 
@@ -954,15 +958,12 @@ async function hostPoll(){
       const answers = r.answers||{};
       doneEarly = state.players.length>0 && state.players.every(p=>answers[p.id]);
     }
-    // Alla klara: vänta ~1.2 s så att sista svaret syns, sedan avsluta.
-    // Kräver inte längre att state är oförändrat (ritaren skickar streck hela tiden).
     const roundKey = state.planIndex+':'+r.startedAt;
     if(doneEarly && hostDoneKey!==roundKey){ hostDoneKey=roundKey; hostDoneAt=Date.now(); }
     if(timeLeft<=0 || (doneEarly && Date.now()-hostDoneAt>=1200)){
       await finalizeRound(state); return;
     }
 
-    // Bokstavstips körs EFTER slutkontrollen och blockerar den inte
     if(r.type==='draw' && r.wordLength>2){
       const target=Math.min(Math.floor(elapsed/15), r.wordLength-2);
       if((r.revealedIndices||[]).length < target){
@@ -1057,6 +1058,7 @@ async function hostPoll(){
   }
   
   if(state.phase==='finished' && hostLastPhase!=='finished'){
+    if(hostLastPhase!==null) logEvent('game_finished',{code:hostCode, players:state.players.length, rounds:(state.plan||[]).length});
     renderPodium(state); AudioEngine.playHostFinaleSequence(); 
   }
   hostLastPhase=state.phase;
@@ -1190,8 +1192,6 @@ function showTheftOverlay(state){
   window._theftTimer=setTimeout(()=>{ el.classList.add('hidden'); }, 5000);
 }
 
-// --- Osynlig hjälp: ibland (inte alltid) landar hjulet på en bokstav som
-// fortsätter eller fullbordar ett ord i elevens rutnät. Ser ut som slump.
 const BOKSTAV_ASSIST_CHANCE = 0.45;
 const BOKSTAV_LINES = [[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
   [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24]];
@@ -1215,8 +1215,8 @@ function bokstavHelpWeights(grid){
           if(b-a<2) continue;
           const sub=chars.slice(a,b).join('');
           if(sub.indexOf(' ')!==-1) continue;
-          if(BOKSTAV_DICT.has(sub)) best=Math.max(best,(b-a)*4);   // fullbordar ett ord
-          else if(BOKSTAV_FRAGS.has(sub)) best=Math.max(best,b-a); // bygger vidare på ett ord
+          if(BOKSTAV_DICT.has(sub)) best=Math.max(best,(b-a)*4);
+          else if(BOKSTAV_FRAGS.has(sub)) best=Math.max(best,b-a);
         }
         if(best) w[L]=(w[L]||0)+best;
       });
@@ -1226,8 +1226,6 @@ function bokstavHelpWeights(grid){
 }
 function bokstavPickAssist(grid){
   if(Math.random() > BOKSTAV_ASSIST_CHANCE) return null;
-  // bara de ~6 mest hjälpsamma bokstäverna, viktat slumpval bland dem
-  // -> hjälper på riktigt men blir aldrig samma "perfekta" bokstav varje gång
   const entries=Object.entries(bokstavHelpWeights(grid)).sort((a,b)=>b[1]-a[1]).slice(0,6);
   if(!entries.length) return null;
   let total=0; const ws=entries.map(([L,v])=>{ total+=v; return [L,v]; });
@@ -1488,7 +1486,6 @@ function renderRoundEnd(state){
       const groups=d.groups||null;
       const cellColor={}; let words;
       if(groups){
-        // Längre ord får mörkare grönt; varje ord sin egen nyans
         const sorted=groups.map((g,i)=>Object.assign({i},g)).sort((a,b)=>b.word.length-a.word.length || a.i-b.i);
         sorted.forEach((g,k)=>{ g.col=BOKSTAV_WORD_COLORS[k%BOKSTAV_WORD_COLORS.length]; g.cells.forEach(c=>{ if(!cellColor[c]) cellColor[c]=g.col; }); });
         words=sorted.map(g=>`<span class="gc-word" style="background:${g.col.bg};color:${g.col.fg};">${g.word}</span>`).join('');
@@ -1600,7 +1597,9 @@ function renderPodium(state){
 
 document.getElementById('start-game-btn').addEventListener('click', async ()=>{
   document.getElementById('start-game-btn').disabled = true; const state=await readRoom(hostCode);
-  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,plannedRounds); s.planIndex=-1; return s; }); await advanceRound();
+  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,plannedRounds); s.planIndex=-1; return s; });
+  logEvent('game_started',{code:hostCode, players:(state&&state.players||[]).length, rounds:plannedRounds});
+  await advanceRound();
 });
 document.getElementById('next-round-btn').addEventListener('click', advanceRound);
 document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
@@ -1634,6 +1633,7 @@ document.getElementById('join-btn').addEventListener('click', async ()=>{
   playerId=newId(); const avatar=pickRandom(AVATARS);
   const ok=await updateRoom(code, s=>{ s.players.push({id:playerId,name,avatar,score:0,combo:0}); return s; });
   if(!ok){ err.textContent='Gick inte, försök igen'; document.getElementById('join-btn').disabled = false; return; }
+  logEvent('player_joined',{code});
   AudioEngine.playJoin(); playerCode=code; document.getElementById('player-name-tag').textContent=avatar+' '+name;
   saveSession({role:'player', code, playerId, name, avatar});
   show('player-game-screen'); startPlayerPolling();
