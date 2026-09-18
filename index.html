@@ -16,7 +16,7 @@
   --green:#2E9E52; --red:#D9534F; --purple:#8A2387;
 }
 *{box-sizing:border-box;}
-html { font-size: 19px; } 
+html { font-size: 22px; } 
 html,body{margin:0;padding:0;min-height:100%;font-family:'Nunito',sans-serif;
   background:var(--bg); color:var(--ink); -webkit-user-select:none; user-select:none; overflow-x:hidden;}
 #app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3vh 3vw;}
@@ -27,7 +27,7 @@ h1{font-family:'Fredoka',sans-serif;color:var(--accent-dark);font-size:clamp(1.6
 h2{font-family:'Fredoka',sans-serif;color:var(--ink);font-size:clamp(1.2rem,2.1vw,1.6rem);margin:.2em 0;font-weight:600;}
 p.sub{color:var(--muted);font-weight:600;margin-top:0;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 4px rgba(20,40,70,.06);
-  padding:3vh 3vw;width:min(560px,92vw);text-align:center; position:relative;}
+  padding:3vh 3vw;width:min(645px,92vw);text-align:center; position:relative;}
 .role-row{display:flex;gap:1.2rem;margin-top:1.8rem;justify-content:center;flex-wrap:wrap;}
 .role-btn{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.1rem;background:var(--card);color:var(--ink);
   border:1px solid var(--border);border-radius:16px;padding:1.6rem 2rem;cursor:pointer;box-shadow:0 1px 4px rgba(20,40,70,.06);
@@ -46,7 +46,7 @@ input:focus{outline:none;border-color:var(--accent);}
 .cancel-btn{font-family:'Fredoka',sans-serif;font-weight:600;background:#fff;border:1px solid var(--red);color:var(--red);
   border-radius:10px;padding:.5em 1em;cursor:pointer;font-size:.9rem;display:flex;align-items:center;gap:.3em;}
 .cancel-btn:active{background:#FBE7E6;}
-.board-wrap{width:min(1150px,95vw);}
+.board-wrap{width:min(1320px,95vw);}
 .top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.2vh;gap:1rem;}
 .room-pill{background:var(--accent-light);color:var(--accent-dark);font-family:'Fredoka',sans-serif;font-weight:700;
   border-radius:10px;padding:.4em 1em;font-size:1rem;letter-spacing:.06em;}
@@ -73,7 +73,7 @@ input:focus{outline:none;border-color:var(--accent);}
 .word-hint{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(1.6rem,3.6vw,2.4rem);letter-spacing:.22em;
   color:var(--ink);}
 canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:12px;touch-action:none;
-  width:100%;max-width:560px;height:min(340px,42vh);}
+  width:100%;max-width:645px;height:min(390px,48vh);}
 .brush-row{display:flex;gap:.5rem;align-items:center;justify-content:center;margin-top:1rem;flex-wrap:wrap;}
 .swatch{width:30px;height:30px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform 0.1s;}
 .swatch:active{transform:scale(0.9);}
@@ -158,7 +158,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .grid-card { text-align: center; transition: transform .25s cubic-bezier(0.2,0.9,0.3,1); position: relative; z-index: 1; }
 .grid-card .gc-name { font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.05rem; margin-top: .3rem; }
 .grid-card .gc-words { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .8rem; color: var(--green); max-width: 220px; margin: 0 auto; }
-.grid-card .bokstav-grid { width: 200px; }
+.grid-card .bokstav-grid { width: 230px; }
 .grid-card .bokstav-cell { font-size: 1.1rem; }
 .grid-card .bokstav-cell.scored { background: #C9EFD4; color: #14663A; }
 .grid-card { cursor: default; }
@@ -185,7 +185,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .deadline-pill.hot { background: #FBE1E0; color: var(--red); }
 .bokstav-paper { background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 0.8rem; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); display: inline-block; position:relative; }
 .bokstav-paper::before { content: '📝'; position: absolute; top: -15px; right: -15px; font-size: 2rem; transform: rotate(15deg); }
-.bokstav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(340px, 85vw); }
+.bokstav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(390px, 85vw); }
 .bokstav-cell { background: #fff; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); cursor: pointer; text-transform: uppercase; transition: background 0.1s, transform 0.1s; }
 .bokstav-cell:active { transform: scale(0.92); }
 .bokstav-cell.empty { background: #fafafa; }
@@ -334,7 +334,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
   </div>
 </div>
 
-<div id="player-game-screen" class="hidden" style="width:min(480px,94vw);">
+<div id="player-game-screen" class="hidden" style="width:min(550px,94vw);">
   <div class="card" style="width:100%;">
     <div id="player-idle-view" class="player-idle">
       <div class="big-emoji msi">hourglass_top</div>
@@ -524,11 +524,16 @@ function addBokstavWord(w){
   if(!w) return false;
   const clean = String(w).trim().toUpperCase();
   if(!clean || clean.indexOf(' ')!==-1) return false;
-  if(clean.length < 2 || clean.length > 5) return false;
+  if(clean.length < 1 || clean.length > 5) return false;
   if(BOKSTAV_DICT.has(clean)) return false;
   BOKSTAV_DICT.add(clean); return true;
 }
 BOKSTAV_WORDS.split(/\s+/).forEach(addBokstavWord);
+// Enbokstavsord: ö (остров), å (река), i (в)
+const SINGLE_LETTER_WORDS = ['Ö','Å','I'];
+SINGLE_LETTER_WORDS.forEach(addBokstavWord);
+const BOKSTAV_WORDS_EXTRA = "av by då en ge gå ha ja jo ju ko le må ni nu ny nå oj om på se sy så ta te tå ur ut vi ål år än är öl ön ar ek el ed is ok al uv mö rå bi kö hö ty åt fy bo ro få all bad bak bal bar bas ben bio bit bok bom bor bot bra bud bur bus båt bär bön dag dal dam del den det dig dit dop dog dom dos dum dun dyr dån eld ena era ess far fat fel fem fil fin fot fri fru ful fyr får gav gem ger get glo gnu god gom gro gud gul gym gås hal han har hat hej hel hem hen hit hon hop hos hot hud hur hus hål hår hög hök hör ide ila jag jet jul kal kam kan kar kil klo kok kol kor kul kyl kål kär kök kör lag lam lat led lek ler lin lod lov lur lus låg lån lår lås låt läs lök lön löp lös mal man mat med men mig mil min mod mor mos mun mur mus myr mål mån mår mås nej ner nio nit nog not näs nät nål nöt och ond ont ord orm oro oss ost pip pil pop pub rad ram ren rep rik rim ris rom ros rot rov rum rus råd rån räv röd rök rör sal sen ser sig sik sil sin sju sko sol som son spa sug sur syl syn sår säd säg säl söt tag tak tal tam tar tid tig tio tom ton tre tro tum tur tut tyg typ tåg tår tät ugn ull ung upp val van var vas vem vet vid vik vin vis våg vår väg väl vän yla yta åka åra äga äng äta ärm ärt öga öka öra öre öva asp alla arga barn bank berg bett bild blad blek blev blod blom blus bock bord bota bred brev bror brud bröd buss byta både bäck böja bönor dans data deg dem disk djur dopp drar dra dröm duka dyka däck egen elak elva fall fara farm fart fast fena fest fett fika film fina fisk flod flyg foto frö full fält färg föda föl gala gata gick glad glas glöd golf golv gott grad gran gren gris grop grus gråt grön gröt gård gäst göra hade haka hall halm hals halv hand hare hela hopp hund huva hyra häl hård höft höna höra höst idag inne isen jobb jord juni juli jämt kaka kall kalv kamp karl kind kjol klar klok knä koka kola kopp korg kort krok kula kung kust kvar kyla käpp köra kött lada lamm land lapp last leka lika lila lina liv ljud ljus lock luft lugn lukt lust lyft lysa lång läka läpp läsa lätt löpa lösa löv mage mark mask mata mera mest mild mina mitt mjuk moln mygg mått mörk namn natt nere nord norr näsa nöjd olja orka otur paj park pass pipa plan plus post puss rak rast regn rena resa ring rosa rund rusa rygg rätt röst saga sak salt sand sant seg sida sill sitt sjö sjuk sked skal ska skog skor slag slev slut smak smal smör snö sopa sova spel spis spår stad stam stek sten stig stol stor sula sura svag svan svar syra säck söka sött tack tand tank tant tass tema tiga tjej tomt torn torr tung tupp tyst tält tång unge utan vakt vals vana varm vass veta vild vind visa vit våt vägg värk väst yrke ånga öde ögon öken affär andas ankel badar banan bakar bilar binda bjuda blank bonde bredd bruka bulle bädda bänk börja cykel dansa dagen drake druva eller enkel ensam falla fatta feber fiska fjäll fluga flyga folk fram frysa fråga frukt fylla fågel färja följa gilla glada godis gräva gräs gunga gympa gäspa hacka hallå hamna hatt hemma hitta hjälp hoppa horn hosta hylla hälsa hämta hänga höger ingen inget jacka kaffe kalla kamel kanal kanin karta kasta klara kliva klubb knapp kniv korv kosta kran krama kudde kunna känna köpa laga lampa lära lägga lagom lejon lunch mamma matta melon meter mjölk mössa möbel möte nalle nacke natur noll nyhet olika paket panna pappa plast plats polis prata radio regna ropa rolig rulla rädd räkna saker samma sakta sedan semla sista sitta skola slott sluta smaka snabb snart snäll soffa spark spela spik stark stora storm svamp svara svart sväng säga sälja sänka tacka tala tavla tiger timme titta tolv tomat torka trasa träna tröja trött tugga tumme tunga tvål tvätt tycka tänka under vagn vakna valp vante vecka verka vinna vispa vägen välja vänta väska yngre åska åtta ödla öppna önska ålder vaken ärlig bilen boken huset solen sjön skon kakan katt ägget äpple glass mjöl osten tåget båten dagar ögat öron näsan armen benet foten håret magen ropar sover äter läser leker ritar åker går står heter blå grå brun ett två fyra";
+BOKSTAV_WORDS_EXTRA.split(/\s+/).forEach(addBokstavWord);
 Object.values(DRAW_CATEGORIES).forEach(cat => cat.words.forEach(addBokstavWord));
 SENTENCES.forEach(arr => arr.forEach(addBokstavWord));
 STATEMENTS.forEach(st => st.text.replace(/[.,!?"]/g,' ').split(/\s+/).forEach(addBokstavWord));
@@ -1287,7 +1292,7 @@ window.scoreBokstavGrid = function(grid) {
    const allLines = [...rows, ...cols];
    allLines.forEach(line => {
       const chars = line.map(idx => grid[idx] || ' ').join(''); let lineScored = false;
-      for(let len = 5; len >= 2; len--) {
+      for(let len = 5; len >= 1; len--) {
           if(lineScored) break;
           for(let i=0; i <= 5 - len; i++) {
              const sub = chars.substring(i, i+len).trim();
@@ -1438,7 +1443,7 @@ document.getElementById('tp-approve-word').addEventListener('click', async ()=>{
   const pid=document.getElementById('tp-player').value;
   if(!word || !pid) return tpMsg('Skriv ett ord och välj en elev.', 'var(--red)');
   const clean=word.toUpperCase();
-  if(clean.length<2 || clean.length>5) return tpMsg('Ordet måste vara 2-5 bokstäver (en rad är 5 rutor).', 'var(--red)');
+  if(clean.length<1 || clean.length>5) return tpMsg('Ordet måste vara 1-5 bokstäver (en rad är 5 rutor).', 'var(--red)');
   addBokstavWord(clean);
   const pts=clean.length*100;
   const ok=await updateRoom(hostCode, s=>{
