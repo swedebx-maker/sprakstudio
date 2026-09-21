@@ -52,7 +52,21 @@ input:focus{outline:none;border-color:var(--accent);}
   border-radius:10px;padding:.4em 1em;font-size:1rem;letter-spacing:.06em;}
 .avatars{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:1vh;}
 .avatar-pill{background:#fff;border:1px solid var(--border);border-radius:999px;padding:.35em .8em;display:flex;
-  align-items:center;gap:.35em;font-family:'Fredoka',sans-serif;font-weight:600;font-size:.95rem;animation:popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+  align-items:center;gap:.35em;font-family:'Fredoka',sans-serif;font-weight:600;font-size:.95rem;position:relative;transition:background .2s,border-color .2s;}
+.avatar-pill.pop{animation:popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+.avatar-pill.answered{background:#E7F5EA;border-color:var(--green);}
+.avatar-pill .pill-check{color:var(--green);font-size:1.15em;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 40;}
+.avatar-pill.bump .score{display:inline-block;animation:scoreBump .7s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+@keyframes scoreBump{0%{transform:scale(1);}35%{transform:scale(1.6);color:var(--green);}100%{transform:scale(1);}}
+.avatar-pill .pill-plus{position:absolute;right:.3em;top:-.2em;font-family:'Fredoka',sans-serif;font-weight:700;color:var(--green);font-size:.9rem;pointer-events:none;animation:plusFloat 1.6s ease-out forwards;}
+@keyframes plusFloat{0%{opacity:0;transform:translateY(6px);}15%{opacity:1;}100%{opacity:0;transform:translateY(-26px);}}
+#toast-stack{position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:9500;display:flex;flex-direction:column;align-items:center;gap:.5rem;pointer-events:none;}
+.toast{background:#fff;border:2px solid var(--green);color:var(--ink);font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;padding:.45em 1.1em;border-radius:999px;box-shadow:0 8px 24px rgba(20,40,70,.18);display:flex;align-items:center;gap:.5em;white-space:nowrap;animation:toastIn .35s cubic-bezier(.175,.885,.32,1.275) both;}
+.toast .t-pts{color:var(--green);}
+.toast.first{border-color:var(--yellow-border);background:#FFF8E1;}
+.toast.out{animation:toastOut .3s ease both;}
+@keyframes toastIn{from{opacity:0;transform:translateY(-16px) scale(.9);}to{opacity:1;transform:none;}}
+@keyframes toastOut{to{opacity:0;transform:translateY(-10px);}}
 @keyframes popIn{0%{transform:scale(0);opacity:0;}100%{transform:scale(1);opacity:1;}}
 .avatar-pill.is-drawer{background:var(--accent);color:#fff;border-color:var(--accent);}
 .score{color:var(--accent-dark);font-weight:800;}
@@ -183,7 +197,7 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 #theft-overlay .to-victim { font-size: 2rem; color: #ffb4b0; }
 .deadline-pill { display: inline-flex; align-items: center; gap: .3em; font-family: 'Fredoka', sans-serif; font-weight: 700; background: var(--accent-light); color: var(--accent-dark); border-radius: 999px; padding: .25em .8em; font-size: 1rem; }
 .deadline-pill.hot { background: #FBE1E0; color: var(--red); }
-.bokstav-paper { background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 0.8rem; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); display: inline-block; position:relative; }
+.bokstav-paper { background: #fff; border: 2px solid #ddd; border-radius: 8px; padding: 0.8rem; box-shadow: 2px 4px 12px rgba(0,0,0,0.08); display: block; width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; position:relative; }
 .bokstav-paper::before { content: '📝'; position: absolute; top: -15px; right: -15px; font-size: 2rem; transform: rotate(15deg); }
 .bokstav-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; background: var(--ink); border: 4px solid var(--ink); border-radius: 8px; margin: 0 auto; width: min(390px, 85vw); }
 .bokstav-cell { background: #fff; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-family: 'Fredoka', sans-serif; font-weight: 700; color: var(--ink); cursor: pointer; text-transform: uppercase; transition: background 0.1s, transform 0.1s; }
@@ -282,7 +296,7 @@ html.host-zoom .card{width:min(645px, calc(92vw / var(--z)));}
 html.host-zoom #host-roundend-view.wheel-board{width:auto !important;}
 /* айпады учеников (и стартовый экран) */
 html:not(.host-zoom){font-size:calc(22px / var(--ui));}
-html:not(.host-zoom) .card{width:min(calc(645px / var(--ui)),92vw);}
+html:not(.host-zoom) .card{width:min(calc(645px / var(--ui)),92vw);padding:1.2rem 1rem;}
 html:not(.host-zoom) canvas.draw-canvas{height:min(calc(390px / var(--ui)),48vh);}
 html:not(.host-zoom) .bokstav-grid{width:min(calc(390px / var(--ui)),85vw);}
 html:not(.host-zoom) .swatch{width:calc(30px / var(--ui));height:calc(30px / var(--ui));}
@@ -291,6 +305,7 @@ html:not(.host-zoom) .wheel-container.solo{zoom:calc(1 / var(--ui));}
 </head>
 <body>
 <canvas id="confetti-canvas"></canvas>
+<div id="toast-stack"></div>
 <div id="theft-overlay" class="hidden"></div>
 <div id="net-status" class="hidden"><span class="msi">wifi_off</span><span id="net-status-text">Ingen kontakt...</span></div>
 <div id="app">
@@ -1038,6 +1053,7 @@ let hostFinalizing=false, hostDoneKey=null, hostDoneAt=0;
 async function hostPoll(){
   const state=await readRoom(hostCode, true); if(!state) return;
   (state.extraWords||[]).forEach(addBokstavWord);
+  hostDetectAnswers(state);
 
   const _stateClone = Object.assign({}, state);
   delete _stateClone.hostActiveAt;
@@ -1168,15 +1184,61 @@ async function hostPoll(){
   hostLastPhase=state.phase;
 }
 
+const _pillSeen={}, _pillScores={};
+function answeredSet(state){
+  const r=state.round; const set=new Set();
+  if(state.phase!=='active' || !r) return set;
+  if(r.type==='draw') (r.correctPlayerIds||[]).forEach(id=>set.add(id));
+  else if(r.type==='bokstav') (r.readyPlayers||[]).forEach(id=>set.add(id));
+  else Object.keys(r.answers||{}).forEach(id=>set.add(id));
+  return set;
+}
 function renderAvatars(wrap,state){
+  const wid=wrap.id;
+  const seen=_pillSeen[wid]||(_pillSeen[wid]=new Set());
+  const prev=_pillScores[wid]||(_pillScores[wid]={});
+  const answered=answeredSet(state);
   wrap.innerHTML='';
   state.players.forEach(p=>{
     const isDrawer = state.round && state.round.type==='draw' && state.round.drawerId===p.id && state.phase==='active';
-    const isBokstavReady = state.round && state.round.type==='bokstav' && state.round.readyPlayers && state.round.readyPlayers.includes(p.id);
+    const isNew = !seen.has(p.id); seen.add(p.id);
+    const gained = prev[p.id]!==undefined ? p.score-prev[p.id] : 0; prev[p.id]=p.score;
+    const done = answered.has(p.id) && !isDrawer;
     const pill=document.createElement('div');
-    pill.className='avatar-pill'+(isDrawer?' is-drawer':'')+(isBokstavReady?' is-drawer':''); 
-    pill.innerHTML=`${p.avatar} ${p.name} <span class="score">${p.score}</span>`;
+    pill.className='avatar-pill'+(isNew?' pop':'')+(isDrawer?' is-drawer':'')+(done?' answered':'')+(gained>0?' bump':'');
+    pill.innerHTML=`${done?'<span class="msi pill-check">check_circle</span>':''}${p.avatar} ${p.name} <span class="score">${p.score}</span>${gained>0?`<span class="pill-plus">+${gained}</span>`:''}`;
     wrap.appendChild(pill);
+  });
+}
+
+function hostToast(text, pts, cls){
+  const stack=document.getElementById('toast-stack'); if(!stack) return;
+  const el=document.createElement('div'); el.className='toast '+(cls||'');
+  const t=document.createElement('span'); t.textContent=text; el.appendChild(t);
+  if(pts){ const s=document.createElement('span'); s.className='t-pts'; s.textContent='+'+pts; el.appendChild(s); }
+  stack.appendChild(el);
+  while(stack.children.length>4) stack.firstChild.remove();
+  setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),320); }, 3400);
+}
+const hostSeen={key:null, ids:new Set()};
+function hostDetectAnswers(state){
+  const r=state.round;
+  if(state.phase!=='active' || !r || r.type==='bokstav') return;
+  const key=state.planIndex+':'+r.startedAt;
+  const ids = r.type==='draw' ? (r.correctPlayerIds||[]) : Object.keys(r.answers||{});
+  if(hostSeen.key!==key){ hostSeen.key=key; hostSeen.ids=new Set(ids); return; }
+  ids.forEach(id=>{
+    if(hostSeen.ids.has(id)) return; hostSeen.ids.add(id);
+    const p=state.players.find(x=>x.id===id); if(!p) return;
+    const a=(r.answers||{})[id]||{};
+    if(r.type==='draw'){
+      const first=(r.correctPlayerIds||[]).indexOf(id)===0;
+      hostToast(first ? `🥇 ${p.name} gissade först!` : `${p.avatar} ${p.name} gissade ordet!`, a.points, first?'first':'');
+      AudioEngine.playCorrect();
+    } else if(a.correct){
+      hostToast(`${p.avatar} ${p.name} svarade rätt!`, a.points);
+      AudioEngine.playPop();
+    }
   });
 }
 function renderMiniLB(el,state){ const sorted=[...state.players].sort((a,b)=>b.score-a.score).slice(0,4); el.innerHTML=sorted.map(p=>`<div><span>${p.avatar} ${p.name}</span><span class="lb-score">${p.score}</span></div>`).join(''); }
