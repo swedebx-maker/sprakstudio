@@ -1631,7 +1631,7 @@ async function finalizeRoundInner(state){
     if(r.type==='bokstav') reveal = '';
 
     s.lastRoundResult={type:r.type, reveal, rankBefore, rankAfter, pointsThisRound:pts, bokstavDetail: (typeof bokstavDetail!=='undefined' ? bokstavDetail : null)};
-    const isLastRound = s.planIndex >= s.plan.length - 1; s.phase = isLastRound ? 'finished' : 'round-end'; 
+    s.phase = 'round-end'; 
     return s;
   });
 }
@@ -1704,6 +1704,9 @@ function renderRoundEnd(state){
     document.getElementById('tp-word').value='';
   }
   const nextBtn=document.getElementById('next-round-btn');
+  const isLast = state.planIndex >= (state.plan||[]).length - 1;
+  nextBtn.innerHTML = isLast ? '<span class="msi">flag</span> Avsluta' : 'Nästa runda';
+  nextBtn.style.background = isLast ? 'var(--green)' : '';
   nextBtn.classList.remove('hidden'); nextBtn.disabled=false;
 }
 
@@ -1790,7 +1793,7 @@ document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
 async function advanceRound(){
   document.getElementById('next-round-btn').disabled = true;
   await updateRoom(hostCode, s=>{
-    const idx=s.planIndex+1; if(idx>=s.plan.length) return s;
+    const idx=s.planIndex+1; if(idx>=s.plan.length){ if(s.phase==='round-end') s.phase='finished'; return s; }
     const r=buildRound(s.plan[idx].type, s.plan[idx].drawerId, s.plan[idx]); r.startedAt=Date.now(); r.answers={};
     const snap={}; s.players.forEach(p=>snap[p.id]=p.score); r.scoreSnapshot=snap;
     if(r.type==='bokstav') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(r.size*r.size).fill('')}; }); r.stolen={}; r.bonusLeft={}; r.readyPlayers=[]; }
