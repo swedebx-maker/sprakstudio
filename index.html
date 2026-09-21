@@ -864,6 +864,7 @@ function loadSettings(){
 let gameSettings=loadSettings();
 function saveSettings(){ try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(gameSettings)); }catch(e){} }
 function enabledTypes(){ return ALL_TYPES.filter(t=>gameSettings.enabled[t]); }
+function onlyBokstav(){ const t=enabledTypes(); return t.length===1 && t[0]==='bokstav'; }
 
 function renderGameToggles(){
   const wrap=document.getElementById('game-toggles'); if(!wrap) return;
@@ -881,6 +882,9 @@ function renderGameToggles(){
       AudioEngine.playWrong(); return;
     }
     gameSettings.enabled[t]=!gameSettings.enabled[t];
+    if(gameSettings.enabled[t]) plannedRounds=Math.min(ROUNDS_MAX, plannedRounds+1);
+    if(onlyBokstav()) plannedRounds=1;
+    plannedRounds=Math.max(ROUNDS_MIN, Math.min(ROUNDS_MAX, plannedRounds));
     saveSettings(); AudioEngine.playPop(); renderGameToggles(); renderRoundsPill();
   }));
   wrap.querySelectorAll('.gt-size button').forEach(b=>b.addEventListener('click', ()=>{
@@ -984,7 +988,7 @@ document.addEventListener('visibilitychange', ()=>{
 });
 
 let plannedRounds=12;
-const ROUNDS_MIN=2, ROUNDS_MAX=60, ROUNDS_STEP=1;
+const ROUNDS_MIN=1, ROUNDS_MAX=60, ROUNDS_STEP=1;
 const EST_ROUND_SEC={draw:70, truefalse:13, wordorder:32, sign:18, match:38, bokstav:360};
 const EST_OVERHEAD_SEC=36;
 function estSec(t){ return t==='bokstav' ? (gameSettings.gridSize===4 ? 230 : 360) : EST_ROUND_SEC[t]; }
@@ -1006,7 +1010,7 @@ function renderRoundsPill(){
   document.getElementById('rounds-minus').disabled = plannedRounds<=ROUNDS_MIN;
   document.getElementById('rounds-plus').disabled = plannedRounds>=ROUNDS_MAX;
   const more=document.getElementById('add-rounds-btn');
-  if(more) more.innerHTML=`<span class="msi">add_circle</span> Spela mer (${plannedRounds} rundor till)`;
+  if(more) more.innerHTML=`<span class="msi">add_circle</span> Spela mer (${plannedRounds} ${plannedRounds===1?'runda':'rundor'} till)`;
 }
 document.getElementById('rounds-minus').addEventListener('click', ()=>{
   plannedRounds=Math.max(ROUNDS_MIN, plannedRounds-ROUNDS_STEP); AudioEngine.playPop(); renderRoundsPill();
@@ -1014,6 +1018,7 @@ document.getElementById('rounds-minus').addEventListener('click', ()=>{
 document.getElementById('rounds-plus').addEventListener('click', ()=>{
   plannedRounds=Math.min(ROUNDS_MAX, plannedRounds+ROUNDS_STEP); AudioEngine.playPop(); renderRoundsPill();
 });
+if(onlyBokstav()) plannedRounds=1;
 renderRoundsPill();
 renderGameToggles();
 
