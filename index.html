@@ -249,12 +249,44 @@ canvas.draw-canvas{background:#fff;border:1px solid var(--border);border-radius:
 .podium-slot{ width:auto !important; min-width:150px; max-width:300px; padding:1rem 1.1rem; }
 .podium-slot .podium-name{ width:auto !important; min-width:100%; white-space:nowrap; overflow:visible !important; text-overflow:clip !important; }
 .crown{ top:-128px !important; font-size:4rem !important; z-index:3; }
-:root{--z:1.2;}
+
+/* ===== Выбор типов игр (лобби) ===== */
+.game-toggles{display:flex;gap:.8rem;justify-content:center;align-items:flex-start;flex-wrap:wrap;margin:.4rem 0 .4rem;}
+.gt-col{display:flex;flex-direction:column;align-items:center;gap:.4rem;}
+.gt-item{position:relative;width:3.4rem;height:3.4rem;border-radius:14px;border:2px solid var(--border);background:#fff;color:var(--muted);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .1s,background .15s,border-color .15s,color .15s;}
+.gt-item .gt-ico{font-size:1.9rem;opacity:.4;}
+.gt-item.on{background:var(--accent-light);border-color:var(--accent);color:var(--accent-dark);}
+.gt-item.on .gt-ico{opacity:1;}
+.gt-item:active{transform:scale(.94);}
+.gt-item .gt-check{position:absolute;top:-.5rem;right:-.5rem;width:1.35rem;height:1.35rem;border-radius:50%;background:#fff;border:2px solid var(--border);
+  font-size:.95rem;color:transparent;display:flex;align-items:center;justify-content:center;}
+.gt-item.on .gt-check{background:var(--green);border-color:var(--green);color:#fff;}
+.gt-item::after{content:attr(data-tip);position:absolute;bottom:calc(100% + .7rem);left:50%;transform:translateX(-50%) translateY(4px);
+  background:var(--ink);color:#fff;font-family:'Fredoka',sans-serif;font-weight:600;font-size:.8rem;white-space:nowrap;padding:.35em .7em;
+  border-radius:8px;opacity:0;pointer-events:none;transition:opacity .12s,transform .12s;z-index:20;}
+.gt-item:hover::after,.gt-item:focus-visible::after{opacity:1;transform:translateX(-50%) translateY(0);}
+.gt-item.nope{animation:gtShake .3s;}
+@keyframes gtShake{0%,100%{translate:0;}25%{translate:-5px;}75%{translate:5px;}}
+.gt-size{display:flex;background:#fff;border:2px solid var(--border);border-radius:10px;overflow:hidden;}
+.gt-size button{border:none;background:none;font-family:'Fredoka',sans-serif;font-weight:700;font-size:.8rem;color:var(--muted);padding:.25em .55em;cursor:pointer;}
+.gt-size button.active{background:var(--accent);color:#fff;}
+.gt-size.off{opacity:.3;pointer-events:none;}
+
+/* ===== Масштаб: --ui = во сколько раз уменьшить всё (1 = как было) ===== */
+:root{--ui:1.7; --z:calc(1.2 / var(--ui));}
 html.host-zoom{zoom:var(--z);}
 html.host-zoom #app{min-height:calc(100vh / var(--z));}
 html.host-zoom .board-wrap{width:min(1320px, calc(95vw / var(--z)));}
 html.host-zoom .card{width:min(645px, calc(92vw / var(--z)));}
 html.host-zoom #host-roundend-view.wheel-board{width:auto !important;}
+/* айпады учеников (и стартовый экран) */
+html:not(.host-zoom){font-size:calc(22px / var(--ui));}
+html:not(.host-zoom) .card{width:min(calc(645px / var(--ui)),92vw);}
+html:not(.host-zoom) canvas.draw-canvas{height:min(calc(390px / var(--ui)),48vh);}
+html:not(.host-zoom) .bokstav-grid{width:min(calc(390px / var(--ui)),85vw);}
+html:not(.host-zoom) .swatch{width:calc(30px / var(--ui));height:calc(30px / var(--ui));}
+html:not(.host-zoom) .wheel-container.solo{zoom:calc(1 / var(--ui));}
 </style>
 </head>
 <body>
@@ -308,6 +340,7 @@ html.host-zoom #host-roundend-view.wheel-board{width:auto !important;}
       <img id="lobby-qr" src="" alt="QR" style="width:110px;height:110px;border-radius:10px;border:1px solid var(--border);">
     </div>
     <div class="avatars" id="lobby-avatars-big"></div>
+    <div class="game-toggles" id="game-toggles"></div>
     <button class="primary-btn" id="start-game-btn" disabled>Starta spelet</button>
   </div>
 
@@ -357,7 +390,7 @@ html.host-zoom #host-roundend-view.wheel-board{width:auto !important;}
   </div>
 </div>
 
-<div id="player-game-screen" class="hidden" style="width:min(550px,94vw);">
+<div id="player-game-screen" class="hidden" style="width:min(calc(550px / var(--ui)),94vw);">
   <div class="card" style="width:100%;">
     <div id="player-idle-view" class="player-idle">
       <div class="big-emoji msi">hourglass_top</div>
@@ -804,20 +837,78 @@ const AudioEngine=(function(){
   };
 })();
 
-function buildRound(type,drawerId){
+/* ===== Настройки игр (сохраняются в браузере смартборда) ===== */
+const SETTINGS_KEY='sprakstudio_settings';
+const ALL_TYPES=['draw', ...NON_DRAW_TYPES];
+const GAME_TYPES=[
+  {key:'draw',      icon:'brush',          name:'Rita & Gissa'},
+  {key:'truefalse', icon:'quiz',           name:'Rätt eller fel'},
+  {key:'wordorder', icon:'drag_indicator', name:'Bygg meningen'},
+  {key:'sign',      icon:'signpost',       name:'Vad säger skylten?'},
+  {key:'match',     icon:'join_inner',     name:'Para ihop'},
+  {key:'bokstav',   icon:'grid_on',        name:'Bokstavs-jakt (hjulet)'}
+];
+function loadSettings(){
+  const def={enabled:{}, gridSize:5};
+  ALL_TYPES.forEach(t=>def.enabled[t]=true);
+  try{
+    const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null');
+    if(s){
+      ALL_TYPES.forEach(t=>{ if(s.enabled && typeof s.enabled[t]==='boolean') def.enabled[t]=s.enabled[t]; });
+      if(s.gridSize===4 || s.gridSize===5) def.gridSize=s.gridSize;
+    }
+  }catch(e){}
+  if(!ALL_TYPES.some(t=>def.enabled[t])) ALL_TYPES.forEach(t=>def.enabled[t]=true);
+  return def;
+}
+let gameSettings=loadSettings();
+function saveSettings(){ try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(gameSettings)); }catch(e){} }
+function enabledTypes(){ return ALL_TYPES.filter(t=>gameSettings.enabled[t]); }
+
+function renderGameToggles(){
+  const wrap=document.getElementById('game-toggles'); if(!wrap) return;
+  wrap.innerHTML=GAME_TYPES.map(g=>{
+    const on=!!gameSettings.enabled[g.key];
+    const extra = g.key==='bokstav'
+      ? `<div class="gt-size ${on?'':'off'}">${[4,5].map(n=>`<button type="button" data-size="${n}" class="${gameSettings.gridSize===n?'active':''}">${n}×${n}</button>`).join('')}</div>`
+      : '';
+    return `<div class="gt-col"><button type="button" class="gt-item ${on?'on':''}" data-type="${g.key}" data-tip="${g.name}" aria-label="${g.name}" aria-pressed="${on}"><span class="msi gt-ico">${g.icon}</span><span class="msi gt-check">check</span></button>${extra}</div>`;
+  }).join('');
+  wrap.querySelectorAll('.gt-item').forEach(btn=>btn.addEventListener('click', ()=>{
+    const t=btn.getAttribute('data-type');
+    if(gameSettings.enabled[t] && enabledTypes().length<=1){
+      btn.classList.remove('nope'); void btn.offsetWidth; btn.classList.add('nope');
+      AudioEngine.playWrong(); return;
+    }
+    gameSettings.enabled[t]=!gameSettings.enabled[t];
+    saveSettings(); AudioEngine.playPop(); renderGameToggles(); renderRoundsPill();
+  }));
+  wrap.querySelectorAll('.gt-size button').forEach(b=>b.addEventListener('click', ()=>{
+    gameSettings.gridSize=Number(b.getAttribute('data-size'));
+    saveSettings(); AudioEngine.playPop(); renderGameToggles(); renderRoundsPill();
+  }));
+}
+
+function bokstavSize(r){ return (r && r.size) || 5; }
+
+function buildRound(type,drawerId,opts){
   if(type==='draw'){ const catKey=pickFresh('drawcat',Object.keys(DRAW_CATEGORIES)); const cat=DRAW_CATEGORIES[catKey]; const word=pickFresh('draw:'+catKey,cat.words); return {type:'draw',drawerId,word,wordLength:word.length,emoji:cat.emoji,strokes:[],correctPlayerIds:[],revealedIndices:[]}; }
   if(type==='truefalse'){ const s=pickFresh('tf',STATEMENTS); return {type:'truefalse',statement:s.text,isTrue:s.isTrue}; }
   if(type==='wordorder'){ const words=pickFresh('sent',SENTENCES); return {type:'wordorder',correctOrder:words,scrambled:shuffleNotEqual(words)}; }
   if(type==='sign'){ const s=pickFresh('sign',SIGNS); return {type:'sign',icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct}; }
   if(type==='match'){ return {type:'match',pairs:shuffle(MATCH_PAIRS_POOL).slice(0,6)}; }
-  if(type==='bokstav'){ return {type:'bokstav',spins:0,maxSpins:25,subPhase:'SPIN',wheels:{},draws:{},readyPlayers:[],stolen:{},bonusLeft:{},theft:null,thiefId:null,thiefStage:null,victimId:null,spinEndsAt:0,deadline:0,bonusMode:false}; }
+  if(type==='bokstav'){ const size=(opts && opts.size===4) ? 4 : 5; return {type:'bokstav',size,spins:0,maxSpins:size*size,subPhase:'SPIN',wheels:{},draws:{},readyPlayers:[],stolen:{},bonusLeft:{},theft:null,thiefId:null,thiefStage:null,victimId:null,spinEndsAt:0,deadline:0,bonusMode:false}; }
 }
 function buildPlan(players, count=30){
+  const types=enabledTypes();
+  const drawOn=types.indexOf('draw')!==-1;
+  const others=types.filter(t=>t!=='draw');
+  const size=gameSettings.gridSize;
   const plan=[]; let i=0; let pool=[];
-  const nextType=()=>{ if(!pool.length) pool=shuffle(NON_DRAW_TYPES); return pool.pop(); };
+  const nextOther=()=>{ if(!pool.length) pool=shuffle(others); const t=pool.pop(); return t==='bokstav' ? {type:t,size} : {type:t}; };
   while(plan.length<count){
-    plan.push({type:'draw',drawerId:players[i%players.length].id});
-    if(plan.length<count) plan.push({type:nextType()}); i++;
+    if(drawOn){ plan.push({type:'draw',drawerId:players[i%players.length].id}); i++; }
+    if(others.length && plan.length<count) plan.push(nextOther());
   }
   return plan.slice(0,count);
 }
@@ -896,10 +987,17 @@ let plannedRounds=12;
 const ROUNDS_MIN=2, ROUNDS_MAX=60, ROUNDS_STEP=1;
 const EST_ROUND_SEC={draw:70, truefalse:13, wordorder:32, sign:18, match:38, bokstav:360};
 const EST_OVERHEAD_SEC=36;
+function estSec(t){ return t==='bokstav' ? (gameSettings.gridSize===4 ? 230 : 360) : EST_ROUND_SEC[t]; }
 function estimateMinutes(n){
-  const draws=Math.ceil(n/2), others=Math.floor(n/2);
-  const avgOther=NON_DRAW_TYPES.reduce((a,t)=>a+EST_ROUND_SEC[t],0)/NON_DRAW_TYPES.length;
-  const total=draws*EST_ROUND_SEC.draw + others*avgOther + n*EST_OVERHEAD_SEC + 60;
+  const types=enabledTypes();
+  const drawOn=types.indexOf('draw')!==-1;
+  const others=types.filter(t=>t!=='draw');
+  let draws=0, rest=0;
+  if(drawOn && others.length){ draws=Math.ceil(n/2); rest=n-draws; }
+  else if(drawOn) draws=n;
+  else rest=n;
+  const avgOther = others.length ? others.reduce((a,t)=>a+estSec(t),0)/others.length : 0;
+  const total=draws*EST_ROUND_SEC.draw + rest*avgOther + n*EST_OVERHEAD_SEC + 60;
   return Math.max(1, Math.round(total/60));
 }
 function renderRoundsPill(){
@@ -917,6 +1015,7 @@ document.getElementById('rounds-plus').addEventListener('click', ()=>{
   plannedRounds=Math.min(ROUNDS_MAX, plannedRounds+ROUNDS_STEP); AudioEngine.playPop(); renderRoundsPill();
 });
 renderRoundsPill();
+renderGameToggles();
 
 document.getElementById('mute-btn').addEventListener('click', (e)=>{
   const on=AudioEngine.toggleMusic(); e.currentTarget.querySelector('.msi').textContent = on ? 'volume_up' : 'volume_off';
@@ -1193,8 +1292,16 @@ function showTheftOverlay(state){
 }
 
 const BOKSTAV_ASSIST_CHANCE = 0.45;
-const BOKSTAV_LINES = [[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
-  [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24]];
+const _bokstavLinesCache = {};
+function bokstavLinesFor(n){
+  if(_bokstavLinesCache[n]) return _bokstavLinesCache[n];
+  const L=[];
+  for(let r=0;r<n;r++){ const row=[]; for(let c=0;c<n;c++) row.push(r*n+c); L.push(row); }
+  for(let c=0;c<n;c++){ const col=[]; for(let r=0;r<n;r++) col.push(r*n+c); L.push(col); }
+  return (_bokstavLinesCache[n]=L);
+}
+function gridSideOf(grid){ return Math.round(Math.sqrt((grid||[]).length)) || 5; }
+function bokstavColsStyle(grid){ return `grid-template-columns:repeat(${gridSideOf(grid)},1fr);`; }
 const BOKSTAV_FRAGS = new Set(); let bokstavFragsFor = -1;
 function buildBokstavFrags(){
   BOKSTAV_FRAGS.clear();
@@ -1203,15 +1310,16 @@ function buildBokstavFrags(){
 }
 function bokstavHelpWeights(grid){
   if(bokstavFragsFor!==BOKSTAV_DICT.size) buildBokstavFrags();
+  const n=gridSideOf(grid);
   const w={};
   grid.forEach((cur,cell)=>{
     if(cur) return;
-    BOKSTAV_LINES.forEach(line=>{
+    bokstavLinesFor(n).forEach(line=>{
       const pos=line.indexOf(cell); if(pos===-1) return;
       BOKSTAV_LETTERS.forEach(L=>{
         const chars=line.map(i=> i===cell ? L : (grid[i]||' '));
         let best=0;
-        for(let a=0;a<=pos;a++) for(let b=pos+1;b<=5;b++){
+        for(let a=0;a<=pos;a++) for(let b=pos+1;b<=n;b++){
           if(b-a<2) continue;
           const sub=chars.slice(a,b).join('');
           if(sub.indexOf(' ')!==-1) continue;
@@ -1336,9 +1444,10 @@ function redrawCanvas(canvas,strokes){
 
 const BOKSTAV_TURN_MS = 60000;
 function bokstavGrid(r, pid){
+  const cells = bokstavSize(r)*bokstavSize(r);
   r.answers = r.answers || {};
-  if(!r.answers[pid]) r.answers[pid] = {grid: Array(25).fill('')};
-  if(!r.answers[pid].grid) r.answers[pid].grid = Array(25).fill('');
+  if(!r.answers[pid]) r.answers[pid] = {grid: Array(cells).fill('')};
+  if(!r.answers[pid].grid) r.answers[pid].grid = Array(cells).fill('');
   return r.answers[pid].grid;
 }
 function bokstavHasLetters(r, pid){ return bokstavGrid(r,pid).some(c=>c!==''); }
@@ -1378,14 +1487,13 @@ const BOKSTAV_WORD_COLORS=[
 ];
 window.scoreBokstavGrid = function(grid) {
    let pts = 0; const found = []; const cells = []; const groups = [];
-   const rows = [[0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24]];
-   const cols = [[0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24]];
-   const allLines = [...rows, ...cols];
+   const n = gridSideOf(grid);
+   const allLines = bokstavLinesFor(n);
    allLines.forEach(line => {
-      const chars = line.map(idx => grid[idx] || ' ').join(''); let lineScored = false;
-      for(let len = 5; len >= 1; len--) {
+      const chars = line.map(idx => (grid||[])[idx] || ' ').join(''); let lineScored = false;
+      for(let len = n; len >= 1; len--) {
           if(lineScored) break;
-          for(let i=0; i <= 5 - len; i++) {
+          for(let i=0; i <= n - len; i++) {
              const sub = chars.substring(i, i+len).trim();
              if(sub.length === len && BOKSTAV_DICT.has(sub)) {
                 pts += (len * 100); found.push(sub);
@@ -1435,8 +1543,9 @@ async function finalizeRoundInner(state){
       s.players.forEach(p=>{ if(p.id!==r.drawerId && !(r.correctPlayerIds||[]).includes(p.id)) p.combo=0; });
     } else if(r.type==='bokstav'){
       var bokstavDetail = {};
+      const cellsCount = bokstavSize(r)*bokstavSize(r);
       s.players.forEach(p=>{
-         const grid = (r.answers && r.answers[p.id] && r.answers[p.id].grid) ? r.answers[p.id].grid : Array(25).fill('');
+         const grid = (r.answers && r.answers[p.id] && r.answers[p.id].grid) ? r.answers[p.id].grid : Array(cellsCount).fill('');
          const res = window.scoreBokstavGrid(grid);
          p.score += res.pts;
          bokstavDetail[p.id] = res;
@@ -1479,9 +1588,10 @@ function renderRoundEnd(state){
   const isWheelRound = !!(state.round && state.round.type==='bokstav');
   endView.classList.toggle('wheel-board', isWheelRound);
   if(isWheelRound && res && res.bokstavDetail){
+    const cellsCount = bokstavSize(state.round)*bokstavSize(state.round);
     const cards=[...state.players].sort((a,b)=>b.score-a.score).map(p=>{
       const d=res.bokstavDetail[p.id] || {};
-      const grid=((state.round.answers||{})[p.id]||{}).grid || Array(25).fill('');
+      const grid=((state.round.answers||{})[p.id]||{}).grid || Array(cellsCount).fill('');
       const scored=new Set(d.cells||[]);
       const groups=d.groups||null;
       const cellColor={}; let words;
@@ -1496,7 +1606,7 @@ function renderRoundEnd(state){
         return `<div class="bokstav-cell ${l?'filled':'empty'} ${(!groups&&scored.has(i))?'scored':''}"${st}>${l}</div>`;
       }).join('');
       return `<div class="grid-card">
-        <div class="bokstav-paper"><div class="bokstav-grid">${cellsHTML}</div></div>
+        <div class="bokstav-paper"><div class="bokstav-grid" style="${bokstavColsStyle(grid)}">${cellsHTML}</div></div>
         <div class="gc-name">${p.avatar} ${p.name} <span style="color:var(--accent-dark);">+${(res.pointsThisRound||{})[p.id]||0}</span></div>
         <div class="gc-words">${words}</div>
       </div>`;
@@ -1545,7 +1655,9 @@ document.getElementById('tp-approve-word').addEventListener('click', async ()=>{
   const pid=document.getElementById('tp-player').value;
   if(!word || !pid) return tpMsg('Skriv ett ord och välj en elev.', 'var(--red)');
   const clean=word.toUpperCase();
-  if(clean.length<2 || clean.length>5) return tpMsg('Ordet måste vara 2-5 bokstäver (en rad är 5 rutor).', 'var(--red)');
+  const cur=roomCache[hostCode] && roomCache[hostCode].state;
+  const maxLen=bokstavSize(cur && cur.round);
+  if(clean.length<2 || clean.length>maxLen) return tpMsg('Ordet måste vara 2-'+maxLen+' bokstäver (en rad är '+maxLen+' rutor).', 'var(--red)');
   addBokstavWord(clean);
   const pts=clean.length*100;
   const ok=await updateRoom(hostCode, s=>{
@@ -1598,7 +1710,7 @@ function renderPodium(state){
 document.getElementById('start-game-btn').addEventListener('click', async ()=>{
   document.getElementById('start-game-btn').disabled = true; const state=await readRoom(hostCode);
   await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,plannedRounds); s.planIndex=-1; return s; });
-  logEvent('game_started',{code:hostCode, players:(state&&state.players||[]).length, rounds:plannedRounds});
+  logEvent('game_started',{code:hostCode, players:(state&&state.players||[]).length, rounds:plannedRounds, types:enabledTypes().join(','), grid:gameSettings.gridSize});
   await advanceRound();
 });
 document.getElementById('next-round-btn').addEventListener('click', advanceRound);
@@ -1612,9 +1724,9 @@ async function advanceRound(){
   document.getElementById('next-round-btn').disabled = true;
   await updateRoom(hostCode, s=>{
     const idx=s.planIndex+1; if(idx>=s.plan.length) return s;
-    const r=buildRound(s.plan[idx].type, s.plan[idx].drawerId); r.startedAt=Date.now(); r.answers={};
+    const r=buildRound(s.plan[idx].type, s.plan[idx].drawerId, s.plan[idx]); r.startedAt=Date.now(); r.answers={};
     const snap={}; s.players.forEach(p=>snap[p.id]=p.score); r.scoreSnapshot=snap;
-    if(r.type==='bokstav') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(25).fill('')}; }); r.stolen={}; r.bonusLeft={}; r.readyPlayers=[]; }
+    if(r.type==='bokstav') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(r.size*r.size).fill('')}; }); r.stolen={}; r.bonusLeft={}; r.readyPlayers=[]; }
     s.round=r; s.planIndex=idx; s.phase='active'; return s;
   });
   hostRenderedRoundKey=null; document.getElementById('next-round-btn').disabled = false;
@@ -1715,7 +1827,7 @@ function renderPlayerRound(state){
 }
 
 function bokstavGridHTML(grid, clickable, letterToPlace){
-  return `<div class="bokstav-paper"><div class="bokstav-grid">${grid.map((l,i)=>{
+  return `<div class="bokstav-paper"><div class="bokstav-grid" style="${bokstavColsStyle(grid)}">${grid.map((l,i)=>{
     const canClick = clickable && !l;
     return `<div class="bokstav-cell ${l?'filled':'empty'}" ${canClick?`data-cell="${i}"`:''}>${l}</div>`;
   }).join('')}</div></div>`;
@@ -1805,7 +1917,7 @@ function renderBokstavPlayer(state) {
       const vGrid = bokstavGrid(r, r.victimId);
       const vPlayer = state.players.find(p=>p.id===r.victimId);
       body.innerHTML = `<h2 style="font-size:1.15rem;">Stjäl en bokstav från ${vPlayer?vPlayer.name:'?'} ${deadlinePill(playerLocalDeadline)}</h2>
-        <div class="bokstav-paper"><div class="bokstav-grid">${vGrid.map((l,i)=>
+        <div class="bokstav-paper"><div class="bokstav-grid" style="${bokstavColsStyle(vGrid)}">${vGrid.map((l,i)=>
           `<div class="bokstav-cell ${l?'filled':'empty'}" ${l?`data-steal="${i}"`:''} style="${l?'background:var(--accent-light);border:2px solid var(--accent);':''}">${l}</div>`).join('')}</div></div>`;
       document.querySelectorAll('[data-steal]').forEach(cell=>cell.addEventListener('click', ()=>{
         const idx=Number(cell.getAttribute('data-steal'));
