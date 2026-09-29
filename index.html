@@ -56,6 +56,9 @@ input:focus{outline:none;border-color:var(--accent);}
 .avatar-pill.pop{animation:popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
 .avatar-pill.answered{background:#E7F5EA;border-color:var(--green);}
 .avatar-pill .pill-check{color:var(--green);font-size:1.15em;font-variation-settings:'FILL' 1,'wght' 600,'GRAD' 0,'opsz' 40;}
+.kick-btn{position:absolute;top:-.55em;right:-.55em;width:1.5em;height:1.5em;border-radius:50%;border:2px solid #fff;background:var(--red);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 6px rgba(0,0,0,.25);z-index:4;}
+.kick-btn .msi{font-size:1em;font-variation-settings:'FILL' 0,'wght' 700,'GRAD' 0,'opsz' 20;}
+.kick-btn:active{transform:scale(.9);}
 .avatar-pill.bump .score{display:inline-block;animation:scoreBump .7s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
 @keyframes scoreBump{0%{transform:scale(1);}35%{transform:scale(1.6);color:var(--green);}100%{transform:scale(1);}}
 .avatar-pill .pill-plus{position:absolute;right:.3em;top:-.2em;font-family:'Fredoka',sans-serif;font-weight:700;color:var(--green);font-size:.9rem;pointer-events:none;animation:plusFloat 1.6s ease-out forwards;}
@@ -64,6 +67,7 @@ input:focus{outline:none;border-color:var(--accent);}
 .toast{background:#fff;border:2px solid var(--green);color:var(--ink);font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.3rem;padding:.45em 1.1em;border-radius:999px;box-shadow:0 8px 24px rgba(20,40,70,.18);display:flex;align-items:center;gap:.5em;white-space:nowrap;animation:toastIn .35s cubic-bezier(.175,.885,.32,1.275) both;}
 .toast .t-pts{color:var(--green);}
 .toast.first{border-color:var(--yellow-border);background:#FFF8E1;}
+.toast.gone{border-color:var(--red);}
 .toast.out{animation:toastOut .3s ease both;}
 @keyframes toastIn{from{opacity:0;transform:translateY(-16px) scale(.9);}to{opacity:1;transform:none;}}
 @keyframes toastOut{to{opacity:0;transform:translateY(-10px);}}
@@ -411,6 +415,7 @@ html:not(.host-zoom) .wheel-container.solo{zoom:calc(1 / var(--ui));}
       <div class="big-emoji msi">hourglass_top</div>
       <div class="player-name-tag" id="player-name-tag"></div>
       <p class="sub" id="player-status-text">Väntar på läraren...</p>
+      <button class="primary-btn hidden" id="rejoin-btn">Gå med igen</button>
     </div>
     <div id="player-round-view" class="hidden">
       <div class="mini-leaderboard" id="player-mini-lb" style="position:static;display:inline-block;margin-bottom:1rem;"></div>
@@ -620,9 +625,14 @@ MATCH_PAIRS_POOL.forEach(p => addBokstavWord(p.word));
 const ROUND_DURATIONS={draw:90, truefalse:15, wordorder:40, sign:20, match:45, bokstav:30};
 const NON_DRAW_TYPES=["truefalse","wordorder","sign","match","bokstav"];
 
+/* ===== Присутствие: ученик пингует, учитель выкидывает неактивных ===== */
+const KICK_AFTER_MS=45000;   // сколько можно «пропадать» до вылета
+const PING_EVERY_MS=5000;    // как часто айпад отмечается
+
 let isHost=false;
 const roomCache={};
 let netFails=0;
+let lastPresence=null;
 
 function setNetStatus(ok, text){
   const el=document.getElementById('net-status'); if(!el) return;
@@ -634,16 +644,18 @@ function netOk(){ if(netFails>0){ netFails=0; setNetStatus(true); } }
 function netFail(){ netFails++; if(netFails>=2) setNetStatus(false); }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-async function readRoom(code, useCache){
+async function readRoom(code, useCache, extra){
   if(!code) return null;
   const cached=roomCache[code];
   let url='/api/room?code='+encodeURIComponent(code);
   if(useCache && cached) url+='&since='+cached.version;
+  if(extra) url+=extra;
   try{
     const r=await fetch(url,{cache:'no-store'});
     if(!r.ok) throw new Error('http '+r.status);
     const j=await r.json();
     netOk();
+    if(j.presence) lastPresence={map:j.presence, now:j.now||Date.now(), code};
     if(j.notModified) return cached ? cached.state : null;
     if(!j.value){ delete roomCache[code]; return null; }
     roomCache[code]={version:j.version||0, state:j.value, fetchedAt:Date.now()};
@@ -749,7 +761,7 @@ async function offerResume(){
       AudioEngine.ensureCtx();
       playerCode=saved.code; playerId=saved.playerId;
       document.getElementById('player-name-tag').textContent=saved.avatar+' '+saved.name;
-      playerLastStateHash=''; playerRenderedRoundKey=null; playerLastPhase=null;
+      playerLastStateHash=''; playerRenderedRoundKey=null; playerLastPhase=null; playerLastPing=0;
       show('player-game-screen'); startPlayerPolling();
     }
   });
@@ -897,9 +909,7 @@ function renderGameToggles(){
       AudioEngine.playWrong(); return;
     }
     gameSettings.enabled[t]=!gameSettings.enabled[t];
-    if(gameSettings.enabled[t]) plannedRounds=Math.min(ROUNDS_MAX, plannedRounds+1);
-    if(onlyBokstav()) plannedRounds=1;
-    plannedRounds=Math.max(ROUNDS_MIN, Math.min(ROUNDS_MAX, plannedRounds));
+    plannedRounds=defaultRoundsFor();
     saveSettings(); AudioEngine.playPop(); renderGameToggles(); renderRoundsPill();
   }));
   wrap.querySelectorAll('.gt-size button').forEach(b=>b.addEventListener('click', ()=>{
@@ -918,18 +928,28 @@ function buildRound(type,drawerId,opts){
   if(type==='match'){ return {type:'match',pairs:shuffle(MATCH_PAIRS_POOL).slice(0,6)}; }
   if(type==='bokstav'){ const size=(opts && opts.size===4) ? 4 : 5; return {type:'bokstav',size,spins:0,maxSpins:size*size,subPhase:'SPIN',wheels:{},draws:{},readyPlayers:[],stolen:{},bonusLeft:{},theft:null,thiefId:null,thiefStage:null,victimId:null,spinEndsAt:0,deadline:0,bonusMode:false}; }
 }
+
+// Сколько раундов рисования: чтобы каждая включённая игра попала в план хотя бы раз
+function drawSlots(count, othersLen, drawOn){
+  if(!drawOn) return 0;
+  if(!othersLen) return count;
+  return Math.max(count>=2?1:0, Math.min(Math.ceil(count/2), count-othersLen));
+}
+// Художник назначается в advanceRound из реально присутствующих игроков
 function buildPlan(players, count=30){
   const types=enabledTypes();
   const drawOn=types.indexOf('draw')!==-1;
   const others=types.filter(t=>t!=='draw');
   const size=gameSettings.gridSize;
-  const plan=[]; let i=0; let pool=[];
+  const draws=drawSlots(count, others.length, drawOn);
+  let pool=[];
   const nextOther=()=>{ if(!pool.length) pool=shuffle(others); const t=pool.pop(); return t==='bokstav' ? {type:t,size} : {type:t}; };
-  while(plan.length<count){
-    if(drawOn){ plan.push({type:'draw',drawerId:players[i%players.length].id}); i++; }
-    if(others.length && plan.length<count) plan.push(nextOther());
+  const plan=[];
+  for(let i=0;i<count;i++){
+    const isDraw = draws>0 && Math.floor(i*draws/count)!==Math.floor((i-1)*draws/count);
+    plan.push(isDraw ? {type:'draw'} : nextOther());
   }
-  return plan.slice(0,count);
+  return plan;
 }
 
 let hostCode=null, hostPollTimer=null, hostPollStop=true, hostRenderedRoundKey=null, hostLastPhase=null, hostLastPlayerCount=0, hostLastTickSecond=null;
@@ -949,6 +969,12 @@ function startHostHeartbeat() {
 window.ADMIN = {
    nextRound: () => advanceRound(),
    winRound: () => updateRoom(hostCode, s => { if(s.round) s.round.startedAt = 0; return s; }),
+   kick: (name) => {
+       const st = roomCache[hostCode] && roomCache[hostCode].state;
+       const p = st && st.players.find(x => x.name.toLowerCase() === String(name).toLowerCase());
+       if(!p){ console.log("Ingen spelare med det namnet."); return; }
+       return kickPlayers([p.id], 'manual');
+   },
    forceThief: () => updateRoom(hostCode, s => {
        if(s.round && s.round.type === 'bokstav' && s.round.subPhase === 'SPIN') {
            s.round.forceThief = true;
@@ -965,7 +991,7 @@ window.ADMIN = {
        return s;
    })
 };
-console.log("%c🎓 Admin Commands Available: ADMIN.forceThief(), ADMIN.skipToBokstav(), ADMIN.winRound()", "color: #2B7DE0; font-size: 14px; font-weight: bold;");
+console.log("%c🎓 Admin Commands Available: ADMIN.forceThief(), ADMIN.skipToBokstav(), ADMIN.winRound(), ADMIN.kick('namn')", "color: #2B7DE0; font-size: 14px; font-weight: bold;");
 
 document.getElementById('create-room-btn').addEventListener('click', async ()=>{
   AudioEngine.startMusic(); AudioEngine.preloadAudio(); 
@@ -1002,8 +1028,11 @@ document.addEventListener('visibilitychange', ()=>{
   if(!playerPollStop){ clearTimeout(playerPollTimer); playerLoop(); }
 });
 
-let plannedRounds=12;
+const ROUNDS_DEFAULT=12;
 const ROUNDS_MIN=1, ROUNDS_MAX=60, ROUNDS_STEP=1;
+// Все игры включены → 12 раундов; иначе по одному раунду на каждую включённую игру
+function defaultRoundsFor(){ const n=enabledTypes().length; return n>=ALL_TYPES.length ? ROUNDS_DEFAULT : n; }
+let plannedRounds=ROUNDS_DEFAULT;
 const EST_ROUND_SEC={draw:70, truefalse:13, wordorder:32, sign:18, match:38, bokstav:360};
 const EST_OVERHEAD_SEC=36;
 function estSec(t){ return t==='bokstav' ? (gameSettings.gridSize===4 ? 230 : 360) : EST_ROUND_SEC[t]; }
@@ -1011,10 +1040,7 @@ function estimateMinutes(n){
   const types=enabledTypes();
   const drawOn=types.indexOf('draw')!==-1;
   const others=types.filter(t=>t!=='draw');
-  let draws=0, rest=0;
-  if(drawOn && others.length){ draws=Math.ceil(n/2); rest=n-draws; }
-  else if(drawOn) draws=n;
-  else rest=n;
+  const draws=drawSlots(n, others.length, drawOn), rest=n-draws;
   const avgOther = others.length ? others.reduce((a,t)=>a+estSec(t),0)/others.length : 0;
   const total=draws*EST_ROUND_SEC.draw + rest*avgOther + n*EST_OVERHEAD_SEC + 60;
   return Math.max(1, Math.round(total/60));
@@ -1033,7 +1059,7 @@ document.getElementById('rounds-minus').addEventListener('click', ()=>{
 document.getElementById('rounds-plus').addEventListener('click', ()=>{
   plannedRounds=Math.min(ROUNDS_MAX, plannedRounds+ROUNDS_STEP); AudioEngine.playPop(); renderRoundsPill();
 });
-if(onlyBokstav()) plannedRounds=1;
+plannedRounds=defaultRoundsFor();
 renderRoundsPill();
 renderGameToggles();
 
@@ -1048,10 +1074,73 @@ document.getElementById('cancel-room-btn').addEventListener('click', async ()=>{
   stopHostPolling(); clearSession(); isHost=false; setHostZoom(false); show('role-screen');
 });
 
+/* ===== Вылет неактивных / кик учителем ===== */
+const hostFirstSeen={}; let hostKicking=false;
+
+async function hostCheckInactive(state){
+  if(hostKicking || !lastPresence || lastPresence.code!==hostCode) return false;
+  if(state.phase==='finished' || state.phase==='cancelled') return false;
+  const now=lastPresence.now, map=lastPresence.map||{};
+  const gone=[];
+  state.players.forEach(p=>{
+    let seen=Number(map[p.id])||0;
+    if(!seen){ if(!hostFirstSeen[p.id]) hostFirstSeen[p.id]=now; seen=hostFirstSeen[p.id]; }
+    if(now-seen > KICK_AFTER_MS) gone.push(p.id);
+  });
+  if(!gone.length) return false;
+  hostKicking=true;
+  try{ await kickPlayers(gone,'inactive'); } finally { hostKicking=false; }
+  return true;
+}
+
+function removePlayersFromState(s, set, reason){
+  s.players=s.players.filter(p=>!set.has(p.id));
+  s.kicked=(s.kicked||[]).concat([...set].map(id=>({id,reason}))).slice(-40);
+  const r=s.round; if(!r) return;
+  if(r.answers) set.forEach(id=>{ delete r.answers[id]; });
+  if(r.type==='draw'){
+    r.correctPlayerIds=(r.correctPlayerIds||[]).filter(id=>!set.has(id));
+    if(set.has(r.drawerId) && s.phase==='active') r.endNow=true;
+  }
+  if(r.type==='bokstav'){
+    ['wheels','draws','bonusLeft','stolen'].forEach(k=>{ if(r[k]) set.forEach(id=>{ delete r[k][id]; }); });
+    r.readyPlayers=(r.readyPlayers||[]).filter(id=>!set.has(id));
+    if(set.has(r.thiefId)){ r.thiefId=null; r.thiefStage=null; r.victimId=null; }
+    else if(set.has(r.victimId) && r.thiefStage && r.thiefStage!=='DONE'){
+      r.victimId=null; if(r.thiefStage==='PICK_LETTER') r.thiefStage='PICK_VICTIM';
+    }
+  }
+}
+
+async function kickPlayers(ids, reason){
+  let names=[];
+  const ok=await updateRoom(hostCode, s=>{
+    const set=new Set(ids);
+    const leaving=s.players.filter(p=>set.has(p.id));
+    if(!leaving.length) return null;
+    names=leaving.map(p=>p.avatar+' '+p.name);
+    removePlayersFromState(s, set, reason);
+    return s;
+  });
+  if(!ok) return false;
+  names.forEach(n=>hostToast(reason==='manual' ? `${n} togs bort` : `${n} lämnade spelet`, 0, 'gone'));
+  logEvent('player_kicked',{code:hostCode, reason, n:names.length});
+  hostForceRender=true;
+  return true;
+}
+
+function pickDrawer(s){
+  if(!s.players.length) return null;
+  const c=s.drawCounts||{}; let best=null;
+  s.players.forEach(p=>{ if(!best || (c[p.id]||0) < (c[best.id]||0)) best=p; });
+  return best.id;
+}
+
 let hostFinalizing=false, hostDoneKey=null, hostDoneAt=0;
 
 async function hostPoll(){
-  const state=await readRoom(hostCode, true); if(!state) return;
+  const state=await readRoom(hostCode, true, '&presence=1'); if(!state) return;
+  if(await hostCheckInactive(state)) return;
   (state.extraWords||[]).forEach(addBokstavWord);
   hostDetectAnswers(state);
 
@@ -1080,7 +1169,7 @@ async function hostPoll(){
     }
     const roundKey = state.planIndex+':'+r.startedAt;
     if(doneEarly && hostDoneKey!==roundKey){ hostDoneKey=roundKey; hostDoneAt=Date.now(); }
-    if(timeLeft<=0 || (doneEarly && Date.now()-hostDoneAt>=1200)){
+    if(timeLeft<=0 || r.endNow || (doneEarly && Date.now()-hostDoneAt>=1200)){
       await finalizeRound(state); return;
     }
 
@@ -1162,7 +1251,7 @@ async function hostPoll(){
       if(rcard) rcard.classList.toggle('wheel-board', state.round.type==='bokstav');
 
       let key=state.round.type+':'+state.planIndex;
-      if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId+':'+((state.round.readyPlayers||[]).length);
+      if(state.round.type==='bokstav') key += ':'+state.round.subPhase+':'+state.round.spins+':'+state.round.thiefStage+':'+state.round.victimId+':'+((state.round.readyPlayers||[]).length)+':'+state.players.length;
       else if(state.round.type==='draw') key += ':'+(state.round.revealedIndices||[]).length;
       
       if(hostRenderedRoundKey!==key){
@@ -1206,7 +1295,13 @@ function renderAvatars(wrap,state){
     const done = answered.has(p.id) && !isDrawer;
     const pill=document.createElement('div');
     pill.className='avatar-pill'+(isNew?' pop':'')+(isDrawer?' is-drawer':'')+(done?' answered':'')+(gained>0?' bump':'');
-    pill.innerHTML=`${done?'<span class="msi pill-check">check_circle</span>':''}${p.avatar} ${p.name} <span class="score">${p.score}</span>${gained>0?`<span class="pill-plus">+${gained}</span>`:''}`;
+    const canKick = isHost && !!hostCode;
+    pill.innerHTML=`${done?'<span class="msi pill-check">check_circle</span>':''}${p.avatar} ${p.name} <span class="score">${p.score}</span>${gained>0?`<span class="pill-plus">+${gained}</span>`:''}${canKick?'<button class="kick-btn" aria-label="Ta bort"><span class="msi">close</span></button>':''}`;
+    if(canKick) pill.querySelector('.kick-btn').addEventListener('click', async e=>{
+      e.stopPropagation();
+      if(!confirm(`Ta bort ${p.name} från spelet?`)) return;
+      await kickPlayers([p.id],'manual');
+    });
     wrap.appendChild(pill);
   });
 }
@@ -1451,14 +1546,16 @@ window.hostSpinAllWheels = async function(){
   const now=Date.now();
   await updateRoom(hostCode, st=>{
     const rr=st.round; if(rr.type!=='bokstav' || rr.subPhase!=='SPIN') return st;
+    const alive=new Set(st.players.map(p=>p.id));
+    Object.keys(wheels).forEach(id=>{ if(!alive.has(id)){ delete wheels[id]; delete draws[id]; } });
     rr.wheels=wheels; rr.draws=draws; rr.spins+=1; rr.subPhase='PLACE';
     rr.bonusMode=bonusMode; rr.theft=null; rr.victimId=null;
     rr.spinEndsAt=now+4300; rr.deadline=now+4300+BOKSTAV_TURN_MS;
     rr.readyPlayers=[];
     rr.forceThief=false;
     rr.bonusLeft=rr.bonusLeft||{};
-    if(bonusMode) participants.forEach(p=>{ rr.bonusLeft[p.id]=Math.max(0,(rr.bonusLeft[p.id]||0)-1); });
-    if(thiefPid){ rr.thiefId=thiefPid; rr.thiefStage='PICK_VICTIM'; }
+    if(bonusMode) participants.forEach(p=>{ if(alive.has(p.id)) rr.bonusLeft[p.id]=Math.max(0,(rr.bonusLeft[p.id]||0)-1); });
+    if(thiefPid && alive.has(thiefPid)){ rr.thiefId=thiefPid; rr.thiefStage='PICK_VICTIM'; }
     else { rr.thiefId=null; rr.thiefStage=null; }
     st.players.forEach(p=>{ if(draws[p.id]===undefined) bokstavMarkReady(rr, p.id); });
     return st;
@@ -1779,7 +1876,7 @@ function renderPodium(state){
 
 document.getElementById('start-game-btn').addEventListener('click', async ()=>{
   document.getElementById('start-game-btn').disabled = true; const state=await readRoom(hostCode);
-  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,plannedRounds); s.planIndex=-1; return s; });
+  await updateRoom(hostCode, s=>{ s.plan=buildPlan(s.players,plannedRounds); s.planIndex=-1; s.drawCounts={}; return s; });
   logEvent('game_started',{code:hostCode, players:(state&&state.players||[]).length, rounds:plannedRounds, types:enabledTypes().join(','), grid:gameSettings.gridSize});
   await advanceRound();
 });
@@ -1793,8 +1890,16 @@ document.getElementById('add-rounds-btn').addEventListener('click', async ()=>{
 async function advanceRound(){
   document.getElementById('next-round-btn').disabled = true;
   await updateRoom(hostCode, s=>{
-    const idx=s.planIndex+1; if(idx>=s.plan.length){ if(s.phase==='round-end') s.phase='finished'; return s; }
-    const r=buildRound(s.plan[idx].type, s.plan[idx].drawerId, s.plan[idx]); r.startedAt=Date.now(); r.answers={};
+    let idx=s.planIndex+1;
+    while(idx<s.plan.length && s.plan[idx].type==='draw' && !s.players.length) idx++;
+    if(idx>=s.plan.length){ if(s.phase==='round-end') s.phase='finished'; return s; }
+    const item=s.plan[idx];
+    let drawerId=null;
+    if(item.type==='draw'){
+      drawerId=pickDrawer(s);
+      s.drawCounts=s.drawCounts||{}; s.drawCounts[drawerId]=(s.drawCounts[drawerId]||0)+1;
+    }
+    const r=buildRound(item.type, drawerId, item); r.startedAt=Date.now(); r.answers={};
     const snap={}; s.players.forEach(p=>snap[p.id]=p.score); r.scoreSnapshot=snap;
     if(r.type==='bokstav') { s.players.forEach(p=>{ r.answers[p.id] = {grid: Array(r.size*r.size).fill('')}; }); r.stolen={}; r.bonusLeft={}; r.readyPlayers=[]; }
     s.round=r; s.planIndex=idx; s.phase='active'; return s;
@@ -1807,6 +1912,33 @@ let playerCode=null, playerId=null, playerPollTimer=null, playerPollStop=true, p
 let playerSpellNote='';
 let wordOrderLocal=[], matchState=null, drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
 
+/* ===== Пинг присутствия и экран «тебя выкинули» ===== */
+let playerLastPing=0;
+function playerPingParam(){
+  if(document.hidden || !playerId) return '';
+  if(Date.now()-playerLastPing < PING_EVERY_MS) return '';
+  playerLastPing=Date.now();
+  return '&pid='+encodeURIComponent(playerId);
+}
+function showKicked(state){
+  const info=(state.kicked||[]).find(k=>k.id===playerId);
+  ['player-round-view','player-roundend-view'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('player-idle-view').classList.remove('hidden');
+  document.querySelector('#player-idle-view .big-emoji').textContent='logout';
+  document.getElementById('player-status-text').textContent = info && info.reason==='manual'
+    ? 'Läraren tog bort dig från spelet.' : 'Du var borta för länge och togs bort från spelet.';
+  document.getElementById('rejoin-btn').classList.remove('hidden');
+  clearTimeout(window._playerSpinTimer);
+  stopPlayerPolling(); clearSession();
+}
+document.getElementById('rejoin-btn').addEventListener('click', ()=>{
+  document.getElementById('rejoin-btn').classList.add('hidden');
+  document.getElementById('join-code').value=playerCode||'';
+  document.getElementById('join-btn').disabled=false;
+  document.getElementById('join-error').textContent='';
+  show('player-join-screen');
+});
+
 document.getElementById('join-btn').addEventListener('click', async ()=>{
   AudioEngine.ensureCtx(); const code=document.getElementById('join-code').value.trim().toUpperCase(); const name=document.getElementById('join-name').value.trim();
   const err=document.getElementById('join-error'); err.textContent=''; if(!code||!name){ err.textContent='Fyll i kod och namn!'; return; }
@@ -1818,17 +1950,19 @@ document.getElementById('join-btn').addEventListener('click', async ()=>{
   logEvent('player_joined',{code});
   AudioEngine.playJoin(); playerCode=code; document.getElementById('player-name-tag').textContent=avatar+' '+name;
   saveSession({role:'player', code, playerId, name, avatar});
+  playerLastStateHash=''; playerRenderedRoundKey=null; playerLastPhase=null; playerLastPing=0; playerSpinKey=null; playerAnimatedSpin=-1;
   show('player-game-screen'); startPlayerPolling();
 });
 
 async function playerPoll(){
-  const state=await readRoom(playerCode, true); if(!state) return; 
+  const state=await readRoom(playerCode, true, playerPingParam()); if(!state) return; 
   const _stateClone = Object.assign({}, state); delete _stateClone.hostActiveAt;
   const hash = JSON.stringify(_stateClone);
   const idle=document.getElementById('player-idle-view'); const roundView=document.getElementById('player-round-view'); const endView=document.getElementById('player-roundend-view');
   if(state.phase==='cancelled'){
     [roundView,endView].forEach(v=>v.classList.add('hidden')); idle.classList.remove('hidden'); document.getElementById('player-status-text').textContent='Läraren avslutade rummet.'; stopPlayerPolling(); clearSession(); return;
   }
+  if(!(state.players||[]).some(p=>p.id===playerId)){ showKicked(state); return; }
   if(state.phase==='active' && state.round && state.round.type==='draw' && state.round.drawerId!==playerId) redrawCanvas(document.getElementById('player-canvas'),state.round.strokes);
 
   if (hash === playerLastStateHash && !playerForceRender) return;
@@ -1836,6 +1970,8 @@ async function playerPoll(){
   [idle,roundView,endView].forEach(v=>v.classList.add('hidden'));
 
   if(state.phase==='lobby'){
+    document.querySelector('#player-idle-view .big-emoji').textContent='hourglass_top';
+    document.getElementById('rejoin-btn').classList.add('hidden');
     idle.classList.remove('hidden'); document.getElementById('player-status-text').textContent='Väntar på läraren...';
   } else if(state.phase==='active' && state.round){
     roundView.classList.remove('hidden'); renderMiniLB(document.getElementById('player-mini-lb'),state);
@@ -2031,6 +2167,7 @@ function renderBokstavPlayer(state) {
 window.submitBokstavPlacement = async function(index) {
   await updateRoom(playerCode, s => {
     const r=s.round; if(!r || r.type!=='bokstav' || r.subPhase!=='PLACE') return s;
+    if(!s.players.some(p=>p.id===playerId)) return null;
     if((r.readyPlayers||[]).indexOf(playerId)!==-1) return s;
     const grid=bokstavGrid(r, playerId);
     const letter=r.draws[playerId];
@@ -2043,12 +2180,13 @@ window.submitBokstavPlacement = async function(index) {
 window.bokstavPickVictim = async function(vId) {
   await updateRoom(playerCode, s => {
     const r=s.round; if(!r || r.thiefId!==playerId || r.thiefStage!=='PICK_VICTIM') return s;
+    if(!s.players.some(p=>p.id===vId)) return s;
     r.victimId=vId; r.thiefStage='PICK_LETTER'; return s;
   });
 }
 window.bokstavStealLetter = async function(index) {
   await updateRoom(playerCode, s => {
-    const r=s.round; if(!r || r.thiefId!==playerId || r.thiefStage!=='PICK_LETTER') return s;
+    const r=s.round; if(!r || r.thiefId!==playerId || r.thiefStage!=='PICK_LETTER' || !r.victimId) return s;
     const g=bokstavGrid(r, r.victimId);
     let letter=g[index];
     if(!letter){
@@ -2202,6 +2340,7 @@ async function syncStrokes(){
   await updateRoom(playerCode, s=>{
     const r=s.round;
     if(s.phase!=='active' || !r || r.type!=='draw' || r.drawerId!==playerId) return null;
+    if(!s.players.some(p=>p.id===playerId)) return null;
     r.strokes=drawState.strokes; return s;
   });
 }
@@ -2211,9 +2350,10 @@ async function submitGuess(){
   btn.disabled=true; let resultInfo=null;
   await updateRoom(playerCode, s=>{
     if(s.phase!=='active' || !s.round || s.round.type!=='draw') return null; const r=s.round; if((r.correctPlayerIds||[]).includes(playerId)){ resultInfo={correct:true}; return s; }
+    const player=s.players.find(p=>p.id===playerId); if(!player) return null;
     const isCorrect = normalizeSwedish(val)===normalizeSwedish(r.word);
     if(isCorrect){
-      const player=s.players.find(p=>p.id===playerId); const pts=calcScore(Math.max(0,ROUND_DURATIONS.draw-(Date.now()-r.startedAt)/1000)/ROUND_DURATIONS.draw, player.combo||0);
+      const pts=calcScore(Math.max(0,ROUND_DURATIONS.draw-(Date.now()-r.startedAt)/1000)/ROUND_DURATIONS.draw, player.combo||0);
       player.score+=pts; player.combo=(player.combo||0)+1; r.correctPlayerIds=(r.correctPlayerIds||[]).concat(playerId); r.answers=r.answers||{}; r.answers[playerId]={value:val,correct:true,points:pts};
       resultInfo={correct:true, word:r.word, exact: val.toLowerCase().trim()===r.word.toLowerCase()};
     } else { resultInfo={correct:false, sim:Math.round(similarity(normalizeSwedish(val),normalizeSwedish(r.word))*100)}; }
@@ -2236,9 +2376,9 @@ async function submitAnswer(value){
   document.querySelectorAll('.tf-btn,.choice-btn, .primary-btn').forEach(b=>b.disabled=true); let wasCorrect=null;
   await updateRoom(playerCode, s=>{
     if(s.phase!=='active' || !s.round) return s; const r=s.round; r.answers=r.answers||{}; if(r.answers[playerId]) return s;
+    const player=s.players.find(p=>p.id===playerId); if(!player) return null;
     let correct=false;
     if(r.type==='truefalse') correct = value===r.isTrue; else if(r.type==='wordorder') correct = JSON.stringify(value)===JSON.stringify(r.correctOrder); else if(r.type==='sign') correct = value===r.correct; else if(r.type==='match') correct = value===true;
-    const player=s.players.find(p=>p.id===playerId);
     if(correct){
       const pts=calcScore(Math.max(0,ROUND_DURATIONS[r.type]-(Date.now()-r.startedAt)/1000)/ROUND_DURATIONS[r.type], player.combo||0);
       player.score+=pts; player.combo=(player.combo||0)+1; r.answers[playerId]={value,correct:true,points:pts}; wasCorrect=true;
