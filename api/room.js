@@ -4,12 +4,24 @@ const redis = Redis.fromEnv({ automaticDeserialization: false });
 
 const TTL = 60 * 60 * 6;
 
+// KEYS: room, version, presence-hash
+// ARGV: pid ('' = no ping), now (server ms), wantPresence ('1'/'0'), ttl
+// Returns: { state, version, id1, ts1, id2, ts2, ... }
 const READ_SCRIPT = `
 local s = redis.call('GET', KEYS[1])
 local v = redis.call('GET', KEYS[2])
 if s == false then s = '' end
 if v == false then v = '0' end
-return { s, v }
+if ARGV[1] ~= '' and s ~= '' then
+  redis.call('HSET', KEYS[3], ARGV[1], ARGV[2])
+  redis.call('EXPIRE', KEYS[3], tonumber(ARGV[4]))
+end
+local out = { s, v }
+if ARGV[3] == '1' then
+  local p = redis.call('HGETALL', KEYS[3])
+  for i = 1, #p do out[#out + 1] = p[i] end
+end
+return out
 `;
 
 const CAS_SCRIPT = `
@@ -28,7 +40,7 @@ return { '1', tostring(nv), '' }
 
 function keys(code) {
   const c = String(code || '').toUpperCase();
-  return ['room:' + c, 'roomv:' + c];
+  return ['room:' + c, 'roomv:' + c, 'roomp:' + c];
 }
 
 module.exports = async (req, res) => {
@@ -39,19 +51,35 @@ module.exports = async (req, res) => {
       const code = (req.query.code || '').toUpperCase();
       if (!code) return res.status(400).json({ error: 'missing code' });
 
-      const [k, kv] = keys(code);
-      const out = await redis.eval(READ_SCRIPT, [k, kv], []);
+      const pid = String(req.query.pid || '').slice(0, 32);
+      const wantPresence = req.query.presence === '1';
+      const now = Date.now();
+
+      const [k, kv, kp] = keys(code);
+      const out = await redis.eval(
+        READ_SCRIPT,
+        [k, kv, kp],
+        [pid, String(now), wantPresence ? '1' : '0', String(TTL)]
+      );
       const raw = out && out[0] ? String(out[0]) : '';
       const version = Number((out && out[1]) || 0);
 
       if (!raw) return res.status(200).json({ value: null, version: 0 });
 
-      const since = req.query.since;
-      if (since !== undefined && since !== '' && Number(since) === version) {
-        return res.status(200).json({ notModified: true, version });
+      const extra = {};
+      if (wantPresence) {
+        const presence = {};
+        for (let i = 2; i + 1 < out.length; i += 2) presence[String(out[i])] = Number(out[i + 1]) || 0;
+        extra.presence = presence;
+        extra.now = now;
       }
 
-      return res.status(200).json({ value: JSON.parse(raw), version });
+      const since = req.query.since;
+      if (since !== undefined && since !== '' && Number(since) === version) {
+        return res.status(200).json(Object.assign({ notModified: true, version }, extra));
+      }
+
+      return res.status(200).json(Object.assign({ value: JSON.parse(raw), version }, extra));
     }
 
     if (req.method === 'POST') {
