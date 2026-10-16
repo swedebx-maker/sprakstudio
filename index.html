@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="sv">
+<html lang="sv" translate="no" class="notranslate">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#EAF1F9">
 <title>Språkstudio Party</title>
@@ -678,6 +679,23 @@ canvas.draw-canvas{display:block;background:#fff;border:3px solid #DCE5F0;border
 .p-card .scene{margin:-2px auto 0;box-shadow:0 4px 0 #DCE5F0;width:min(100%, calc(42vh * 1.6));}
 html:not(.host-zoom) #app{padding:14px 12px;}
 
+/* ---------- защита от автоперевода ---------- */
+#tr-canary{position:fixed;left:2px;bottom:2px;font-size:12px;line-height:1;opacity:.01;pointer-events:none;z-index:1;white-space:nowrap;color:var(--ink);}
+#tr-block{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:rgba(20,40,70,.72);}
+#tr-block .trb-card{background:#fff;color:var(--ink);border-radius:26px;padding:28px 26px 24px;max-width:480px;width:100%;text-align:center;
+  box-shadow:0 10px 0 rgba(20,40,70,.35);animation:popIn .35s cubic-bezier(.2,1.5,.4,1);}
+#tr-block .trb-ico{position:relative;width:88px;height:88px;margin:0 auto 10px;border-radius:50%;background:#FFE1E6;color:var(--red-d);
+  display:flex;align-items:center;justify-content:center;}
+#tr-block .trb-ico .msi{font-size:52px;}
+#tr-block .trb-ico i{position:absolute;left:12px;right:12px;top:50%;height:7px;margin-top:-3.5px;border-radius:4px;background:var(--red);transform:rotate(-40deg);box-shadow:0 0 0 3px #FFE1E6;}
+#tr-block h2{font-family:var(--display);font-weight:400;font-size:1.9rem;margin:.1em 0 .3em;}
+#tr-block p{font-family:var(--round);font-weight:600;color:var(--ink-2);font-size:1.05rem;margin:0 0 14px;}
+#tr-block .trb-how{display:flex;flex-direction:column;gap:8px;background:var(--gray-1);border-radius:16px;padding:12px 14px;text-align:left;
+  font-family:var(--round);font-weight:500;font-size:.98rem;line-height:1.45;}
+#tr-block .key{display:inline-block;background:#fff;border:2px solid var(--line);border-radius:8px;padding:0 .45em;font-weight:700;color:var(--violet-d);}
+#tr-block .trb-how .msi{color:var(--violet);}
+
 /* =====================================================================
    small screens / reduced motion
    ===================================================================== */
@@ -705,6 +723,19 @@ html:not(.host-zoom) #app{padding:14px 12px;}
 <div id="toast-stack"></div>
 <div id="theft-overlay" class="hidden"></div>
 <div id="round-intro" class="hidden"></div>
+<!-- Ловушка для переводчиков: единственный текст, который разрешено переводить. Если он изменился, значит включили перевод -->
+<div id="tr-canary" translate="yes" aria-hidden="true">Hej! Välkommen till lektionen i svenska idag.</div>
+<div id="tr-block" class="hidden" role="alertdialog" aria-live="assertive">
+  <div class="trb-card">
+    <div class="trb-ico"><span class="msi">translate</span><i></i></div>
+    <h2>Stäng av översättningen!</h2>
+    <p>Spelet fungerar bara på svenska. Du kan inte svara medan sidan är översatt.</p>
+    <div class="trb-how">
+      <div><b>iPad (Safari):</b> tryck på <span class="key">aA</span> i adressfältet och välj <span class="key">Visa original</span></div>
+      <div><b>Chrome:</b> tryck på <span class="msi">g_translate</span> och välj <span class="key">Svenska</span></div>
+    </div>
+  </div>
+</div>
 <div id="net-status" class="hidden"><span class="msi">wifi_off</span><span id="net-status-text">Ingen kontakt...</span></div>
 <div id="app">
 
@@ -1765,7 +1796,7 @@ function calcScore(timeLeftFraction,combo){ const base=200+Math.round(800*Math.m
 function normalizeSwedish(s){ return s.toLowerCase().trim().replace(/å|ä/g,'a').replace(/ö/g,'o'); }
 function similarity(a,b){ const m=a.length,n=b.length; if(m===0) return n===0?1:0; if(n===0) return 0; const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0)); for(let i=0;i<=m;i++) dp[i][0]=i; for(let j=0;j<=n;j++) dp[0][j]=j; for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); const maxLen=Math.max(m,n); return maxLen===0?1:1-dp[m][n]/maxLen; }
 
-function show(id){ ['role-screen','host-create-screen','host-board-screen','player-join-screen','player-game-screen'].forEach(s=>document.getElementById(s).classList.toggle('hidden',s!==id)); }
+function show(id){ ['role-screen','host-create-screen','host-board-screen','player-join-screen','player-game-screen'].forEach(s=>document.getElementById(s).classList.toggle('hidden',s!==id)); if(window.__trCheck) window.__trCheck(); }
 
 document.getElementById('host-role-btn').addEventListener('click',()=>{ setHostZoom(true); show('host-create-screen'); });
 document.getElementById('player-role-btn').addEventListener('click',()=>show('player-join-screen'));
@@ -3047,6 +3078,43 @@ let playerCode=null, playerId=null, playerPollTimer=null, playerPollStop=true, p
 let playerSpellNote='';
 let wordOrderLocal=[], matchState=null, drawState={color:'#233246',size:4,tool:'pen',strokes:[],currentStroke:null,lastSync:0};
 
+/* ===== Защита от автоперевода (Google Translate, Safari, Edge) =====
+   1) <html translate="no">, class="notranslate" и <meta name="google" content="notranslate"> запрещают перевод.
+   2) Если переводчик всё равно что-то перевёл, меняется текст ловушки #tr-canary (или Google
+      вешает на <html> класс translated-ltr). Тогда на айпаде экран закрывается, пока перевод не выключат. */
+const TrGuard=(function(){
+  const canary=document.getElementById('tr-canary');
+  const block=document.getElementById('tr-block');
+  const ORIGINAL=canary ? canary.textContent : '';
+  let on=false, reported=false;
+  function translated(){
+    const html=document.documentElement;
+    if(/\btranslated-(ltr|rtl)\b/.test(html.className)) return true;
+    if(html.lang && !/^sv/i.test(html.lang)) return true;
+    if(canary && canary.textContent!==ORIGINAL) return true;
+    if(canary && canary.querySelector('font')) return true;
+    return false;
+  }
+  function check(){
+    if(!block) return;
+    // закрываем только экраны ученика (на смартборде учителю не мешаем)
+    const pj=document.getElementById('player-join-screen'), pg=document.getElementById('player-game-screen');
+    const studentScreen=(pj && !pj.classList.contains('hidden')) || (pg && !pg.classList.contains('hidden'));
+    const t=translated() && studentScreen && !isHost;
+    if(t===on) return;
+    on=t; block.classList.toggle('hidden', !t);
+    if(t && !reported){ reported=true; logEvent('translate_blocked',{code:playerCode||''}); }
+  }
+  try{
+    const mo=new MutationObserver(check);
+    if(canary) mo.observe(canary,{characterData:true,childList:true,subtree:true});
+    mo.observe(document.documentElement,{attributes:true,attributeFilter:['class','lang']});
+  }catch(e){}
+  setInterval(check, 2000);
+  window.__trCheck=check;
+  return {check};
+})();
+
 /* ===== Полоска времени на айпаде (transform, без перерасчёта вёрстки) ===== */
 let playerTimerState=null;
 function updatePlayerTimer(state){
@@ -3561,7 +3629,7 @@ async function submitAnswer(value, pickedEl){
   const st=document.getElementById('tf-status')||document.getElementById('wo-status')||document.getElementById('sign-status')||document.getElementById('match-status');
   if(pickedEl && wasCorrect!==null && pickedEl.classList.contains('choice-btn')) pickedEl.classList.add(wasCorrect?'right':'wrong');
   if(st){
-    if(wasCorrect===true){ st.textContent='Rätt!Väntar på de andra...'; st.className='p-status-line right'; }
+    if(wasCorrect===true){ st.textContent='Rätt! ✓ Väntar på de andra...'; st.className='p-status-line right'; }
     else if(wasCorrect===false){ st.textContent='Tyvärr fel, vi ses i nästa runda!'; st.className='p-status-line wrong'; }
     else { st.textContent='Skickat! Väntar på de andra...'; st.className='p-status-line'; }
   }
