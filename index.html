@@ -758,6 +758,25 @@ html:not(.host-zoom) #app{padding:14px 12px;}
 .ee-btn:active{transform:translateY(5px);box-shadow:none;}
 .ee-btn:disabled{opacity:.55;}
 #player-game-screen .p-card{position:relative;}
+.ee-card .ee-hint{font-family:var(--round);font-weight:600;font-size:1.1rem;color:var(--gray-4);}
+.ee-big .ee-top{font-family:var(--round);font-weight:600;font-size:1.05rem;color:var(--ink-2);}
+.ee-big .ee-hint{font-family:var(--round);font-weight:700;font-size:1.05rem;color:var(--gray-4);}
+.ee-big .ee-hint.bad{color:var(--red-d);}
+.ee-big .ee-w{text-align:center;line-height:1.25;padding:0 10px;}
+.verb-table{display:flex;align-items:stretch;justify-content:center;gap:1rem;}
+.verb-table .vt-emo{align-self:center;font-size:5rem;margin-right:.6rem;}
+.vt-col{display:flex;flex-direction:column;gap:.5rem;min-width:12rem;}
+.vt-h{font-family:var(--round);font-weight:700;font-size:1.5rem;color:var(--cat-d);text-align:center;display:flex;flex-direction:column;}
+.vt-h small{font-size:.65em;color:var(--gray-4);font-weight:600;}
+.vt-c{font-family:var(--round);font-weight:700;font-size:3rem;color:var(--ink);background:#fff;border-radius:1.1rem;padding:.4em .5em;text-align:center;
+  box-shadow:0 .35rem 0 var(--gray-3),0 0 0 .15rem var(--gray-2);}
+.vt-c.gap{background:var(--cat);color:#fff;box-shadow:0 .35rem 0 var(--cat-d);animation:gapPulse 1.6s ease-in-out infinite;}
+.verb-table.small{gap:6px;margin:2px 0 4px;}
+.verb-table.small .vt-emo{font-size:34px;margin-right:2px;}
+.verb-table.small .vt-col{min-width:0;flex:1;gap:4px;}
+.verb-table.small .vt-h{font-size:.8rem;}
+.verb-table.small .vt-c{font-size:1rem;padding:.55em .2em;border-radius:10px;box-shadow:0 3px 0 var(--gray-3),0 0 0 2px var(--gray-2);}
+.verb-table.small .vt-c.gap{box-shadow:0 3px 0 var(--cat-d);}
 
 /* ---------- защита от автоперевода ---------- */
 #tr-canary{position:fixed;left:2px;bottom:2px;font-size:12px;line-height:1;opacity:.01;pointer-events:none;z-index:1;white-space:nowrap;color:var(--ink);}
@@ -1762,8 +1781,8 @@ SENTENCES.forEach(arr => arr.forEach(addBokstavWord));
 STATEMENTS.forEach(st => st.text.replace(/[.,!?"]/g,' ').split(/\s+/).forEach(addBokstavWord));
 MATCH_PAIRS_POOL.forEach(p => addBokstavWord(p.word));
 
-const ROUND_DURATIONS={draw:90, truefalse:15, wordorder:40, sign:20, match:45, bokstav:30, lyssna:20, klocka:20, lucka:20, udda:20, enett:35};
-const NON_DRAW_TYPES=["truefalse","wordorder","sign","match","bokstav","lyssna","klocka","lucka","udda","enett"];
+const ROUND_DURATIONS={draw:90, truefalse:15, wordorder:40, sign:20, match:45, bokstav:30, lyssna:20, klocka:20, lucka:20, udda:20, enett:35, igar:40, adjektiv:45, verb:22};
+const NON_DRAW_TYPES=["truefalse","wordorder","sign","match","bokstav","klocka","lucka","udda","enett","adjektiv"];
 
 /* ===== Внешний вид раундов: цвет категории, иконка, название ===== */
 const TYPE_META={
@@ -1777,9 +1796,13 @@ const TYPE_META={
   klocka:   {name:'Vad är klockan?',   short:'Klockan',   icon:'schedule',       c:'#F0505A', d:'#C0313B', ink:'#fff'},
   lucka:    {name:'Fyll i luckan',     short:'Luckan',    icon:'edit_note',      c:'#2C4A8A', d:'#1B3263', ink:'#fff'},
   udda:     {name:'Vilket passar inte?',short:'Udda ord', icon:'search',         c:'#C2703D', d:'#93502A', ink:'#fff'},
-  enett:    {name:'En eller ett?',     short:'En/ett',    icon:'bolt',           c:'#4F6D8F', d:'#36506E', ink:'#fff'}
+  enett:    {name:'En eller ett?',     short:'En/ett',    icon:'bolt',           c:'#4F6D8F', d:'#36506E', ink:'#fff'},
+  igar:     {name:'Igår!',             short:'Igår',      icon:'history',        c:'#12A594', d:'#0B7A6D', ink:'#fff'},
+  adjektiv: {name:'Adjektiv',          short:'Adjektiv',  icon:'format_color_text', c:'#0E8AA8', d:'#0A6880', ink:'#fff'},
+  verb:     {name:'Verbtabellen',      short:'Verb',      icon:'table_chart',    c:'#5B6BD6', d:'#4050B0', ink:'#fff'}
 };
-const CHOICE_TYPES=['lyssna','klocka','lucka','udda'];
+const BLITZ_TYPES=['enett','igar','adjektiv'];
+const CHOICE_TYPES=['klocka','lucka','udda','verb'];
 /* Время раунда с учётом паузы и «+10 сек» */
 function roundDur(r){ return (ROUND_DURATIONS[r.type]||20) + (r.extraSec||0); }
 function roundElapsed(r){ return Math.max(0, ((r.pausedAt||Date.now()) - r.startedAt - (r.pausedMs||0)) / 1000); }
@@ -1818,6 +1841,11 @@ function buildClockRound(){
   [[h+2,m],[h,(m+10)%60],[h+1,(m+30)%60]].forEach(([hh,mm])=>{ const t=tidText(hh,mm); if(opts.length<3 && t!==correct && !opts.includes(t)) opts.push(t); });
   if(m===30){ const trap='halv '+hw(h); if(trap!==correct && !opts.includes(trap)) opts[0]=trap; }
   return {type:'klocka', h, m, correct, choices:shuffle([correct,...opts])};
+}
+const VERB_HEADS=['att ...','idag','igår','har ...'];
+const VERB_SUB=['infinitiv','presens','preteritum','supinum'];
+function verbTableHTML(r,size){
+  return `<div class="verb-table ${size}"><span class="vt-emo">${r.e}</span>${r.forms.map((f,i)=>`<div class="vt-col"><div class="vt-h">${VERB_HEADS[i]}<small>${VERB_SUB[i]}</small></div><div class="vt-c ${i===r.hide?'gap':''}">${i===r.hide?'?':escHTML(f)}</div></div>`).join('')}</div>`;
 }
 function clockSVG(h,m,cls){
   const ha=((h%12)+m/60)*30, ma=m*6;
@@ -2110,7 +2138,7 @@ const GAME_TYPES=[
   {key:'sign',      icon:'signpost',       name:'Vad säger skylten?'},
   {key:'match',     icon:'join_inner',     name:'Para ihop'},
   {key:'bokstav',   icon:'grid_on',        name:'Bokstavs-jakt (hjulet)'},
-  {key:'lyssna'},{key:'klocka'},{key:'lucka'},{key:'udda'},{key:'enett'}
+  {key:'klocka'},{key:'lucka'},{key:'udda'},{key:'enett'},{key:'adjektiv'}
 ];
 function loadSettings(){
   const def={enabled:{}, gridSize:5};
@@ -2164,17 +2192,43 @@ function buildRound(type,drawerId,opts){
   if(type==='wordorder'){ const words=pickFresh('sent',SENTENCES); return {type:'wordorder',correctOrder:words,scrambled:shuffleNotEqual(words)}; }
   if(type==='sign'){ const s=pickFresh('sign',SIGNS); return {type:'sign',scene:s.scene,icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct}; }
   if(type==='match'){ return {type:'match',pairs:shuffle(MATCH_PAIRS_POOL).slice(0,6)}; }
-  if(type==='lyssna'){
-    // половина раундов: одно слово, половина: короткая фраза
-    const usePhrase=Math.random()<0.5;
-    const it = usePhrase ? pickFresh('listenP',LISTEN_PHRASES) : (p=>({say:p.word, emoji:p.emoji}))(pickFresh('listenW',MATCH_PAIRS_POOL));
-    const others=shuffle(MATCH_PAIRS_POOL.map(p=>p.emoji).filter(e=>e!==it.emoji)).slice(0,3);
-    return {type:'lyssna', say:it.say, correct:it.emoji, choices:shuffle([it.emoji,...others])};
-  }
   if(type==='klocka'){ return buildClockRound(); }
   if(type==='lucka'){ const g=pickFresh('gap',GAP_SENTENCES); return {type:'lucka', sentence:g.s, correct:g.a, choices:shuffle([g.a,...g.o])}; }
   if(type==='udda'){ const o=pickFresh('odd',ODD_ONE); return {type:'udda', words:shuffle(o.w), choices:null, correct:o.odd, why:o.why}; }
-  if(type==='enett'){ const items=shuffle(EN_ETT).slice(0,8).map(x=>({g:x[0], w:x[1], e:x[2]})); return {type:'enett', items}; }
+  if(type==='enett'){
+    // 3-5 ett-ord из 8, чтобы нельзя было угадывать «всегда en»
+    const k=3+Math.floor(Math.random()*3);
+    const ett=shuffle(EN_ETT.filter(x=>x[0]==='ett')).slice(0,k), en=shuffle(EN_ETT.filter(x=>x[0]==='en')).slice(0,8-k);
+    const items=shuffle([...ett,...en]).map(x=>({e:x[2], before:'', after:x[1], opts:['en','ett'], a:x[0], card:x[1]}));
+    return {type:'enett', items};
+  }
+  if(type==='igar'){
+    const items=shuffle(VERBS).slice(0,8).map(v=>({e:v[5], top:`Idag ${v[1]} jag ${v[6]}.`, before:'Igår', after:`jag ${v[6]}.`,
+      opts:shuffle([v[2],v[4]]), a:v[2], card:v[1], inf:v[0]}));
+    return {type:'igar', items};
+  }
+  if(type==='adjektiv'){
+    const pick=g=>shuffle(ADJ_NOUNS.filter(n=>n[0]===g));
+    const pools={en:pick('en'), ett:pick('ett'), pl:pick('pl')};
+    const plan=shuffle(['en','en','en','ett','ett','ett','pl','pl']);
+    const used=new Set(), idx={en:0,ett:0,pl:0};
+    const items=plan.map(g=>{
+      const n=pools[g][idx[g]++];
+      const set=shuffle(ADJ_SETS[n[3]]); const key=set.find(k=>!used.has(k))||set[0]; used.add(key);
+      const A=ADJ_FORMS[key]; const ans = g==='en'?A[0]:g==='ett'?A[1]:A[2];
+      const art = g==='pl' ? 'två' : g;
+      return {e:n[2], before:art, after:n[1], hint:A[0], opts:[...new Set(A)], a:ans, card:`${art} ${n[1]}`};
+    });
+    return {type:'adjektiv', items};
+  }
+  if(type==='verb'){
+    const v=pickFresh('verb',VERBS); const forms=v.slice(0,4);
+    const roll=Math.random(); const hide = roll<0.5 ? 2 : roll<0.75 ? 3 : 1;
+    const correct=forms[hide];
+    const pool=[forms[1],forms[2],forms[3],v[4],forms[0]].filter(x=>x!==correct);
+    const choices=shuffle([correct,...[...new Set(pool)].slice(0,3)]);
+    return {type:'verb', forms, hide, e:v[5], correct, choices};
+  }
   if(type==='bokstav'){ const size=(opts && opts.size===4) ? 4 : 5; return {type:'bokstav',size,spins:0,maxSpins:size*size,subPhase:'SPIN',wheels:{},draws:{},readyPlayers:[],stolen:{},bonusLeft:{},theft:null,thiefId:null,thiefStage:null,victimId:null,spinEndsAt:0,deadline:0,bonusMode:false}; }
 }
 
@@ -2314,7 +2368,7 @@ const ROUNDS_MIN=1, ROUNDS_MAX=60, ROUNDS_STEP=1;
 // Все игры включены → 12 раундов; иначе по одному раунду на каждую включённую игру
 function defaultRoundsFor(){ const n=enabledTypes().length; return n>=ALL_TYPES.length ? ROUNDS_DEFAULT : n; }
 let plannedRounds=ROUNDS_DEFAULT;
-const EST_ROUND_SEC={draw:70, truefalse:13, wordorder:32, sign:18, match:38, bokstav:360, lyssna:18, klocka:18, lucka:17, udda:16, enett:30};
+const EST_ROUND_SEC={draw:70, truefalse:13, wordorder:32, sign:18, match:38, bokstav:360, lyssna:18, klocka:18, lucka:17, udda:16, enett:30, igar:34, adjektiv:38, verb:19};
 const EST_OVERHEAD_SEC=36;
 function estSec(t){ return t==='bokstav' ? (gameSettings.gridSize===4 ? 230 : 360) : EST_ROUND_SEC[t]; }
 function estimateMinutes(n){
@@ -2751,10 +2805,16 @@ function renderHostRound(state){
     body.innerHTML=`<div class="q-text mid" style="margin-bottom:2rem;">Vilket ord passar inte?</div>
       <div class="odd-row">${r.words.map((w,i)=>`<span class="odd-tile" style="animation-delay:${(i*0.08).toFixed(2)}s">${escHTML(w)}</span>`).join('')}</div>
       <div class="q-hint"><span class="msi">tablet_mac</span>Svara på iPaden</div>`;
-  } else if(r.type==='enett'){
-    body.innerHTML=`<div class="q-text mid" style="margin-bottom:1.6rem;"><span style="color:var(--violet)">en</span> eller <span style="color:var(--green-d)">ett</span>?</div>
-      <div class="enett-grid">${r.items.map((it,i)=>`<div class="ee-card" style="animation-delay:${(i*0.06).toFixed(2)}s"><span class="ee-emo">${it.e}</span><span class="ee-w">${escHTML(it.w)}</span></div>`).join('')}</div>
+  } else if(BLITZ_TYPES.includes(r.type)){
+    const head = r.type==='enett' ? `<span style="color:var(--violet)">en</span> eller <span style="color:var(--green-d)">ett</span>?`
+      : r.type==='igar' ? `Idag <span class="msi" style="font-size:.9em;color:var(--cat)">arrow_forward</span> <span style="color:var(--cat)">igår</span>`
+      : `Stor, <span style="color:var(--cat)">stort</span> eller <span style="color:var(--green-d)">stora</span>?`;
+    body.innerHTML=`<div class="q-text mid" style="margin-bottom:1.6rem;">${head}</div>
+      <div class="enett-grid">${r.items.map((it,i)=>`<div class="ee-card" style="animation-delay:${(i*0.06).toFixed(2)}s"><span class="ee-emo">${it.e}</span><span class="ee-w">${escHTML(it.card)}</span>${it.hint?`<span class="ee-hint">${escHTML(it.hint)}</span>`:''}</div>`).join('')}</div>
       <div class="q-hint"><span class="msi">bolt</span>Så snabbt du kan på iPaden</div>`;
+  } else if(r.type==='verb'){
+    body.innerHTML=`<div class="q-text mid" style="margin-bottom:2rem;">Vilken form saknas?</div>${verbTableHTML(r,'big')}
+      <div class="q-hint"><span class="msi">tablet_mac</span>Svara på iPaden</div>`;
   } else if(r.type==='match'){
     body.innerHTML=`<div class="q-text mid" style="margin-bottom:1.6rem;">Vad heter de på svenska?</div>
       <div class="match-show">${r.pairs.map((p,i)=>`<div class="m-card" style="animation-delay:${(i*0.07).toFixed(2)}s">${p.emoji}</div>`).join('')}</div>
@@ -3086,7 +3146,7 @@ function renderPlayerAnswerSummary(r, playerId){
   if(r.type==='sign') return chip(escHTML(a.value), a.correct?'ok':'bad');
   if(r.type==='match') return a.correct ? chip('Alla par ✓','ok') : chip('ej klar','mute');
   if(r.type==='draw') return a.value ? chip('”'+escHTML(a.value)+'”', 'ok') : chip('inget svar','mute');
-  if(r.type==='enett') return chip((a.got||0)+' av '+r.items.length, a.correct?'ok':'bad');
+  if(BLITZ_TYPES.includes(r.type)) return chip((a.got||0)+' av '+r.items.length, a.correct?'ok':'bad');
   if(CHOICE_TYPES.includes(r.type)) return chip(escHTML(a.value), a.correct?'ok':'bad');
   return '';
 }
@@ -3131,7 +3191,8 @@ async function finalizeRoundInner(state){
     if(r.type==='klocka') reveal = 'Klockan är '+r.correct;
     if(r.type==='lucka') reveal = r.sentence.replace('___', r.correct);
     if(r.type==='udda') reveal = r.correct+'. '+r.why;
-    if(r.type==='enett') reveal = r.items.map(i=>i.g+' '+i.w).join(', ');
+    if(BLITZ_TYPES.includes(r.type)) reveal = r.items.map(i=>[i.before,i.a,i.after].filter(Boolean).join(' ')).join(', ');
+    if(r.type==='verb') reveal = r.forms.join(', ');
 
     s.lastRoundResult={type:r.type, reveal, rankBefore, rankAfter, pointsThisRound:pts, bokstavDetail: (typeof bokstavDetail!=='undefined' ? bokstavDetail : null)};
     s.phase = 'round-end'; 
@@ -3150,7 +3211,8 @@ function revealPlain(r, res){
   if(r.type==='klocka') return 'Klockan är '+r.correct+'.';
   if(r.type==='lucka') return r.sentence.replace('___', r.correct);
   if(r.type==='udda') return r.correct+'. '+r.why;
-  if(r.type==='enett') return 'Titta på tavlan: en eller ett?';
+  if(BLITZ_TYPES.includes(r.type)) return 'Titta på tavlan, där står alla svar!';
+  if(r.type==='verb') return r.forms[0]+', '+r.forms[1]+', '+r.forms[2]+', '+r.forms[3];
   return 'Titta på tavlan!';
 }
 function revealHTML(r, res){
@@ -3164,7 +3226,10 @@ function revealHTML(r, res){
   if(r.type==='klocka') return `Klockan är ${escHTML(r.correct)}<span class="rv-q">${pad2(r.h)}:${pad2(r.m)}</span>`;
   if(r.type==='lucka') return escHTML(r.sentence).replace('___', `<span style="color:var(--green-d);text-decoration:underline;">${escHTML(r.correct)}</span>`);
   if(r.type==='udda') return `${escHTML(r.correct)}<span class="rv-q">${escHTML(r.why)}</span>`;
-  if(r.type==='enett') return r.items.map(i=>`<span style="white-space:nowrap;margin-right:.6em;font-size:.8em;"><b style="color:${i.g==='en'?'var(--violet)':'var(--green-d)'}">${i.g}</b> ${escHTML(i.w)}</span>`).join('');
+  if(r.type==='enett') return r.items.map(i=>`<span style="white-space:nowrap;margin-right:.6em;font-size:.8em;"><b style="color:${i.a==='en'?'var(--violet)':'var(--green-d)'}">${i.a}</b> ${escHTML(i.after)}</span>`).join(' ');
+  if(r.type==='igar') return r.items.map(i=>`<span style="white-space:nowrap;margin-right:.7em;font-size:.72em;">${escHTML(i.card)} → <b style="color:var(--green-d)">${escHTML(i.a)}</b></span>`).join(' ');
+  if(r.type==='adjektiv') return r.items.map(i=>`<span style="white-space:nowrap;margin-right:.7em;font-size:.72em;">${escHTML(i.before)} <b style="color:var(--green-d)">${escHTML(i.a)}</b> ${escHTML(i.after)}</span>`).join(' ');
+  if(r.type==='verb') return r.forms.map((f,i)=>i===r.hide?`<b style="color:var(--green-d)">${escHTML(f)}</b>`:escHTML(f)).join(' · ');
   return res ? escHTML(res.reveal) : '';
 }
 function renderRoundEnd(state){
@@ -3415,7 +3480,7 @@ function tickPlayerTimer(){
   t.firstElementChild.style.transform='scaleX('+left.toFixed(3)+')';
   t.classList.toggle('hot', left*roundDur(r)<=5);
   // блиц: если время почти вышло, отправляем то, что успели
-  if(r.type==='enett' && enettState && !enettState.sent && !r.pausedAt && left*roundDur(r)<=1.5 && enettState.answers.length) enettSubmit();
+  if(BLITZ_TYPES.includes(r.type) && enettState && !enettState.sent && !r.pausedAt && left*roundDur(r)<=1.5 && enettState.answers.length) enettSubmit();
 }
 setInterval(()=>{ if(!isHost && playerTimerState) tickPlayerTimer(); }, 1000);
 
@@ -3525,7 +3590,7 @@ async function playerPoll(){
 
 function renderPlayerRound(state){
   const r=state.round; const body=document.getElementById('round-content-player'); const isDrawer = r.type==='draw' && r.drawerId===playerId;
-  if(r.type!=='enett') enettState=null;
+  if(!BLITZ_TYPES.includes(r.type)) enettState=null;
 
   if(r.type==='draw'){
     if(isDrawer){
@@ -3554,6 +3619,7 @@ function renderPlayerRound(state){
     if(r.type==='klocka') head=`<div class="p-clock">${clockSVG(r.h,r.m,'small')}</div><div class="p-q small">Vad är klockan?</div>`;
     if(r.type==='lucka'){ const parts=escHTML(r.sentence).split('___'); head=`<div class="p-q gap-text">${parts[0]}<span class="gap-box">?</span>${parts[1]||''}</div>`; }
     if(r.type==='udda') head=`<div class="p-q small">Vilket ord passar inte?</div>`;
+    if(r.type==='verb') head=verbTableHTML(r,'small')+`<div class="p-q small">Vilken form saknas?</div>`;
     const opts = r.type==='udda' ? r.words : r.choices;
     body.innerHTML = head + `<div class="${r.type==='lyssna'?'emoji-grid':'choice-col'}" id="pick-choices"></div><div class="p-status-line" id="sign-status"></div>`;
     const wrap=document.getElementById('pick-choices');
@@ -3561,7 +3627,7 @@ function renderPlayerRound(state){
       if(r.type==='lyssna'){ btn.className='emoji-btn choice-btn'; btn.textContent=c; }
       else { btn.className='choice-btn'; btn.innerHTML=`<span class="dot" style="--dc:${ANSWER_COLORS[i%4]}">${'ABCD'[i]}</span>`; btn.appendChild(document.createTextNode(c)); }
       btn.addEventListener('click', ()=>submitAnswer(c, btn)); wrap.appendChild(btn); });
-  } else if(r.type==='enett'){
+  } else if(BLITZ_TYPES.includes(r.type)){
     renderEnEtt(r);
   } else if(r.type==='match'){
     matchState={pairs:r.pairs, matchedWords:[], selectedWord:null, selectedEmoji:null, shuffledWords:shuffle(r.pairs.map(p=>p.word)), shuffledEmojis:shuffle(r.pairs.map(p=>p.emoji))};
@@ -3916,39 +3982,47 @@ async function submitGuess(){
 
 /* ===== En eller ett: блиц на айпаде, ответы копятся локально и уходят одним запросом ===== */
 let enettState=null;
+const BLITZ_BTN=[['var(--violet)','var(--violet-d)','#fff'],['var(--green)','var(--green-d)','#06341B'],['var(--orange)','var(--orange-d)','#fff']];
 function renderEnEtt(r){
   enettState={items:r.items, i:0, answers:[], sent:false, round:r};
   const body=document.getElementById('round-content-player');
   body.innerHTML=`<div class="ee-progress" id="ee-progress">${r.items.map(()=>'<i></i>').join('')}</div>
     <div class="ee-stage"><div class="ee-big" id="ee-big"></div></div>
-    <div class="ee-btns"><button class="ee-btn en" id="ee-en">en</button><button class="ee-btn ett" id="ee-ett">ett</button></div>
+    <div class="ee-btns" id="ee-btns"></div>
     <div class="p-status-line" id="ee-status"></div>`;
-  document.getElementById('ee-en').addEventListener('click', ()=>enettPick('en'));
-  document.getElementById('ee-ett').addEventListener('click', ()=>enettPick('ett'));
   enettShow();
+}
+function blitzLine(it, fill, cls){
+  const slot=`<b class="ee-slot ${cls||''}">${fill?escHTML(fill):'?'}</b>`;
+  return [it.before?escHTML(it.before):'', slot, it.after?escHTML(it.after):''].filter(Boolean).join(' ');
 }
 function enettShow(){
   const st=enettState; const big=document.getElementById('ee-big'); if(!st||!big) return;
-  if(st.i>=st.items.length){ big.innerHTML=`<div class="ee-done"><span class="msi">task_alt</span>Klart!</div>`; return; }
+  const btns=document.getElementById('ee-btns');
+  if(st.i>=st.items.length){ big.innerHTML=`<div class="ee-done"><span class="msi">task_alt</span>Klart!</div>`; if(btns) btns.innerHTML=''; return; }
   const it=st.items[st.i];
-  big.innerHTML=`<span class="ee-emo">${it.e}</span><span class="ee-w"><b class="ee-slot">?</b> ${escHTML(it.w)}</span>`;
+  big.innerHTML=`${it.top?`<span class="ee-top">${escHTML(it.top)}</span>`:''}<span class="ee-emo">${it.e}</span><span class="ee-w">${blitzLine(it)}</span>${it.hint?`<span class="ee-hint">(${escHTML(it.hint)})</span>`:''}`;
   big.classList.remove('pop'); void big.offsetWidth; big.classList.add('pop');
+  if(btns){
+    btns.style.gridTemplateColumns=`repeat(${it.opts.length},1fr)`;
+    btns.innerHTML=it.opts.map((o,k)=>{ const c=BLITZ_BTN[k%3]; return `<button class="ee-btn" data-k="${k}" style="background:${c[0]};box-shadow:0 7px 0 ${c[1]};color:${c[2]};${o.length>6?'font-size:2rem;':''}">${escHTML(o)}</button>`; }).join('');
+    btns.querySelectorAll('.ee-btn').forEach(b=>b.addEventListener('click', ()=>enettPick(it.opts[Number(b.dataset.k)])));
+  }
 }
 function enettPick(g){
   const st=enettState; if(!st || st.sent || st.i>=st.items.length) return;
-  const it=st.items[st.i]; const ok=g===it.g; st.answers.push(g);
+  const it=st.items[st.i]; const ok=g===it.a; st.answers.push(g);
   const dots=document.querySelectorAll('#ee-progress i'); if(dots[st.i]) dots[st.i].className=ok?'ok':'bad';
   const big=document.getElementById('ee-big');
-  big.innerHTML=`<span class="ee-emo">${it.e}</span><span class="ee-w"><b class="ee-slot ${ok?'ok':'bad'}">${it.g}</b> ${escHTML(it.w)}</span>`;
+  big.innerHTML=`${it.top?`<span class="ee-top">${escHTML(it.top)}</span>`:''}<span class="ee-emo">${it.e}</span><span class="ee-w">${blitzLine(it, it.a, ok?'ok':'bad')}</span>${ok?'':`<span class="ee-hint bad">inte ”${escHTML(g)}”</span>`}`;
   big.classList.toggle('shake', !ok);
   if(ok) AudioEngine.playPop(); else AudioEngine.playWrong();
   st.i++;
   document.querySelectorAll('.ee-btn').forEach(b=>b.disabled=true);
   setTimeout(()=>{
-    document.querySelectorAll('.ee-btn').forEach(b=>b.disabled=false);
     big.classList.remove('shake');
     if(st.i>=st.items.length) enettSubmit(); else enettShow();
-  }, ok?380:900);
+  }, ok?420:1300);
 }
 async function enettSubmit(){
   const st=enettState; if(!st || st.sent) return; st.sent=true;
@@ -3965,14 +4039,14 @@ async function submitAnswer(value, pickedEl){
   if(pickedEl) pickedEl.classList.add('picked');
   await updateRoom(playerCode, s=>{
     if(s.phase!=='active' || !s.round) return s; const r=s.round; r.answers=r.answers||{}; if(r.answers[playerId]) return s;
-    if(r.pausedAt && r.type!=='enett') return null;
+    if(r.pausedAt && !BLITZ_TYPES.includes(r.type)) return null;
     const player=s.players.find(p=>p.id===playerId); if(!player) return null;
     let correct=false, ratio=1;
     if(r.type==='truefalse') correct = value===r.isTrue; else if(r.type==='wordorder') correct = JSON.stringify(value)===JSON.stringify(r.correctOrder); else if(r.type==='sign') correct = value===r.correct; else if(r.type==='match') correct = value===true;
     else if(CHOICE_TYPES.includes(r.type)) correct = value===r.correct;
-    else if(r.type==='enett'){
+    else if(BLITZ_TYPES.includes(r.type)){
       // блиц: очки пропорционально числу верных, «верно» для серии, если ≥ 6 из 8
-      const got=(value||[]).filter((g,i)=>r.items[i] && g===r.items[i].g).length;
+      const got=(value||[]).filter((g,i)=>r.items[i] && g===r.items[i].a).length;
       ratio=got/r.items.length; correct = got>=Math.ceil(r.items.length*0.75);
       const pts = got ? Math.round(calcScore(roundLeftFrac(r), correct?(player.combo||0):0)*ratio) : 0;
       player.score+=pts; if(correct) player.combo=(player.combo||0)+1;
@@ -4082,19 +4156,6 @@ MATCH_PAIRS_POOL.push(
   {word:"näsa",emoji:"👃"},{word:"öra",emoji:"👂"},{word:"mun",emoji:"👄"},{word:"brev",emoji:"✉️"},{word:"ljus",emoji:"🕯️"}
 );
 
-/* ---------- НОВАЯ ИГРА: Lyssna & välj (доска говорит, на айпаде выбирают картинку) ---------- */
-const LISTEN_PHRASES=[
-  {say:"Jag äter en banan.",emoji:"🍌"},{say:"Det snöar ute.",emoji:"❄️"},{say:"Han cyklar till jobbet.",emoji:"🚲"},
-  {say:"Vi åker tåg.",emoji:"🚆"},{say:"Hon läser en bok.",emoji:"📖"},{say:"Det regnar idag.",emoji:"🌧️"},
-  {say:"Jag har ont i tanden.",emoji:"🦷"},{say:"Han ringer sin mamma.",emoji:"📱"},{say:"Vi köper glass.",emoji:"🍦"},
-  {say:"Katten sover.",emoji:"🐱"},{say:"Jag tar bussen.",emoji:"🚌"},{say:"Solen skiner.",emoji:"☀️"},
-  {say:"Barnen spelar fotboll.",emoji:"⚽"},{say:"Vi äter pizza.",emoji:"🍕"},{say:"Jag öppnar dörren.",emoji:"🚪"},
-  {say:"Flygplanet landar.",emoji:"✈️"},{say:"Det brinner!",emoji:"🔥"},{say:"Han dricker en kopp kaffe.",emoji:"☕"},
-  {say:"Hon köper ost.",emoji:"🧀"},{say:"Vi går till sjukhuset.",emoji:"🏥"},{say:"Jag släcker lampan.",emoji:"💡"},
-  {say:"Mormor får en present.",emoji:"🎁"},{say:"Han spelar gitarr.",emoji:"🎸"},{say:"Hästen springer.",emoji:"🐴"},
-  {say:"Ta med paraply idag.",emoji:"☂️"},{say:"Jag skriver ett brev.",emoji:"✉️"}
-];
-
 /* ---------- НОВАЯ ИГРА: Fyll i luckan ---------- */
 const GAP_SENTENCES=[
   {s:"Jag ___ kaffe varje morgon.",a:"dricker",o:["äter","sover","läser"]},
@@ -4183,22 +4244,185 @@ const ODD_ONE=[
   {w:["tolv","tjugo","hundra","tisdag"],odd:"tisdag",why:"De andra är tal."}
 ];
 
-/* ---------- НОВАЯ ИГРА: En eller ett? (блиц из 8 слов) ---------- */
+/* ---------- En eller ett? (блиц из 8 слов) ---------- */
 const EN_ETT=[
-  ["en","bil","🚗"],["en","katt","🐱"],["en","hund","🐶"],["en","bok","📖"],["en","säng","🛏️"],["en","lampa","💡"],
-  ["en","dörr","🚪"],["en","jacka","🧥"],["en","tröja","👕"],["en","sko","👟"],["en","banan","🍌"],["en","tomat","🍅"],
-  ["en","gurka","🥒"],["en","morot","🥕"],["en","kopp","☕"],["en","sked","🥄"],["en","kniv","🔪"],["en","klocka","⏰"],
-  ["en","väska","👜"],["en","penna","✏️"],["en","dator","💻"],["en","cykel","🚲"],["en","buss","🚌"],["en","båt","⛵"],
-  ["en","blomma","🌸"],["en","fågel","🐦"],["en","fisk","🐟"],["en","häst","🐴"],["en","ko","🐄"],["en","gris","🐷"],
-  ["en","mus","🐭"],["en","groda","🐸"],["en","nyckel","🔑"],["en","telefon","📱"],["en","soffa","🛋️"],["en","ost","🧀"],
-  ["en","korv","🌭"],["en","tårta","🎂"],["en","glass","🍦"],["en","boll","⚽"],["en","stjärna","⭐"],["en","sol","☀️"],
-  ["en","orm","🐍"],["en","uggla","🦉"],["en","citron","🍋"],["en","gitarr","🎸"],["en","tand","🦷"],
-  ["ett","hus","🏠"],["ett","äpple","🍎"],["ett","ägg","🥚"],["ett","tåg","🚆"],["ett","flygplan","✈️"],["ett","träd","🌳"],
-  ["ett","bröd","🍞"],["ett","päron","🍐"],["ett","öra","👂"],["ett","öga","👁️"],["ett","får","🐑"],["ett","lejon","🦁"],
-  ["ett","bi","🐝"],["ett","moln","☁️"],["ett","berg","⛰️"],["ett","hjärta","❤️"],["ett","paraply","☂️"],["ett","pussel","🧩"],
-  ["ett","paket","🎁"],["ett","brev","✉️"],["ett","lås","🔒"],["ett","skepp","🚢"],["ett","tält","⛺"],["ett","ljus","🕯️"],
-  ["ett","piano","🎹"],["ett","barn","🧒"],["ett","glas","🥛"],["ett","kort","🃏"],
-  ["ett","finger","☝️"],["ett","ben","🦴"],["ett","sjukhus","🏥"]
+  // мат
+  ["en","banan","🍌"],["en","tomat","🍅"],["en","gurka","🥒"],["en","morot","🥕"],["en","citron","🍋"],["en","apelsin","🍊"],
+  ["en","vattenmelon","🍉"],["en","ananas","🍍"],["en","druva","🍇"],["en","jordgubbe","🍓"],["en","potatis","🥔"],["en","lök","🧅"],
+  ["en","svamp","🍄"],["en","majskolv","🌽"],["en","jordnöt","🥜"],["en","ost","🧀"],["en","korv","🌭"],["en","tårta","🎂"],
+  ["en","glass","🍦"],["en","kaka","🍪"],["en","munk","🍩"],["en","hamburgare","🍔"],["en","smörgås","🥪"],["en","pannkaka","🥞"],
+  ["en","sallad","🥗"],["en","soppa","🍲"],["en","pizza","🍕"],["en","kopp","☕"],["en","sked","🥄"],["en","kniv","🔪"],
+  ["en","burk","🥫"],["en","korg","🧺"],
+  ["ett","äpple","🍎"],["ett","päron","🍐"],["ett","körsbär","🍒"],["ett","ägg","🥚"],["ett","bröd","🍞"],["ett","glas","🥛"],
+  ["ett","godis","🍬"],["ett","kvitto","🧾"],
+  // djur
+  ["en","hund","🐶"],["en","katt","🐱"],["en","häst","🐴"],["en","ko","🐄"],["en","gris","🐷"],["en","fågel","🐦"],
+  ["en","fisk","🐟"],["en","mus","🐭"],["en","groda","🐸"],["en","orm","🐍"],["en","uggla","🦉"],["en","höna","🐔"],
+  ["en","tupp","🐓"],["en","anka","🦆"],["en","pingvin","🐧"],["en","elefant","🐘"],["en","giraff","🦒"],["en","zebra","🦓"],
+  ["en","tiger","🐯"],["en","räv","🦊"],["en","varg","🐺"],["en","kanin","🐰"],["en","hamster","🐹"],["en","val","🐳"],
+  ["en","delfin","🐬"],["en","haj","🦈"],["en","bläckfisk","🐙"],["en","krabba","🦀"],["en","snigel","🐌"],["en","fjäril","🦋"],
+  ["en","myra","🐜"],["en","spindel","🕷️"],["en","sköldpadda","🐢"],["en","kamel","🐫"],["en","igelkott","🦔"],["en","ekorre","🐿️"],
+  ["en","örn","🦅"],["en","get","🐐"],["en","björn","🐻"],["en","apa","🐒"],["en","nyckelpiga","🐞"],["en","panda","🐼"],
+  ["ett","lejon","🦁"],["ett","får","🐑"],["ett","bi","🐝"],["ett","spöke","👻"],
+  // транспорт
+  ["en","bil","🚗"],["en","buss","🚌"],["en","cykel","🚲"],["en","båt","⛵"],["en","taxi","🚕"],["en","polisbil","🚓"],
+  ["en","brandbil","🚒"],["en","traktor","🚜"],["en","helikopter","🚁"],["en","raket","🚀"],["en","motorcykel","🏍️"],["en","spårvagn","🚋"],
+  ["en","lastbil","🚚"],["en","ambulans","🚑"],["en","skateboard","🛹"],["en","sparkcykel","🛴"],["en","kanot","🛶"],
+  ["ett","tåg","🚆"],["ett","flygplan","✈️"],["ett","skepp","🚢"],["ett","lok","🚂"],["ett","ankare","⚓"],["ett","trafikljus","🚦"],
+  // дом и вещи
+  ["en","säng","🛏️"],["en","stol","🪑"],["en","lampa","💡"],["en","dörr","🚪"],["en","soffa","🛋️"],["en","toalett","🚽"],
+  ["en","dusch","🚿"],["en","tvål","🧼"],["en","nyckel","🔑"],["en","klocka","⏰"],["en","telefon","📱"],["en","dator","💻"],
+  ["en","kamera","📷"],["en","tv","📺"],["en","radio","📻"],["en","mikrofon","🎤"],["en","bok","📖"],["en","tidning","📰"],
+  ["en","kalender","📅"],["en","penna","✏️"],["en","sax","✂️"],["en","linjal","📏"],["en","pensel","🖌️"],["en","krita","🖍️"],
+  ["en","ficklampa","🔦"],["en","magnet","🧲"],["en","hammare","🔨"],["en","väska","👜"],["en","ryggsäck","🎒"],["en","ballong","🎈"],
+  ["en","nalle","🧸"],["en","tärning","🎲"],["en","boll","⚽"],["en","present","🎁"],["en","ring","💍"],["en","krona","👑"],
+  ["en","diamant","💎"],["en","termometer","🌡️"],["en","tablett","💊"],["en","gitarr","🎸"],["en","trumma","🥁"],["en","fiol","🎻"],
+  ["en","trumpet","🎺"],["en","saxofon","🎷"],["en","kompass","🧭"],["en","karta","🗺️"],["en","tavla","🖼️"],["en","flagga","🚩"],
+  ["en","julgran","🎄"],["en","pumpa","🎃"],["en","tomte","🎅"],["en","skärm","🖥️"],
+  ["ett","hus","🏠"],["ett","paraply","☂️"],["ett","brev","✉️"],["ett","paket","📦"],["ett","lås","🔒"],["ett","tält","⛺"],
+  ["ett","ljus","🕯️"],["ett","piano","🎹"],["ett","kort","🃏"],["ett","pussel","🧩"],["ett","badkar","🛁"],["ett","batteri","🔋"],
+  ["ett","mikroskop","🔬"],["ett","teleskop","🔭"],["ett","tangentbord","⌨️"],["ett","timglas","⏳"],["ett","plåster","🩹"],
+  ["ett","tv-spel","🎮"],["ett","armbandsur","⌚"],["ett","gem","📎"],["ett","bokmärke","🔖"],["ett","larm","🚨"],["ett","meddelande","💬"],
+  ["ett","mål","🥅"],
+  // одежда
+  ["en","tröja","👕"],["en","jacka","🧥"],["en","klänning","👗"],["en","sko","👟"],["en","keps","🧢"],["en","handske","🧤"],
+  ["en","halsduk","🧣"],["en","strumpa","🧦"],["en","stövel","👢"],["en","skjorta","👔"],["en","hatt","🎩"],
+  // тело и люди
+  ["en","näsa","👃"],["en","mun","👄"],["en","hand","✋"],["en","fot","🦶"],["en","tand","🦷"],["en","arm","💪"],
+  ["en","tunga","👅"],["en","hjärna","🧠"],["en","bebis","👶"],["en","flicka","👧"],["en","pojke","👦"],["en","polis","👮"],
+  ["ett","öga","👁️"],["ett","öra","👂"],["ett","finger","☝️"],["ett","ben","🦴"],["ett","hjärta","❤️"],["ett","barn","🧒"],
+  ["ett","ansikte","🙂"],
+  // природа и город
+  ["en","sol","☀️"],["en","måne","🌙"],["en","stjärna","⭐"],["en","blomma","🌸"],["en","ros","🌹"],["en","tulpan","🌷"],
+  ["en","solros","🌻"],["en","kaktus","🌵"],["en","palm","🌴"],["en","gran","🌲"],["en","vulkan","🌋"],["en","regnbåge","🌈"],
+  ["en","snögubbe","⛄"],["en","blixt","⚡"],["en","eld","🔥"],["en","droppe","💧"],["en","ö","🏝️"],["en","strand","🏖️"],
+  ["en","snöflinga","❄️"],["en","kyrka","⛪"],["en","skola","🏫"],["en","bank","🏦"],["en","butik","🏪"],["en","fabrik","🏭"],
+  ["en","bro","🌉"],["en","fontän","⛲"],["en","stad","🏙️"],["en","planta","🌱"],
+  ["ett","träd","🌳"],["ett","moln","☁️"],["ett","berg","⛰️"],["ett","hav","🌊"],["ett","löv","🍁"],["ett","slott","🏰"],
+  ["ett","sjukhus","🏥"],["ett","hotell","🏨"],["ett","torn","🗼"],["ett","kontor","🏢"]
+];
+
+/* ---------- Глаголы: [infinitiv, presens, preteritum, supinum, частая ошибка, картинка, продолжение фразы] ---------- */
+const VERBS=[
+  // grupp 1: -ar, -ade, -at
+  ["prata","pratar","pratade","pratat","pratte","💬","svenska"],
+  ["spela","spelar","spelade","spelat","spelte","⚽","fotboll"],
+  ["laga","lagar","lagade","lagat","lagte","🍳","mat"],
+  ["städa","städar","städade","städat","städde","🧹","rummet"],
+  ["titta","tittar","tittade","tittat","titte","📺","på tv"],
+  ["lyssna","lyssnar","lyssnade","lyssnat","lyssnte","🎧","på musik"],
+  ["jobba","jobbar","jobbade","jobbat","jobbte","💼","mycket"],
+  ["dansa","dansar","dansade","dansat","danste","💃","på festen"],
+  ["cykla","cyklar","cyklade","cyklat","cyklte","🚲","till skolan"],
+  ["handla","handlar","handlade","handlat","handlte","🛒","mat"],
+  ["öppna","öppnar","öppnade","öppnat","öppnte","🚪","dörren"],
+  ["hoppa","hoppar","hoppade","hoppat","hoppte","🤸","på gympan"],
+  ["simma","simmar","simmade","simmat","simmte","🏊","i sjön"],
+  ["baka","bakar","bakade","bakat","bakte","🧁","en kaka"],
+  ["tvätta","tvättar","tvättade","tvättat","tvättde","🧺","kläder"],
+  ["vänta","väntar","väntade","väntat","väntde","⏳","på bussen"],
+  ["svara","svarar","svarade","svarat","svarde","🙋","på frågan"],
+  ["fråga","frågar","frågade","frågat","frågde","❓","läraren"],
+  ["träna","tränar","tränade","tränat","tränte","🏋️","på gymmet"],
+  ["måla","målar","målade","målat","målte","🎨","en tavla"],
+  ["duscha","duschar","duschade","duschat","duschte","🚿","på morgonen"],
+  ["vakna","vaknar","vaknade","vaknat","vaknte","⏰","tidigt"],
+  ["hitta","hittar","hittade","hittat","hittde","🔑","nyckeln"],
+  ["skratta","skrattar","skrattade","skrattat","skrattde","😂","mycket"],
+  ["träffa","träffar","träffade","träffat","träffte","🤝","en kompis"],
+  ["visa","visar","visade","visat","viste","👉","vägen"],
+  ["studera","studerar","studerade","studerat","studerte","📚","svenska"],
+  // grupp 2: -er, -de/-te, -t
+  ["ringa","ringer","ringde","ringt","ringade","📞","mamma"],
+  ["stänga","stänger","stängde","stängt","stängade","🔒","fönstret"],
+  ["leka","leker","lekte","lekt","lekade","🧸","i parken"],
+  ["köpa","köper","köpte","köpt","köpade","🛍️","en tröja"],
+  ["läsa","läser","läste","läst","läsade","📖","en bok"],
+  ["resa","reser","reste","rest","resade","🧳","till Malmö"],
+  ["åka","åker","åkte","åkt","åkade","🚌","buss"],
+  ["höra","hör","hörde","hört","hörade","👂","musik"],
+  ["köra","kör","körde","kört","körade","🚗","bil"],
+  ["tänka","tänker","tänkte","tänkt","tänkade","🤔","på dig"],
+  ["hjälpa","hjälper","hjälpte","hjälpt","hjälpade","🆘","min bror"],
+  ["glömma","glömmer","glömde","glömt","glömmade","🤦","läxan"],
+  ["behöva","behöver","behövde","behövt","behövade","🙏","hjälp"],
+  ["använda","använder","använde","använt","användade","💻","datorn"],
+  ["bygga","bygger","byggde","byggt","byggade","🧱","ett hus"],
+  ["ställa","ställer","ställde","ställt","ställade","🥛","mjölken i kylen"],
+  ["heta","heter","hette","hetat","hetade","🏷️","Ali"],
+  ["lära","lär","lärde","lärt","lärade","🧑‍🏫","mig svenska"],
+  // grupp 4: starka och oregelbundna
+  ["äta","äter","åt","ätit","ätte","🍕","pizza"],
+  ["dricka","dricker","drack","druckit","drickte","☕","kaffe"],
+  ["sova","sover","sov","sovit","sovde","😴","länge"],
+  ["skriva","skriver","skrev","skrivit","skrivde","✍️","ett brev"],
+  ["springa","springer","sprang","sprungit","springde","🏃","fort"],
+  ["gå","går","gick","gått","gådde","🚶","hem"],
+  ["komma","kommer","kom","kommit","kommde","🏠","hem sent"],
+  ["se","ser","såg","sett","sedde","👀","en film"],
+  ["göra","gör","gjorde","gjort","görde","📝","läxan"],
+  ["ha","har","hade","haft","hadde","🤒","ont i huvudet"],
+  ["säga","säger","sa","sagt","sägde","🗣️","hej"],
+  ["ta","tar","tog","tagit","tade","🚆","tåget"],
+  ["ge","ger","gav","gett","gedde","🎁","en present"],
+  ["få","får","fick","fått","fådde","✉️","ett brev"],
+  ["sitta","sitter","satt","suttit","sittade","🪑","på en stol"],
+  ["stå","står","stod","stått","stådde","🚏","vid hållplatsen"],
+  ["ligga","ligger","låg","legat","liggde","🛏️","i sängen"],
+  ["flyga","flyger","flög","flugit","flygde","✈️","till Stockholm"],
+  ["sjunga","sjunger","sjöng","sjungit","sjungde","🎤","en sång"],
+  ["vinna","vinner","vann","vunnit","vinnde","🏆","matchen"],
+  ["bära","bär","bar","burit","bärde","📦","en låda"],
+  ["gråta","gråter","grät","gråtit","gråtade","😢","lite"],
+  ["välja","väljer","valde","valt","väljde","🤷","en glass"],
+  ["sätta","sätter","satte","satt","sättade","🧢","på mig mössan"],
+  ["sälja","säljer","sålde","sålt","säljde","🏷️","min cykel"],
+  ["förstå","förstår","förstod","förstått","förstådde","💡","läxan"],
+  ["hålla","håller","höll","hållit","hållade","🤲","min lillebror i handen"],
+  ["frysa","fryser","frös","frusit","fryste","🥶","mycket"],
+  ["bjuda","bjuder","bjöd","bjudit","bjudde","🎂","på tårta"],
+  ["bli","blir","blev","blivit","blidde","😊","glad"],
+  ["skära","skär","skar","skurit","skärde","🔪","bröd"],
+  ["vara","är","var","varit","ärde","🙂","glad"]
+];
+
+/* ---------- Прилагательные: [en-form, ett-form, plural], по группам, чтобы сочетания были осмысленными ---------- */
+const ADJ_FORMS={
+  stor:["stor","stort","stora"], liten:["liten","litet","små"], ny:["ny","nytt","nya"], gammal:["gammal","gammalt","gamla"],
+  röd:["röd","rött","röda"], grön:["grön","grönt","gröna"], gul:["gul","gult","gula"], vit:["vit","vitt","vita"], svart:["svart","svart","svarta"],
+  brun:["brun","brunt","bruna"], fin:["fin","fint","fina"], ful:["ful","fult","fula"], dyr:["dyr","dyrt","dyra"], billig:["billig","billigt","billiga"],
+  ren:["ren","rent","rena"], smutsig:["smutsig","smutsigt","smutsiga"], trasig:["trasig","trasigt","trasiga"], tung:["tung","tungt","tunga"],
+  mjuk:["mjuk","mjukt","mjuka"], hård:["hård","hårt","hårda"], rund:["rund","runt","runda"], lång:["lång","långt","långa"],
+  söt:["söt","sött","söta"], glad:["glad","glatt","glada"], arg:["arg","argt","arga"], snabb:["snabb","snabbt","snabba"],
+  tjock:["tjock","tjockt","tjocka"], trött:["trött","trött","trötta"], hungrig:["hungrig","hungrigt","hungriga"], ung:["ung","ungt","unga"],
+  god:["god","gott","goda"], varm:["varm","varmt","varma"], kall:["kall","kallt","kalla"], färsk:["färsk","färskt","färska"]
+};
+const ADJ_SETS={
+  T:["stor","liten","ny","gammal","röd","grön","gul","vit","svart","fin"],
+  A:["stor","liten","gammal","glad","söt","fin","svart","vit"],
+  F:["stor","liten","god","söt","varm","kall","röd","grön","gul"]
+};
+/* [en/ett/pl, слово, картинка, группа] */
+const ADJ_NOUNS=[
+  ["en","bil","🚗","T"],["en","buss","🚌","T"],["en","cykel","🚲","T"],["en","båt","⛵","T"],["en","säng","🛏️","T"],["en","stol","🪑","T"],
+  ["en","lampa","💡","T"],["en","dörr","🚪","T"],["en","soffa","🛋️","T"],["en","nyckel","🔑","T"],["en","klocka","⏰","T"],["en","telefon","📱","T"],
+  ["en","dator","💻","T"],["en","bok","📖","T"],["en","penna","✏️","T"],["en","väska","👜","T"],["en","ryggsäck","🎒","T"],["en","ballong","🎈","T"],
+  ["en","boll","⚽","T"],["en","present","🎁","T"],["en","tröja","👕","T"],["en","jacka","🧥","T"],["en","klänning","👗","T"],["en","sko","👟","T"],
+  ["en","keps","🧢","T"],["en","halsduk","🧣","T"],["en","strumpa","🧦","T"],["en","hatt","🎩","T"],
+  ["ett","hus","🏠","T"],["ett","paraply","☂️","T"],["ett","brev","✉️","T"],["ett","paket","📦","T"],["ett","tält","⛺","T"],["ett","piano","🎹","T"],
+  ["ett","tåg","🚆","T"],["ett","flygplan","✈️","T"],["ett","skepp","🚢","T"],["ett","armbandsur","⌚","T"],["ett","glas","🥛","T"],["ett","kort","🃏","T"],
+  ["en","hund","🐶","A"],["en","katt","🐱","A"],["en","häst","🐴","A"],["en","ko","🐄","A"],["en","gris","🐷","A"],["en","fågel","🐦","A"],
+  ["en","fisk","🐟","A"],["en","mus","🐭","A"],["en","groda","🐸","A"],["en","elefant","🐘","A"],["en","giraff","🦒","A"],["en","tiger","🐯","A"],
+  ["en","räv","🦊","A"],["en","kanin","🐰","A"],["en","björn","🐻","A"],["en","apa","🐒","A"],["en","höna","🐔","A"],["en","pingvin","🐧","A"],
+  ["ett","lejon","🦁","A"],["ett","får","🐑","A"],["ett","barn","🧒","A"],
+  ["en","banan","🍌","F"],["en","tomat","🍅","F"],["en","gurka","🥒","F"],["en","citron","🍋","F"],["en","apelsin","🍊","F"],["en","ost","🧀","F"],
+  ["en","korv","🌭","F"],["en","tårta","🎂","F"],["en","kaka","🍪","F"],["en","pizza","🍕","F"],["en","smörgås","🥪","F"],["en","soppa","🍲","F"],
+  ["ett","äpple","🍎","F"],["ett","päron","🍐","F"],["ett","bröd","🍞","F"],
+  ["pl","bilar","🚗","T"],["pl","böcker","📖","T"],["pl","hus","🏠","T"],["pl","skor","👟","T"],["pl","tröjor","👕","T"],["pl","bollar","⚽","T"],
+  ["pl","lampor","💡","T"],["pl","väskor","👜","T"],["pl","pennor","✏️","T"],["pl","bussar","🚌","T"],["pl","tåg","🚆","T"],["pl","jackor","🧥","T"],
+  ["pl","nycklar","🔑","T"],["pl","båtar","⛵","T"],["pl","stolar","🪑","T"],["pl","koppar","☕","T"],["pl","paket","📦","T"],["pl","blommor","🌸","T"],
+  ["pl","katter","🐱","A"],["pl","hundar","🐶","A"],["pl","fåglar","🐦","A"],["pl","fiskar","🐟","A"],["pl","hästar","🐴","A"],["pl","barn","🧒","A"],
+  ["pl","äpplen","🍎","F"],["pl","bananer","🍌","F"],["pl","kakor","🍪","F"],["pl","tomater","🍅","F"],["pl","ägg","🥚","F"]
 ];
 
 </script>
