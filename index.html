@@ -2505,7 +2505,10 @@ async function hostPoll(){
     }
     const roundKey = state.planIndex+':'+r.startedAt;
     if(doneEarly && hostDoneKey!==roundKey){ hostDoneKey=roundKey; hostDoneAt=Date.now(); }
-    if(r.endNow || (!r.pausedAt && (timeLeft<=0 || (doneEarly && Date.now()-hostDoneAt>=1200)))){
+    // блиц: ученики отправляют ответы в самом конце, поэтому даём им 3 секунды форы
+    const isBlitz=BLITZ_TYPES.includes(r.type), grace=isBlitz?3:0;
+    const endReady = r.endNow && (!isBlitz || doneEarly || Date.now()-(r.endNowAt||0)>3000);
+    if(endReady || (!r.endNow && !r.pausedAt && (timeLeft<=-grace || (doneEarly && Date.now()-hostDoneAt>=1200)))){
       await finalizeRound(state); return;
     }
 
@@ -2731,7 +2734,7 @@ async function hostAddTime(){
 }
 async function hostSkip(){
   if(!hostCode) return;
-  await updateRoom(hostCode, s=>{ const r=s.round; if(s.phase!=='active' || !r || r.type==='bokstav') return null; r.endNow=true; return s; });
+  await updateRoom(hostCode, s=>{ const r=s.round; if(s.phase!=='active' || !r || r.type==='bokstav') return null; r.endNow=true; r.endNowAt=Date.now(); return s; });
   Speech.stop(); clearTimeout(hostPollTimer); hostLoop();
 }
 document.getElementById('ctrl-pause').addEventListener('click', hostTogglePause);
@@ -3480,7 +3483,7 @@ function tickPlayerTimer(){
   t.firstElementChild.style.transform='scaleX('+left.toFixed(3)+')';
   t.classList.toggle('hot', left*roundDur(r)<=5);
   // блиц: если время почти вышло, отправляем то, что успели
-  if(BLITZ_TYPES.includes(r.type) && enettState && !enettState.sent && !r.pausedAt && left*roundDur(r)<=1.5 && enettState.answers.length) enettSubmit();
+  if(BLITZ_TYPES.includes(r.type) && enettState && !enettState.sent && enettState.answers.length && (r.endNow || (!r.pausedAt && left*roundDur(r)<=3))) enettSubmit();
 }
 setInterval(()=>{ if(!isHost && playerTimerState) tickPlayerTimer(); }, 1000);
 
@@ -3537,6 +3540,7 @@ async function playerPoll(){
   }
   if(!(state.players||[]).some(p=>p.id===playerId)){ showKicked(state); return; }
   updatePlayerTimer(state);
+  if(state.phase!=='active' && enettState && !enettState.sent) enettState=null;
   if(state.phase==='active' && state.round && state.round.type==='draw' && state.round.drawerId!==playerId) redrawCanvas(document.getElementById('player-canvas'),state.round.strokes);
 
   if (hash === playerLastStateHash && !playerForceRender) return;
@@ -4027,7 +4031,7 @@ function enettPick(g){
 async function enettSubmit(){
   const st=enettState; if(!st || st.sent) return; st.sent=true;
   document.querySelectorAll('.ee-btn').forEach(b=>b.disabled=true);
-  const got=st.answers.filter((g,i)=>st.items[i] && g===st.items[i].g).length;
+  const got=st.answers.filter((g,i)=>st.items[i] && g===st.items[i].a).length;
   enettShow();
   const status=document.getElementById('ee-status');
   if(status){ status.textContent=`${got} av ${st.items.length} rätt!`; status.className='p-status-line '+(got>=6?'right':'wrong'); }
