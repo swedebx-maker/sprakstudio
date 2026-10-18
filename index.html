@@ -679,6 +679,86 @@ canvas.draw-canvas{display:block;background:#fff;border:3px solid #DCE5F0;border
 .p-card .scene{margin:-2px auto 0;box-shadow:0 4px 0 #DCE5F0;width:min(100%, calc(42vh * 1.6));}
 html:not(.host-zoom) #app{padding:14px 12px;}
 
+/* ---------- управление раундом ---------- */
+.q-head{gap:1rem;}
+.q-cat{flex:1;min-width:0;white-space:nowrap;}
+.q-ctrl{display:flex;gap:.5rem;}
+.qc-btn{height:2.9rem;padding:0 .9rem 0 .7rem;border:none;border-radius:.9rem;cursor:pointer;display:flex;align-items:center;gap:.3rem;
+  background:rgba(255,255,255,.22);color:var(--cat-ink);font-family:var(--round);font-weight:700;font-size:1.05rem;transition:background .15s,transform .08s;}
+.qc-btn .msi{font-size:1.6rem;}
+.qc-btn:hover{background:rgba(255,255,255,.36);}
+.qc-btn:active{transform:scale(.95);}
+.qc-btn.on{background:#fff;color:var(--cat-d);}
+.q-card{position:relative;}
+.q-paused{display:none;position:absolute;left:0;right:0;top:4.8rem;bottom:0;z-index:20;background:rgba(243,246,250,.96);align-items:center;justify-content:center;}
+.q-card.paused .q-paused{display:flex;}
+.qp-in{display:flex;flex-direction:column;align-items:center;gap:.4rem;font-family:var(--display);font-size:4rem;color:var(--ink);}
+.qp-in .msi{font-size:8rem;color:var(--violet);}
+#p-pause{position:absolute;inset:0;z-index:30;border-radius:26px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;text-align:center;}
+#p-pause .pp-in{display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--round);font-weight:600;color:var(--ink-2);font-size:1.1rem;}
+#p-pause .msi{font-size:76px;color:var(--violet);}
+#p-pause b{font-family:var(--display);font-weight:400;font-size:2rem;color:var(--ink);}
+
+/* ---------- новые игры: доска ---------- */
+.lyssna-btn{position:relative;width:15rem;height:15rem;border-radius:50%;border:none;cursor:pointer;background:var(--cat);color:#fff;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 .6rem 0 var(--cat-d);transition:transform .1s;}
+.lyssna-btn .msi{font-size:8.5rem;position:relative;z-index:2;}
+.lyssna-btn:active{transform:translateY(.3rem);box-shadow:0 .3rem 0 var(--cat-d);}
+.lyssna-btn .ring{position:absolute;inset:0;border-radius:50%;border:.5rem solid var(--cat);opacity:0;}
+.lyssna-btn.talking .ring{animation:ringOut 1.4s ease-out infinite;}
+.lyssna-btn.talking .ring.r2{animation-delay:.7s;}
+@keyframes ringOut{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.7);opacity:0;}}
+.q-sub-hint{font-family:var(--round);font-weight:600;color:var(--gray-4);font-size:1.15rem;margin-top:.6rem;}
+.no-voice{margin-top:1rem;font-family:var(--round);font-weight:600;color:var(--ink-2);font-size:1.2rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;}
+.no-voice b{font-family:var(--display);font-weight:400;font-size:3.4rem;color:var(--ink);}
+.clock-stage{display:flex;align-items:center;gap:4rem;}
+.clock.big{width:30rem;height:30rem;}
+.gap-text{line-height:1.5;}
+.gap-box{display:inline-flex;align-items:center;justify-content:center;min-width:3.4em;margin:0 .2em;padding:0 .3em;border-radius:.35em;
+  background:var(--cat);color:#fff;box-shadow:0 .12em 0 var(--cat-d);animation:gapPulse 1.6s ease-in-out infinite;line-height:1.25;}
+@keyframes gapPulse{50%{transform:scale(1.06);}}
+.odd-row{display:flex;flex-wrap:wrap;justify-content:center;gap:1.4rem;max-width:64rem;}
+.odd-tile{font-family:var(--round);font-weight:700;font-size:3.2rem;color:var(--ink);background:#fff;border-radius:1.2rem;padding:.35em .8em;
+  box-shadow:0 .4rem 0 var(--gray-3),0 0 0 .2rem var(--gray-2);animation:tileIn .5s cubic-bezier(.2,1.4,.4,1) both;}
+.enett-grid{display:grid;grid-template-columns:repeat(4,12rem);gap:1rem;}
+.ee-card{background:#fff;border-radius:1.2rem;padding:.8rem .6rem;display:flex;flex-direction:column;align-items:center;gap:.2rem;
+  box-shadow:0 .3rem 0 var(--gray-3),0 0 0 .15rem var(--gray-2);animation:tileIn .5s cubic-bezier(.2,1.4,.4,1) both;}
+.ee-card .ee-emo{font-size:3.6rem;line-height:1.1;}
+.ee-card .ee-w{font-family:var(--round);font-weight:700;font-size:1.7rem;color:var(--ink);}
+
+/* ---------- новые игры: айпад ---------- */
+.p-listen{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--round);font-weight:700;color:var(--cat-d);font-size:1.15rem;margin:4px 0 14px;}
+.p-listen .msi{font-size:1.8rem;}
+.emoji-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.choice-btn.emoji-btn{justify-content:center;font-size:4rem;line-height:1;height:130px;padding:0;background:var(--gray-1);box-shadow:0 5px 0 var(--gray-3);}
+.choice-btn.emoji-btn.right{background:#D6F8E4;box-shadow:0 5px 0 #8FE0B2,0 0 0 4px #2BD67B inset;}
+.choice-btn.emoji-btn.wrong{background:#FFE1E6;box-shadow:0 5px 0 #F4A9B6,0 0 0 4px #FF4D6A inset;}
+.p-clock{display:flex;justify-content:center;margin:2px 0 0;}
+.clock.small{width:min(200px,48vw);height:min(200px,48vw);}
+.p-q.gap-text .gap-box{font-size:.95em;}
+.ee-progress{display:flex;gap:6px;justify-content:center;margin:2px 0 12px;}
+.ee-progress i{width:28px;height:8px;border-radius:4px;background:var(--gray-2);}
+.ee-progress i.ok{background:var(--green);} .ee-progress i.bad{background:var(--red);}
+.ee-stage{display:flex;justify-content:center;}
+.ee-big{width:100%;min-height:190px;border-radius:20px;background:var(--gray-1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.ee-big.pop{animation:eePop .3s cubic-bezier(.2,1.5,.4,1);}
+@keyframes eePop{from{transform:scale(.88);}to{transform:none;}}
+.ee-big.shake{animation:gtShake .3s;}
+.ee-big .ee-emo{font-size:76px;line-height:1;}
+.ee-big .ee-w{font-family:var(--round);font-weight:700;font-size:2.1rem;color:var(--ink);}
+.ee-slot{display:inline-block;min-width:2.2em;text-align:center;color:var(--gray-4);background:#fff;border-radius:10px;border:2px dashed var(--gray-3);margin-right:.15em;}
+.ee-slot.ok,.ee-slot.bad{border-style:solid;}
+.ee-slot.ok{color:var(--green-d);} .ee-slot.bad{color:var(--red-d);}
+.ee-done{display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--display);font-size:2rem;color:var(--green-d);}
+.ee-done .msi{font-size:64px;}
+.ee-btns{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+.ee-btn{height:110px;border:none;border-radius:22px;font-family:var(--display);font-size:2.8rem;color:#fff;cursor:pointer;transition:transform .08s,box-shadow .08s;}
+.ee-btn.en{background:var(--violet);box-shadow:0 7px 0 var(--violet-d);}
+.ee-btn.ett{background:var(--green);color:#06341B;box-shadow:0 7px 0 var(--green-d);}
+.ee-btn:active{transform:translateY(5px);box-shadow:none;}
+.ee-btn:disabled{opacity:.55;}
+#player-game-screen .p-card{position:relative;}
+
 /* ---------- защита от автоперевода ---------- */
 #tr-canary{position:fixed;left:2px;bottom:2px;font-size:12px;line-height:1;opacity:.01;pointer-events:none;z-index:1;white-space:nowrap;color:var(--ink);}
 #tr-block{position:fixed;inset:0;z-index:10050;display:flex;align-items:center;justify-content:center;padding:20px;
@@ -812,12 +892,18 @@ html:not(.host-zoom) #app{padding:14px 12px;}
       <div class="q-card" id="q-card">
         <div class="q-head">
           <div class="q-cat" id="round-type-label"></div>
+          <div class="q-ctrl hidden" id="q-ctrl">
+            <button class="qc-btn" id="ctrl-pause" title="Paus (mellanslag)"><span class="msi">pause</span>Paus</button>
+            <button class="qc-btn" id="ctrl-plus" title="+10 sekunder"><span class="msi">more_time</span>+10</button>
+            <button class="qc-btn" id="ctrl-skip" title="Visa svaret (pil höger)"><span class="msi">skip_next</span>Svar</button>
+          </div>
           <div class="q-timer" id="host-timer-bar-wrap">
             <svg viewBox="0 0 60 60"><circle class="q-timer-bg" cx="30" cy="30" r="26"/><circle class="q-timer-fg" id="host-timer-bar" cx="30" cy="30" r="26"/></svg>
             <span id="host-timer-num"></span>
           </div>
         </div>
         <div class="q-body" id="round-content-host"></div>
+        <div class="q-paused"><div class="qp-in"><span class="msi">pause_circle</span>Paus</div></div>
       </div>
       <aside class="lb-side"><div class="lb-title"><span class="msi">trophy</span>Topplista</div><div id="host-mini-lb"></div></aside>
     </section>
@@ -893,6 +979,7 @@ html:not(.host-zoom) #app{padding:14px 12px;}
       <div class="big-emoji msi">hourglass_top</div>
       <div><button class="btn-3d hidden" id="rejoin-btn">Gå med igen</button></div>
     </div>
+    <div id="p-pause" class="hidden"><div class="pp-in"><span class="msi">pause_circle</span><b>Paus</b>Lyssna på läraren</div></div>
     <div id="player-round-view" class="hidden">
       <div class="p-head" id="p-head"><div class="p-cat" id="p-cat"></div><div class="p-rnd" id="p-rnd"></div><div class="p-timer" id="p-timer"><i></i></div></div>
       <div id="round-content-player"></div>
@@ -1675,8 +1762,8 @@ SENTENCES.forEach(arr => arr.forEach(addBokstavWord));
 STATEMENTS.forEach(st => st.text.replace(/[.,!?"]/g,' ').split(/\s+/).forEach(addBokstavWord));
 MATCH_PAIRS_POOL.forEach(p => addBokstavWord(p.word));
 
-const ROUND_DURATIONS={draw:90, truefalse:15, wordorder:40, sign:20, match:45, bokstav:30};
-const NON_DRAW_TYPES=["truefalse","wordorder","sign","match","bokstav"];
+const ROUND_DURATIONS={draw:90, truefalse:15, wordorder:40, sign:20, match:45, bokstav:30, lyssna:20, klocka:20, lucka:20, udda:20, enett:35};
+const NON_DRAW_TYPES=["truefalse","wordorder","sign","match","bokstav","lyssna","klocka","lucka","udda","enett"];
 
 /* ===== Внешний вид раундов: цвет категории, иконка, название ===== */
 const TYPE_META={
@@ -1685,12 +1772,90 @@ const TYPE_META={
   wordorder:{name:'Bygg meningen',     short:'Meningar',  icon:'drag_indicator', c:'#22C470', d:'#128A4A', ink:'#fff'},
   sign:     {name:'Vardagen i Sverige',short:'Skyltar',   icon:'storefront',     c:'#FF4FA3', d:'#C22A76', ink:'#fff'},
   match:    {name:'Para ihop',         short:'Para ihop', icon:'join_inner',     c:'#FFC93C', d:'#D29400', ink:'#22164D'},
-  bokstav:  {name:'Bokstavs-jakt',     short:'Hjulet',    icon:'casino',         c:'#25C2F2', d:'#118DBA', ink:'#fff'}
+  bokstav:  {name:'Bokstavs-jakt',     short:'Hjulet',    icon:'casino',         c:'#25C2F2', d:'#118DBA', ink:'#fff'},
+  lyssna:   {name:'Lyssna & välj',     short:'Lyssna',    icon:'hearing',        c:'#12A594', d:'#0B7A6D', ink:'#fff'},
+  klocka:   {name:'Vad är klockan?',   short:'Klockan',   icon:'schedule',       c:'#F0505A', d:'#C0313B', ink:'#fff'},
+  lucka:    {name:'Fyll i luckan',     short:'Luckan',    icon:'edit_note',      c:'#2C4A8A', d:'#1B3263', ink:'#fff'},
+  udda:     {name:'Vilket passar inte?',short:'Udda ord', icon:'search',         c:'#C2703D', d:'#93502A', ink:'#fff'},
+  enett:    {name:'En eller ett?',     short:'En/ett',    icon:'bolt',           c:'#4F6D8F', d:'#36506E', ink:'#fff'}
 };
+const CHOICE_TYPES=['lyssna','klocka','lucka','udda'];
+/* Время раунда с учётом паузы и «+10 сек» */
+function roundDur(r){ return (ROUND_DURATIONS[r.type]||20) + (r.extraSec||0); }
+function roundElapsed(r){ return Math.max(0, ((r.pausedAt||Date.now()) - r.startedAt - (r.pausedMs||0)) / 1000); }
+function roundLeftFrac(r){ const d=roundDur(r); return Math.max(0, Math.min(1, (d-roundElapsed(r))/d)); }
 function metaOf(type){ return TYPE_META[type] || TYPE_META.truefalse; }
 function applyCat(el, type){ if(!el) return; const m=metaOf(type); el.style.setProperty('--cat',m.c); el.style.setProperty('--cat-d',m.d); el.style.setProperty('--cat-ink',m.ink); }
 const ANSWER_COLORS=['#FF8A3D','#FF4FA3','#25C2F2','#22C470'];
 function escHTML(str){ return String(str==null?'':str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ===== Klockan: часы и шведские выражения времени ===== */
+function pad2(n){ return String(n).padStart(2,'0'); }
+const HOUR_WORDS=['tolv','ett','två','tre','fyra','fem','sex','sju','åtta','nio','tio','elva','tolv'];
+function hw(h){ return HOUR_WORDS[((h%12)+12)%12]; }
+function tidText(h,m){
+  const H=hw(h), N=hw(h+1);
+  switch(m){
+    case 0: return 'prick '+H;          case 5: return 'fem över '+H;      case 10: return 'tio över '+H;
+    case 15: return 'kvart över '+H;    case 20: return 'tjugo över '+H;   case 25: return 'fem i halv '+N;
+    case 30: return 'halv '+N;          case 35: return 'fem över halv '+N; case 40: return 'tjugo i '+N;
+    case 45: return 'kvart i '+N;       case 50: return 'tio i '+N;        case 55: return 'fem i '+N;
+  }
+  return H;
+}
+function buildClockRound(){
+  const mins=[0,15,30,45,30,15,45,5,10,20,25,35,40,50,55];
+  const h=1+Math.floor(Math.random()*12), m=pickRandom(mins);
+  const correct=tidText(h,m);
+  // ловушки разных видов: соседний час (классика с «halv»), зеркало över/i, другие минуты
+  const groups=[
+    shuffle([[h-1,m],[h+1,m]]),
+    shuffle([[h,(60-m)%60],[h-1,(60-m)%60]]),
+    shuffle([[h,(m+30)%60],[h,(m+5)%60],[h,(m+55)%60],[h,(m+15)%60]])
+  ];
+  const opts=[];
+  groups.forEach(g=>{ for(const [hh,mm] of g){ const t=tidText(hh,mm); if(t!==correct && !opts.includes(t)){ opts.push(t); break; } } });
+  [[h+2,m],[h,(m+10)%60],[h+1,(m+30)%60]].forEach(([hh,mm])=>{ const t=tidText(hh,mm); if(opts.length<3 && t!==correct && !opts.includes(t)) opts.push(t); });
+  if(m===30){ const trap='halv '+hw(h); if(trap!==correct && !opts.includes(trap)) opts[0]=trap; }
+  return {type:'klocka', h, m, correct, choices:shuffle([correct,...opts])};
+}
+function clockSVG(h,m,cls){
+  const ha=((h%12)+m/60)*30, ma=m*6;
+  let ticks='';
+  for(let i=0;i<60;i++){ const big=i%5===0; const a=i*6*Math.PI/180, r1=big?80:85, r2=92;
+    ticks+=`<line x1="${(100+Math.sin(a)*r1).toFixed(1)}" y1="${(100-Math.cos(a)*r1).toFixed(1)}" x2="${(100+Math.sin(a)*r2).toFixed(1)}" y2="${(100-Math.cos(a)*r2).toFixed(1)}" stroke="${big?'#1C2B44':'#9AA6B8'}" stroke-width="${big?3.4:1.4}" stroke-linecap="round"/>`; }
+  let nums=''; for(let i=1;i<=12;i++){ const a=i*30*Math.PI/180; nums+=`<text x="${(100+Math.sin(a)*66).toFixed(1)}" y="${(100-Math.cos(a)*66+7).toFixed(1)}" text-anchor="middle" font-size="20" font-weight="700" fill="#1C2B44">${i}</text>`; }
+  return `<svg class="clock ${cls||''}" viewBox="0 0 200 200" aria-label="klocka"><circle cx="100" cy="104" r="98" fill="rgba(40,70,115,.12)"/><circle cx="100" cy="100" r="98" fill="#2F7DE1"/><circle cx="100" cy="100" r="90" fill="#fff"/>${ticks}${nums}
+    <line x1="100" y1="100" x2="100" y2="48" stroke="#1C2B44" stroke-width="8" stroke-linecap="round" transform="rotate(${ha} 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="24" stroke="#F0505A" stroke-width="5" stroke-linecap="round" transform="rotate(${ma} 100 100)"/>
+    <circle cx="100" cy="100" r="7" fill="#1C2B44"/><circle cx="100" cy="100" r="3" fill="#fff"/></svg>`;
+}
+
+/* ===== Lyssna: шведский голос браузера (на смартборде) ===== */
+const Speech=(function(){
+  let voice=null;
+  function pick(){
+    if(!('speechSynthesis' in window)) return null;
+    const vs=speechSynthesis.getVoices().filter(v=>/^sv/i.test(v.lang));
+    voice = vs.find(v=>/natural|neural/i.test(v.name)) || vs.find(v=>/google/i.test(v.name)) || vs.find(v=>/alva|sofie|hedvig|klara/i.test(v.name)) || vs[0] || null;
+    return voice;
+  }
+  try{ if('speechSynthesis' in window){ pick(); speechSynthesis.onvoiceschanged=pick; } }catch(e){}
+  function hasVoice(){ return !!(voice || pick()); }
+  function say(text, onStart, onEnd){
+    if(!('speechSynthesis' in window)) return false;
+    try{
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text); u.lang='sv-SE'; u.rate=.82; u.pitch=1;
+      if(voice || pick()) u.voice=voice;
+      u.onstart=()=>{ AudioEngine.setMusicVolume(AudioEngine.VOL_DUCK_LB, .3); onStart&&onStart(); };
+      u.onend=u.onerror=()=>{ AudioEngine.setMusicVolume(AudioEngine.VOL_MAIN, .8); onEnd&&onEnd(); };
+      speechSynthesis.speak(u); return true;
+    }catch(e){ return false; }
+  }
+  function stop(){ try{ speechSynthesis.cancel(); }catch(e){} }
+  return {say, stop, hasVoice};
+})();
 function letterTilesHTML(word, revealed, cls){
   return `<div class="${cls}">${word.split('').map((c,i)=> c===' ' ? '<span class="lt gap"></span>'
     : `<span class="lt ${(revealed||[]).includes(i)?'on':''}">${(revealed||[]).includes(i)?c.toUpperCase():''}</span>`).join('')}</div>`;
@@ -1944,7 +2109,8 @@ const GAME_TYPES=[
   {key:'wordorder', icon:'drag_indicator', name:'Bygg meningen'},
   {key:'sign',      icon:'signpost',       name:'Vad säger skylten?'},
   {key:'match',     icon:'join_inner',     name:'Para ihop'},
-  {key:'bokstav',   icon:'grid_on',        name:'Bokstavs-jakt (hjulet)'}
+  {key:'bokstav',   icon:'grid_on',        name:'Bokstavs-jakt (hjulet)'},
+  {key:'lyssna'},{key:'klocka'},{key:'lucka'},{key:'udda'},{key:'enett'}
 ];
 function loadSettings(){
   const def={enabled:{}, gridSize:5};
@@ -1998,6 +2164,17 @@ function buildRound(type,drawerId,opts){
   if(type==='wordorder'){ const words=pickFresh('sent',SENTENCES); return {type:'wordorder',correctOrder:words,scrambled:shuffleNotEqual(words)}; }
   if(type==='sign'){ const s=pickFresh('sign',SIGNS); return {type:'sign',scene:s.scene,icon:s.icon,title:s.title,lines:s.lines,question:s.question,choices:s.choices,correct:s.correct}; }
   if(type==='match'){ return {type:'match',pairs:shuffle(MATCH_PAIRS_POOL).slice(0,6)}; }
+  if(type==='lyssna'){
+    // половина раундов: одно слово, половина: короткая фраза
+    const usePhrase=Math.random()<0.5;
+    const it = usePhrase ? pickFresh('listenP',LISTEN_PHRASES) : (p=>({say:p.word, emoji:p.emoji}))(pickFresh('listenW',MATCH_PAIRS_POOL));
+    const others=shuffle(MATCH_PAIRS_POOL.map(p=>p.emoji).filter(e=>e!==it.emoji)).slice(0,3);
+    return {type:'lyssna', say:it.say, correct:it.emoji, choices:shuffle([it.emoji,...others])};
+  }
+  if(type==='klocka'){ return buildClockRound(); }
+  if(type==='lucka'){ const g=pickFresh('gap',GAP_SENTENCES); return {type:'lucka', sentence:g.s, correct:g.a, choices:shuffle([g.a,...g.o])}; }
+  if(type==='udda'){ const o=pickFresh('odd',ODD_ONE); return {type:'udda', words:shuffle(o.w), choices:null, correct:o.odd, why:o.why}; }
+  if(type==='enett'){ const items=shuffle(EN_ETT).slice(0,8).map(x=>({g:x[0], w:x[1], e:x[2]})); return {type:'enett', items}; }
   if(type==='bokstav'){ const size=(opts && opts.size===4) ? 4 : 5; return {type:'bokstav',size,spins:0,maxSpins:size*size,subPhase:'SPIN',wheels:{},draws:{},readyPlayers:[],stolen:{},bonusLeft:{},theft:null,thiefId:null,thiefStage:null,victimId:null,spinEndsAt:0,deadline:0,bonusMode:false}; }
 }
 
@@ -2034,9 +2211,10 @@ let hostTimerState = null; // {start, dur}
 const TIMER_C = 2*Math.PI*26;
 function updateHostTimer(){
   const wrap=document.getElementById('host-timer-bar-wrap'); if(!wrap || !hostTimerState) return;
-  const left=Math.max(0, hostTimerState.dur-(Date.now()-hostTimerState.start)/1000);
+  const r=hostTimerState.r;
+  const left=Math.max(0, roundDur(r)-roundElapsed(r));
   const fg=document.getElementById('host-timer-bar');
-  if(fg) fg.style.strokeDashoffset = String(TIMER_C*(1-left/hostTimerState.dur));
+  if(fg) fg.style.strokeDashoffset = String(TIMER_C*(1-Math.min(1,left/roundDur(r))));
   const num=document.getElementById('host-timer-num'); const v=String(Math.ceil(left));
   if(num && num.textContent!==v) num.textContent=v;
   wrap.classList.toggle('hot', left<=5 && left>0);
@@ -2136,7 +2314,7 @@ const ROUNDS_MIN=1, ROUNDS_MAX=60, ROUNDS_STEP=1;
 // Все игры включены → 12 раундов; иначе по одному раунду на каждую включённую игру
 function defaultRoundsFor(){ const n=enabledTypes().length; return n>=ALL_TYPES.length ? ROUNDS_DEFAULT : n; }
 let plannedRounds=ROUNDS_DEFAULT;
-const EST_ROUND_SEC={draw:70, truefalse:13, wordorder:32, sign:18, match:38, bokstav:360};
+const EST_ROUND_SEC={draw:70, truefalse:13, wordorder:32, sign:18, match:38, bokstav:360, lyssna:18, klocka:18, lucka:17, udda:16, enett:30};
 const EST_OVERHEAD_SEC=36;
 function estSec(t){ return t==='bokstav' ? (gameSettings.gridSize===4 ? 230 : 360) : EST_ROUND_SEC[t]; }
 function estimateMinutes(n){
@@ -2253,10 +2431,11 @@ async function hostPoll(){
 
   if(state.phase==='active' && state.round && state.round.type!=='bokstav'){
     const r=state.round;
-    const dur=ROUND_DURATIONS[r.type];
-    const elapsed=(Date.now()-r.startedAt)/1000;
+    const dur=roundDur(r);
+    const elapsed=roundElapsed(r);
     const timeLeft=Math.max(0,dur-elapsed);
-    if(!hostTimerState || hostTimerState.start!==r.startedAt){ hostTimerState={start:r.startedAt, dur}; updateHostTimer(); }
+    hostTimerState={r}; updateHostTimer();
+    syncHostControls(r);
     const ceilLeft=Math.ceil(timeLeft);
     if(ceilLeft === 5 && hostLastTickSecond !== 5) AudioEngine.setMusicVolume(AudioEngine.VOL_DUCK_TIMER, 1.0);
     if(ceilLeft<=5 && ceilLeft>=1 && ceilLeft!==hostLastTickSecond){ hostLastTickSecond=ceilLeft; AudioEngine.playTick(); }
@@ -2272,7 +2451,7 @@ async function hostPoll(){
     }
     const roundKey = state.planIndex+':'+r.startedAt;
     if(doneEarly && hostDoneKey!==roundKey){ hostDoneKey=roundKey; hostDoneAt=Date.now(); }
-    if(timeLeft<=0 || r.endNow || (doneEarly && Date.now()-hostDoneAt>=1200)){
+    if(r.endNow || (!r.pausedAt && (timeLeft<=0 || (doneEarly && Date.now()-hostDoneAt>=1200)))){
       await finalizeRound(state); return;
     }
 
@@ -2291,7 +2470,7 @@ async function hostPoll(){
     }
   }
 
-  if(!(state.phase==='active' && state.round && state.round.type!=='bokstav')) hostTimerState=null;
+  if(!(state.phase==='active' && state.round && state.round.type!=='bokstav')){ hostTimerState=null; syncHostControls(null); }
 
   if(state.phase==='active' && state.round && state.round.type==='bokstav'){
     const r=state.round;
@@ -2467,9 +2646,73 @@ function renderMiniLB(el,state){
     + (sorted.length>top.length ? `<div class="lb-more">+${sorted.length-top.length} till</div>` : '');
 }
 
+
+/* ===== Управление раундом: пауза, +10 сек, пропустить (и клавиши: пробел, →) ===== */
+let hostCtrlRound=null;
+function syncHostControls(r){
+  const box=document.getElementById('q-ctrl'); if(!box) return;
+  hostCtrlRound=r;
+  const show=!!r && r.type!=='bokstav';
+  box.classList.toggle('hidden', !show);
+  const paused=!!(r && r.pausedAt);
+  const pb=document.getElementById('ctrl-pause');
+  if(pb){ pb.innerHTML = paused ? '<span class="msi">play_arrow</span>Fortsätt' : '<span class="msi">pause</span>Paus'; pb.classList.toggle('on', paused); }
+  const card=document.getElementById('q-card'); if(card) card.classList.toggle('paused', paused);
+}
+async function hostTogglePause(){
+  if(!hostCode) return;
+  await updateRoom(hostCode, s=>{
+    const r=s.round; if(s.phase!=='active' || !r || r.type==='bokstav') return null;
+    if(r.pausedAt){ r.pausedMs=(r.pausedMs||0)+(Date.now()-r.pausedAt); delete r.pausedAt; }
+    else r.pausedAt=Date.now();
+    return s;
+  });
+  if(hostCtrlRound && hostCtrlRound.type==='lyssna') Speech.stop();
+  hostForceRender=true; clearTimeout(hostPollTimer); hostLoop();
+}
+async function hostAddTime(){
+  if(!hostCode) return;
+  await updateRoom(hostCode, s=>{ const r=s.round; if(s.phase!=='active' || !r || r.type==='bokstav') return null; r.extraSec=(r.extraSec||0)+10; return s; });
+  AudioEngine.playPop(); clearTimeout(hostPollTimer); hostLoop();
+}
+async function hostSkip(){
+  if(!hostCode) return;
+  await updateRoom(hostCode, s=>{ const r=s.round; if(s.phase!=='active' || !r || r.type==='bokstav') return null; r.endNow=true; return s; });
+  Speech.stop(); clearTimeout(hostPollTimer); hostLoop();
+}
+document.getElementById('ctrl-pause').addEventListener('click', hostTogglePause);
+document.getElementById('ctrl-plus').addEventListener('click', hostAddTime);
+document.getElementById('ctrl-skip').addEventListener('click', hostSkip);
+document.addEventListener('keydown', e=>{
+  if(!isHost || !hostCode) return;
+  if(/INPUT|SELECT|TEXTAREA/.test((e.target&&e.target.tagName)||'')) return;
+  const st=roomCache[hostCode] && roomCache[hostCode].state; if(!st) return;
+  if(st.phase==='active' && st.round && st.round.type!=='bokstav'){
+    if(e.code==='Space'){ e.preventDefault(); hostTogglePause(); }
+    else if(e.key==='ArrowRight'){ e.preventDefault(); hostSkip(); }
+  } else if(st.phase==='round-end' && (e.key==='ArrowRight' || e.code==='Space')){
+    e.preventDefault(); const nb=document.getElementById('next-round-btn'); if(nb && !nb.disabled && !nb.classList.contains('hidden')) nb.click();
+  }
+});
+
+/* Lyssna: доска сама произносит фразу после заставки и ещё раз через 8 секунд */
+let lyssnaTimers=[];
+function lyssnaSpeak(r){
+  const btn=document.getElementById('lyssna-btn');
+  const ok=Speech.say(r.say, ()=>btn&&btn.classList.add('talking'), ()=>btn&&btn.classList.remove('talking'));
+  if(!ok && btn) btn.classList.remove('talking');
+}
+function scheduleLyssna(state){
+  lyssnaTimers.forEach(clearTimeout); lyssnaTimers=[]; Speech.stop();
+  const r=state.round; const key=state.planIndex+':'+r.startedAt;
+  const still=()=>{ const st=roomCache[hostCode]&&roomCache[hostCode].state; return st && st.phase==='active' && st.round && (st.planIndex+':'+st.round.startedAt)===key && !st.round.pausedAt; };
+  lyssnaTimers.push(setTimeout(()=>{ if(still()) lyssnaSpeak(r); }, 1800));
+  lyssnaTimers.push(setTimeout(()=>{ if(still()) lyssnaSpeak(r); }, 9000));
+}
 function renderHostRound(state){
   const r=state.round; const label=document.getElementById('round-type-label'); const body=document.getElementById('round-content-host');
   const m=metaOf(r.type);
+  if(r.type!=='lyssna'){ lyssnaTimers.forEach(clearTimeout); lyssnaTimers=[]; }
   label.innerHTML=`<span class="msi">${m.icon}</span>${m.name}`;
   if(r.type==='draw'){
     const drawer=state.players.find(p=>p.id===r.drawerId);
@@ -2489,6 +2732,29 @@ function renderHostRound(state){
     body.innerHTML = `<div class="sign-split">${Scenes.render(r,'h')}<div class="sign-q"><div class="q-text">${escHTML(r.question)}</div>
       <div class="ans-list">${r.choices.map((c,i)=>`<div class="ans"><span class="dot" style="--dc:${ANSWER_COLORS[i%4]}">${'ABCD'[i]}</span>${escHTML(c)}</div>`).join('')}</div></div></div>`;
     Scenes.mount(body);
+  } else if(r.type==='lyssna'){
+    const voice=Speech.hasVoice();
+    body.innerHTML=`<button class="lyssna-btn" id="lyssna-btn" aria-label="Lyssna igen"><span class="ring r1"></span><span class="ring r2"></span><span class="msi">volume_up</span></button>
+      <div class="q-text mid" style="margin-top:1.6rem;">Lyssna! Vilken bild är det?</div>
+      ${voice ? '<div class="q-sub-hint">Tryck på högtalaren för att höra igen</div>' : `<div class="no-voice">Ingen svensk röst i webbläsaren. Läs högt för klassen:<b>${escHTML(r.say)}</b></div>`}
+      <div class="q-hint"><span class="msi">tablet_mac</span>Välj bild på iPaden</div>`;
+    document.getElementById('lyssna-btn').addEventListener('click', ()=>lyssnaSpeak(r));
+    scheduleLyssna(state);
+  } else if(r.type==='klocka'){
+    body.innerHTML=`<div class="clock-stage">${clockSVG(r.h,r.m,'big')}<div class="q-text mid">Vad är klockan?</div></div>
+      <div class="q-hint"><span class="msi">tablet_mac</span>Svara på iPaden</div>`;
+  } else if(r.type==='lucka'){
+    const parts=escHTML(r.sentence).split('___');
+    body.innerHTML=`<div class="q-text gap-text">${parts[0]}<span class="gap-box">?</span>${parts[1]||''}</div>
+      <div class="q-hint"><span class="msi">tablet_mac</span>Välj ordet på iPaden</div>`;
+  } else if(r.type==='udda'){
+    body.innerHTML=`<div class="q-text mid" style="margin-bottom:2rem;">Vilket ord passar inte?</div>
+      <div class="odd-row">${r.words.map((w,i)=>`<span class="odd-tile" style="animation-delay:${(i*0.08).toFixed(2)}s">${escHTML(w)}</span>`).join('')}</div>
+      <div class="q-hint"><span class="msi">tablet_mac</span>Svara på iPaden</div>`;
+  } else if(r.type==='enett'){
+    body.innerHTML=`<div class="q-text mid" style="margin-bottom:1.6rem;"><span style="color:var(--violet)">en</span> eller <span style="color:var(--green-d)">ett</span>?</div>
+      <div class="enett-grid">${r.items.map((it,i)=>`<div class="ee-card" style="animation-delay:${(i*0.06).toFixed(2)}s"><span class="ee-emo">${it.e}</span><span class="ee-w">${escHTML(it.w)}</span></div>`).join('')}</div>
+      <div class="q-hint"><span class="msi">bolt</span>Så snabbt du kan på iPaden</div>`;
   } else if(r.type==='match'){
     body.innerHTML=`<div class="q-text mid" style="margin-bottom:1.6rem;">Vad heter de på svenska?</div>
       <div class="match-show">${r.pairs.map((p,i)=>`<div class="m-card" style="animation-delay:${(i*0.07).toFixed(2)}s">${p.emoji}</div>`).join('')}</div>
@@ -2820,6 +3086,8 @@ function renderPlayerAnswerSummary(r, playerId){
   if(r.type==='sign') return chip(escHTML(a.value), a.correct?'ok':'bad');
   if(r.type==='match') return a.correct ? chip('Alla par ✓','ok') : chip('ej klar','mute');
   if(r.type==='draw') return a.value ? chip('”'+escHTML(a.value)+'”', 'ok') : chip('inget svar','mute');
+  if(r.type==='enett') return chip((a.got||0)+' av '+r.items.length, a.correct?'ok':'bad');
+  if(CHOICE_TYPES.includes(r.type)) return chip(escHTML(a.value), a.correct?'ok':'bad');
   return '';
 }
 
@@ -2859,6 +3127,11 @@ async function finalizeRoundInner(state){
     if(r.type==='sign') reveal = 'Rätt svar : '+r.correct;
     if(r.type==='match') reveal = 'Paren: '+r.pairs.map(p=>p.word+' '+p.emoji).join(', ');
     if(r.type==='bokstav') reveal = '';
+    if(r.type==='lyssna') reveal = r.say;
+    if(r.type==='klocka') reveal = 'Klockan är '+r.correct;
+    if(r.type==='lucka') reveal = r.sentence.replace('___', r.correct);
+    if(r.type==='udda') reveal = r.correct+'. '+r.why;
+    if(r.type==='enett') reveal = r.items.map(i=>i.g+' '+i.w).join(', ');
 
     s.lastRoundResult={type:r.type, reveal, rankBefore, rankAfter, pointsThisRound:pts, bokstavDetail: (typeof bokstavDetail!=='undefined' ? bokstavDetail : null)};
     s.phase = 'round-end'; 
@@ -2873,6 +3146,11 @@ function revealPlain(r, res){
   if(r.type==='wordorder') return r.correctOrder.join(' ');
   if(r.type==='sign') return 'Rätt svar: '+r.correct;
   if(r.type==='match') return 'Bra jobbat med paren!';
+  if(r.type==='lyssna') return 'Hon sa: ”'+r.say+'”';
+  if(r.type==='klocka') return 'Klockan är '+r.correct+'.';
+  if(r.type==='lucka') return r.sentence.replace('___', r.correct);
+  if(r.type==='udda') return r.correct+'. '+r.why;
+  if(r.type==='enett') return 'Titta på tavlan: en eller ett?';
   return 'Titta på tavlan!';
 }
 function revealHTML(r, res){
@@ -2882,6 +3160,11 @@ function revealHTML(r, res){
   if(r.type==='wordorder') return escHTML(r.correctOrder.join(' '));
   if(r.type==='sign') return `${escHTML(r.correct)}<span class="rv-q">${escHTML(r.question)}</span>`;
   if(r.type==='match') return r.pairs.map(p=>`<span style="white-space:nowrap;margin-right:.7em;">${p.emoji} ${escHTML(p.word)}</span>`).join('');
+  if(r.type==='lyssna') return `${r.correct} ”${escHTML(r.say)}”`;
+  if(r.type==='klocka') return `Klockan är ${escHTML(r.correct)}<span class="rv-q">${pad2(r.h)}:${pad2(r.m)}</span>`;
+  if(r.type==='lucka') return escHTML(r.sentence).replace('___', `<span style="color:var(--green-d);text-decoration:underline;">${escHTML(r.correct)}</span>`);
+  if(r.type==='udda') return `${escHTML(r.correct)}<span class="rv-q">${escHTML(r.why)}</span>`;
+  if(r.type==='enett') return r.items.map(i=>`<span style="white-space:nowrap;margin-right:.6em;font-size:.8em;"><b style="color:${i.g==='en'?'var(--violet)':'var(--green-d)'}">${i.g}</b> ${escHTML(i.w)}</span>`).join('');
   return res ? escHTML(res.reveal) : '';
 }
 function renderRoundEnd(state){
@@ -3120,16 +3403,19 @@ let playerTimerState=null;
 function updatePlayerTimer(state){
   const r=state && state.round;
   const show = state && state.phase==='active' && r && r.type!=='bokstav' && ROUND_DURATIONS[r.type];
-  playerTimerState = show ? {start:r.startedAt, dur:ROUND_DURATIONS[r.type]} : null;
+  playerTimerState = show ? {r} : null;
   const t=document.getElementById('p-timer'); if(t) t.classList.toggle('hidden', !show);
+  const pz=document.getElementById('p-pause'); if(pz) pz.classList.toggle('hidden', !(show && r.pausedAt));
   tickPlayerTimer();
 }
 function tickPlayerTimer(){
   if(!playerTimerState) return;
   const t=document.getElementById('p-timer'); if(!t) return;
-  const left=Math.max(0, Math.min(1, (playerTimerState.dur-(Date.now()-playerTimerState.start)/1000)/playerTimerState.dur));
+  const r=playerTimerState.r, left=roundLeftFrac(r);
   t.firstElementChild.style.transform='scaleX('+left.toFixed(3)+')';
-  t.classList.toggle('hot', left*playerTimerState.dur<=5);
+  t.classList.toggle('hot', left*roundDur(r)<=5);
+  // блиц: если время почти вышло, отправляем то, что успели
+  if(r.type==='enett' && enettState && !enettState.sent && !r.pausedAt && left*roundDur(r)<=1.5 && enettState.answers.length) enettSubmit();
 }
 setInterval(()=>{ if(!isHost && playerTimerState) tickPlayerTimer(); }, 1000);
 
@@ -3239,6 +3525,7 @@ async function playerPoll(){
 
 function renderPlayerRound(state){
   const r=state.round; const body=document.getElementById('round-content-player'); const isDrawer = r.type==='draw' && r.drawerId===playerId;
+  if(r.type!=='enett') enettState=null;
 
   if(r.type==='draw'){
     if(isDrawer){
@@ -3261,6 +3548,21 @@ function renderPlayerRound(state){
     body.innerHTML = Scenes.render(r,'p') + `<div class="p-q small">${escHTML(r.question)}</div><div class="choice-col" id="sign-choices"></div><div class="p-status-line" id="sign-status"></div>`;
     Scenes.mount(body);
     const wrap=document.getElementById('sign-choices'); r.choices.forEach((c,i)=>{ const btn=document.createElement('button'); btn.className='choice-btn'; btn.innerHTML=`<span class="dot" style="--dc:${ANSWER_COLORS[i%4]}">${'ABCD'[i]}</span>`; btn.appendChild(document.createTextNode(c)); btn.addEventListener('click', ()=>submitAnswer(c, btn)); wrap.appendChild(btn); });
+  } else if(CHOICE_TYPES.includes(r.type)){
+    let head='';
+    if(r.type==='lyssna') head=`<div class="p-listen"><span class="msi">hearing</span>Lyssna på tavlan och välj bilden</div>`;
+    if(r.type==='klocka') head=`<div class="p-clock">${clockSVG(r.h,r.m,'small')}</div><div class="p-q small">Vad är klockan?</div>`;
+    if(r.type==='lucka'){ const parts=escHTML(r.sentence).split('___'); head=`<div class="p-q gap-text">${parts[0]}<span class="gap-box">?</span>${parts[1]||''}</div>`; }
+    if(r.type==='udda') head=`<div class="p-q small">Vilket ord passar inte?</div>`;
+    const opts = r.type==='udda' ? r.words : r.choices;
+    body.innerHTML = head + `<div class="${r.type==='lyssna'?'emoji-grid':'choice-col'}" id="pick-choices"></div><div class="p-status-line" id="sign-status"></div>`;
+    const wrap=document.getElementById('pick-choices');
+    opts.forEach((c,i)=>{ const btn=document.createElement('button');
+      if(r.type==='lyssna'){ btn.className='emoji-btn choice-btn'; btn.textContent=c; }
+      else { btn.className='choice-btn'; btn.innerHTML=`<span class="dot" style="--dc:${ANSWER_COLORS[i%4]}">${'ABCD'[i]}</span>`; btn.appendChild(document.createTextNode(c)); }
+      btn.addEventListener('click', ()=>submitAnswer(c, btn)); wrap.appendChild(btn); });
+  } else if(r.type==='enett'){
+    renderEnEtt(r);
   } else if(r.type==='match'){
     matchState={pairs:r.pairs, matchedWords:[], selectedWord:null, selectedEmoji:null, shuffledWords:shuffle(r.pairs.map(p=>p.word)), shuffledEmojis:shuffle(r.pairs.map(p=>p.emoji))};
     body.innerHTML=`<div class="p-q small">Tryck på ett ord och sedan på rätt bild</div><div class="match-columns"><div class="match-col" id="match-words"></div><div class="match-col" id="match-emojis"></div></div><div class="p-status-line" id="match-status"></div>`; renderMatchColumns();
@@ -3592,7 +3894,7 @@ async function submitGuess(){
     const player=s.players.find(p=>p.id===playerId); if(!player) return null;
     const isCorrect = normalizeSwedish(val)===normalizeSwedish(r.word);
     if(isCorrect){
-      const pts=calcScore(Math.max(0,ROUND_DURATIONS.draw-(Date.now()-r.startedAt)/1000)/ROUND_DURATIONS.draw, player.combo||0);
+      const pts=calcScore(roundLeftFrac(r), player.combo||0);
       player.score+=pts; player.combo=(player.combo||0)+1; r.correctPlayerIds=(r.correctPlayerIds||[]).concat(playerId); r.answers=r.answers||{}; r.answers[playerId]={value:val,correct:true,points:pts};
       resultInfo={correct:true, word:r.word, exact: val.toLowerCase().trim()===r.word.toLowerCase()};
     } else { resultInfo={correct:false, sim:Math.round(similarity(normalizeSwedish(val),normalizeSwedish(r.word))*100)}; }
@@ -3611,21 +3913,80 @@ async function submitGuess(){
   else { status.textContent='Fel, försök igen'; status.className='p-status-line wrong'; input.value=''; input.focus(); AudioEngine.playWrong(); }
 }
 
+
+/* ===== En eller ett: блиц на айпаде, ответы копятся локально и уходят одним запросом ===== */
+let enettState=null;
+function renderEnEtt(r){
+  enettState={items:r.items, i:0, answers:[], sent:false, round:r};
+  const body=document.getElementById('round-content-player');
+  body.innerHTML=`<div class="ee-progress" id="ee-progress">${r.items.map(()=>'<i></i>').join('')}</div>
+    <div class="ee-stage"><div class="ee-big" id="ee-big"></div></div>
+    <div class="ee-btns"><button class="ee-btn en" id="ee-en">en</button><button class="ee-btn ett" id="ee-ett">ett</button></div>
+    <div class="p-status-line" id="ee-status"></div>`;
+  document.getElementById('ee-en').addEventListener('click', ()=>enettPick('en'));
+  document.getElementById('ee-ett').addEventListener('click', ()=>enettPick('ett'));
+  enettShow();
+}
+function enettShow(){
+  const st=enettState; const big=document.getElementById('ee-big'); if(!st||!big) return;
+  if(st.i>=st.items.length){ big.innerHTML=`<div class="ee-done"><span class="msi">task_alt</span>Klart!</div>`; return; }
+  const it=st.items[st.i];
+  big.innerHTML=`<span class="ee-emo">${it.e}</span><span class="ee-w"><b class="ee-slot">?</b> ${escHTML(it.w)}</span>`;
+  big.classList.remove('pop'); void big.offsetWidth; big.classList.add('pop');
+}
+function enettPick(g){
+  const st=enettState; if(!st || st.sent || st.i>=st.items.length) return;
+  const it=st.items[st.i]; const ok=g===it.g; st.answers.push(g);
+  const dots=document.querySelectorAll('#ee-progress i'); if(dots[st.i]) dots[st.i].className=ok?'ok':'bad';
+  const big=document.getElementById('ee-big');
+  big.innerHTML=`<span class="ee-emo">${it.e}</span><span class="ee-w"><b class="ee-slot ${ok?'ok':'bad'}">${it.g}</b> ${escHTML(it.w)}</span>`;
+  big.classList.toggle('shake', !ok);
+  if(ok) AudioEngine.playPop(); else AudioEngine.playWrong();
+  st.i++;
+  document.querySelectorAll('.ee-btn').forEach(b=>b.disabled=true);
+  setTimeout(()=>{
+    document.querySelectorAll('.ee-btn').forEach(b=>b.disabled=false);
+    big.classList.remove('shake');
+    if(st.i>=st.items.length) enettSubmit(); else enettShow();
+  }, ok?380:900);
+}
+async function enettSubmit(){
+  const st=enettState; if(!st || st.sent) return; st.sent=true;
+  document.querySelectorAll('.ee-btn').forEach(b=>b.disabled=true);
+  const got=st.answers.filter((g,i)=>st.items[i] && g===st.items[i].g).length;
+  enettShow();
+  const status=document.getElementById('ee-status');
+  if(status){ status.textContent=`${got} av ${st.items.length} rätt!`; status.className='p-status-line '+(got>=6?'right':'wrong'); }
+  await submitAnswer(st.answers.slice());
+  if(status){ status.textContent=`${got} av ${st.items.length} rätt! Väntar på de andra...`; }
+}
 async function submitAnswer(value, pickedEl){
-  document.querySelectorAll('.tf-btn,.choice-btn,#wo-submit-btn').forEach(b=>b.disabled=true); let wasCorrect=null;
+  if(!Array.isArray(value) || !enettState) document.querySelectorAll('.tf-btn,.choice-btn,#wo-submit-btn').forEach(b=>b.disabled=true); let wasCorrect=null;
   if(pickedEl) pickedEl.classList.add('picked');
   await updateRoom(playerCode, s=>{
     if(s.phase!=='active' || !s.round) return s; const r=s.round; r.answers=r.answers||{}; if(r.answers[playerId]) return s;
+    if(r.pausedAt && r.type!=='enett') return null;
     const player=s.players.find(p=>p.id===playerId); if(!player) return null;
-    let correct=false;
+    let correct=false, ratio=1;
     if(r.type==='truefalse') correct = value===r.isTrue; else if(r.type==='wordorder') correct = JSON.stringify(value)===JSON.stringify(r.correctOrder); else if(r.type==='sign') correct = value===r.correct; else if(r.type==='match') correct = value===true;
+    else if(CHOICE_TYPES.includes(r.type)) correct = value===r.correct;
+    else if(r.type==='enett'){
+      // блиц: очки пропорционально числу верных, «верно» для серии, если ≥ 6 из 8
+      const got=(value||[]).filter((g,i)=>r.items[i] && g===r.items[i].g).length;
+      ratio=got/r.items.length; correct = got>=Math.ceil(r.items.length*0.75);
+      const pts = got ? Math.round(calcScore(roundLeftFrac(r), correct?(player.combo||0):0)*ratio) : 0;
+      player.score+=pts; if(correct) player.combo=(player.combo||0)+1;
+      r.answers[playerId]={value,correct,points:pts,got}; wasCorrect=correct;
+      return s;
+    }
     if(correct){
-      const pts=calcScore(Math.max(0,ROUND_DURATIONS[r.type]-(Date.now()-r.startedAt)/1000)/ROUND_DURATIONS[r.type], player.combo||0);
+      const pts=calcScore(roundLeftFrac(r), player.combo||0);
       player.score+=pts; player.combo=(player.combo||0)+1; r.answers[playerId]={value,correct:true,points:pts}; wasCorrect=true;
     } else { r.answers[playerId]={value,correct:false,points:0}; wasCorrect=false; }
     return s;
   });
   if(wasCorrect===true) AudioEngine.playCorrect(); else if(wasCorrect===false) AudioEngine.playWrong();
+  if(enettState && Array.isArray(value)) return;
   const st=document.getElementById('tf-status')||document.getElementById('wo-status')||document.getElementById('sign-status')||document.getElementById('match-status');
   if(pickedEl && wasCorrect!==null && pickedEl.classList.contains('choice-btn')) pickedEl.classList.add(wasCorrect?'right':'wrong');
   if(st){
@@ -3635,6 +3996,211 @@ async function submitAnswer(value, pickedEl){
   }
   if(wasCorrect===true && pickedEl){ const r=pickedEl.getBoundingClientRect(); miniBurst(r.left+r.width/2, r.top+r.height/2); }
 }
+</script>
+<script>
+/* =====================================================================
+   Задания. Старые игры пополняются, новые игры берут свои списки отсюда.
+   ===================================================================== */
+
+/* ---------- Rätt eller fel: ещё утверждения ---------- */
+STATEMENTS.push(
+  {text:"Ett år har tolv månader.",isTrue:true}, {text:"Januari är årets första månad.",isTrue:true},
+  {text:"December kommer före november.",isTrue:false}, {text:"Lördag och söndag är helg.",isTrue:true},
+  {text:"En vecka har fem dagar.",isTrue:false}, {text:"En elefant är större än en mus.",isTrue:true},
+  {text:"Fem plus fem är elva.",isTrue:false}, {text:"Tre gånger tre är nio.",isTrue:true},
+  {text:"Man använder paraply när det regnar.",isTrue:true}, {text:"Glass är varm.",isTrue:false},
+  {text:"Man har vantar på händerna.",isTrue:true}, {text:"Man har handskar på fötterna.",isTrue:false},
+  {text:"Midsommar firas i juni.",isTrue:true}, {text:"Sverige har en kung.",isTrue:true},
+  {text:"Sveriges huvudstad är Göteborg.",isTrue:false}, {text:"Man kör på höger sida av vägen i Sverige.",isTrue:true},
+  {text:"Man måste ha biljett på bussen.",isTrue:true}, {text:"Man kan låna böcker gratis på biblioteket.",isTrue:true},
+  {text:"En frisör klipper hår.",isTrue:true}, {text:"En bagare jobbar på en bank.",isTrue:false},
+  {text:"Man tvättar kläder i tvättmaskinen.",isTrue:true}, {text:"Man ställer mjölken i kylskåpet.",isTrue:true},
+  {text:"Man lagar mat på spisen.",isTrue:true}, {text:"Halv fyra är samma som 16:30.",isTrue:false},
+  {text:"Kvart över tre är samma som 15:15.",isTrue:true}, {text:"Man säger ”tack” när man får något.",isTrue:true},
+  {text:"Man säger ”hej då” när man kommer.",isTrue:false}, {text:"Man säger ”god morgon” på kvällen.",isTrue:false},
+  {text:"Hösten kommer efter sommaren.",isTrue:true}, {text:"Våren kommer efter vintern.",isTrue:true},
+  {text:"På hösten faller löven från träden.",isTrue:true}, {text:"Det finns isbjörnar i svenska skogar.",isTrue:false},
+  {text:"En ko ger mjölk.",isTrue:true}, {text:"Hönor lägger ägg.",isTrue:true}, {text:"En hund säger mjau.",isTrue:false},
+  {text:"Man ser med öronen.",isTrue:false}, {text:"Man hör med öronen.",isTrue:true}, {text:"Man luktar med näsan.",isTrue:true},
+  {text:"Köttbullar är en svensk maträtt.",isTrue:true}, {text:"Fika betyder kaffe och något gott att äta.",isTrue:true},
+  {text:"Man går till tandläkaren när man har ont i en tand.",isTrue:true}, {text:"Man går till frisören när man är sjuk.",isTrue:false},
+  {text:"Tåget åker på räls.",isTrue:true}, {text:"Ett flygplan flyger i luften.",isTrue:true},
+  {text:"En citron smakar sött.",isTrue:false}, {text:"En citron smakar surt.",isTrue:true},
+  {text:"På natten är det mörkt ute.",isTrue:true}, {text:"Man ringer 112 när det brinner.",isTrue:true},
+  {text:"En läkare lagar bilar.",isTrue:false}, {text:"Polisen hjälper människor.",isTrue:true},
+  {text:"En stol har oftast fyra ben.",isTrue:true}, {text:"Snö är svart.",isTrue:false},
+  {text:"Man borstar tänderna med en tandborste.",isTrue:true}, {text:"Ett barn är äldre än sin mamma.",isTrue:false},
+  {text:"Man betalar med kort eller med mobilen i affären.",isTrue:true}, {text:"Man sätter på sig en mössa när det är kallt.",isTrue:true}
+);
+
+/* ---------- Bygg meningen: ещё предложения (только с одним естественным порядком) ---------- */
+SENTENCES.push(
+  ["Barnen","leker","i","parken"], ["Jag","har","två","bröder"], ["Min","pappa","lagar","mat"],
+  ["Vi","bor","i","en","lägenhet"], ["Hon","är","född","i","Syrien"], ["Vad","heter","du"],
+  ["Hur","mår","du"], ["Var","bor","du"], ["Jag","vill","köpa","en","biljett"], ["Det","är","min","tur"],
+  ["Kan","jag","få","en","kopp","kaffe"], ["Jag","lyssnar","på","musik"], ["Han","tvättar","sina","kläder"],
+  ["Affären","stänger","klockan","åtta"], ["Jag","behöver","en","ny","jacka"], ["Min","telefon","är","trasig"],
+  ["Vem","är","din","lärare"], ["Hon","tar","bussen","till","jobbet"], ["Jag","är","inte","hungrig"],
+  ["Vi","har","en","stor","hund"]
+);
+
+/* ---------- Vardagen i Sverige: те же сцены, новые тексты и вопросы ---------- */
+SIGNS.push(
+  {icon:"storefront",scene:"shop",title:"Hörnbutiken",lines:["Öppet alla dagar","07–23"],question:"När stänger butiken?",choices:["Klockan 7","Klockan 23","Klockan 12"],correct:"Klockan 23"},
+  {icon:"storefront",scene:"shop",title:"Torgets Livs",lines:["Mån–Fre 8–20","Lör–Sön 10–16"],question:"När öppnar affären på lördag?",choices:["Klockan 8","Klockan 10","Klockan 16"],correct:"Klockan 10"},
+  {icon:"storefront",scene:"shop",title:"Bageriet",lines:["Färskt bröd varje dag","Stängt på måndagar"],question:"Vilken dag är bageriet stängt?",choices:["Måndag","Fredag","Söndag"],correct:"Måndag"},
+  {icon:"receipt_long",scene:"receipt",title:"Kvitto",lines:["Bananer ...... 22 kr","Ost .......... 59 kr","Totalt ....... 81 kr"],question:"Vad kostar osten?",choices:["22 kr","59 kr","81 kr"],correct:"59 kr"},
+  {icon:"receipt_long",scene:"receipt",title:"Kvitto",lines:["Kaffe ........ 45 kr","Ägg .......... 32 kr","Totalt ....... 77 kr"],question:"Hur mycket kostar allt?",choices:["45 kr","32 kr","77 kr"],correct:"77 kr"},
+  {icon:"directions_bus",scene:"busstop",title:"Hållplats Torget",lines:["Buss 12 → Sjukhuset","Nästa buss: 5 min"],question:"Vart åker buss 12?",choices:["Till skolan","Till sjukhuset","Till torget"],correct:"Till sjukhuset"},
+  {icon:"directions_bus",scene:"busstop",title:"Busshållplats",lines:["Buss 7 → Stationen","Går inte på söndagar"],question:"Kan man åka buss 7 på söndag?",choices:["Ja","Nej","Bara på kvällen"],correct:"Nej"},
+  {icon:"local_pharmacy",scene:"pharmacy",title:"Apotek",lines:["Mån–Fre 9–20","Lördag 10–16","Söndag stängt"],question:"Är apoteket öppet på söndag?",choices:["Ja","Nej","Bara på morgonen"],correct:"Nej"},
+  {icon:"restaurant",scene:"cafeteria",title:"Skolans matsedel",lines:["Torsdag: Ärtsoppa","Fredag: Pizza","Vegetariskt varje dag"],question:"Vad äter man på fredag?",choices:["Ärtsoppa","Pizza","Fisk"],correct:"Pizza"},
+  {icon:"schedule",scene:"classroom",title:"Schema 7B",lines:["08:10 Engelska","09:00 Idrott","10:15 Lunch"],question:"När äter klassen lunch?",choices:["08:10","09:00","10:15"],correct:"10:15"},
+  {icon:"schedule",scene:"classroom",title:"Läxa till fredag",lines:["Läs sidan 12–14","Skriv tre meningar"],question:"Hur många meningar ska man skriva?",choices:["Tre","Tolv","Fjorton"],correct:"Tre"},
+  {icon:"local_hospital",scene:"clinic",title:"Tandvården",lines:["Öppet: Mån–Tor 8–16","Kom 10 min innan","Ring om du är sjuk"],question:"När ska man komma?",choices:["10 min innan","10 min efter","Klockan 10"],correct:"10 min innan"},
+  {icon:"confirmation_number",scene:"buscard",title:"Månadskort",lines:["Vuxen","Giltigt: 30 dagar","Pris: 890 kr"],question:"Vad kostar kortet?",choices:["30 kr","890 kr","Gratis"],correct:"890 kr"},
+  {icon:"sell",scene:"clothes",title:"Skor",lines:["Förr: 800 kr","Nu: 400 kr","−50%"],question:"Hur mycket sparar man?",choices:["400 kr","800 kr","50 kr"],correct:"400 kr"},
+  {icon:"sell",scene:"clothes",title:"Tröja",lines:["Förr: 300 kr","Nu: 200 kr"],question:"Vad kostar tröjan nu?",choices:["300 kr","200 kr","100 kr"],correct:"200 kr"},
+  {icon:"train",scene:"station",title:"Tågstationen",lines:["Tåg till Göteborg","Avgång 09:40","Försenat 15 min"],question:"Vad är problemet?",choices:["Tåget är försenat","Tåget är inställt","Tåget är fullt"],correct:"Tåget är försenat"},
+  {icon:"pool",scene:"pool",title:"Simhallen",lines:["Vuxen: 70 kr","Barn: 30 kr","Badmössa krävs"],question:"Vad kostar det för ett barn?",choices:["70 kr","30 kr","100 kr"],correct:"30 kr"},
+  {icon:"local_library",scene:"library",title:"Biblioteket",lines:["Mån–Tor 10–19","Fredag 10–16","Tyst läsrum på plan 2"],question:"Var finns det tysta läsrummet?",choices:["På plan 1","På plan 2","I entrén"],correct:"På plan 2"},
+  {icon:"sunny",scene:"weather",title:"Väder idag",lines:["Kiruna","−15 grader","Snö och blåst"],question:"Vilka kläder behöver man?",choices:["Shorts och t-shirt","Varm jacka och mössa","Badkläder"],correct:"Varm jacka och mössa"},
+  {icon:"door_front",scene:"stairwell",title:"Anslag i trapphuset",lines:["Hissen är trasig","Reparation på måndag","Ta trappan"],question:"Varför ska man ta trappan?",choices:["Hissen är trasig","Det är städdag","Det är tyst"],correct:"Hissen är trasig"},
+  {icon:"door_front",scene:"stairwell",title:"Till alla grannar",lines:["Sopor slängs i soprummet","Glas och papper sorteras","Inte i trapphuset!"],question:"Var slänger man sopor?",choices:["I trapphuset","I soprummet","På gatan"],correct:"I soprummet"},
+  {icon:"work",scene:"jobad",title:"Jobbannons",lines:["Vi söker en städare","Heltid","Körkort är ett krav"],question:"Vad måste man ha?",choices:["Körkort","Egen bil","Universitet"],correct:"Körkort"},
+  {icon:"school",scene:"school",title:"Järvenskolan info",lines:["Studiedag fredag","Ingen skola för elever","Fritids är öppet"],question:"Ska eleverna gå till skolan på fredag?",choices:["Ja","Nej","Bara på morgonen"],correct:"Nej"}
+);
+
+/* ---------- Para ihop: ещё пары слово + картинка ---------- */
+MATCH_PAIRS_POOL.push(
+  {word:"banan",emoji:"🍌"},{word:"tomat",emoji:"🍅"},{word:"morot",emoji:"🥕"},{word:"potatis",emoji:"🥔"},{word:"citron",emoji:"🍋"},
+  {word:"päron",emoji:"🍐"},{word:"jordgubbe",emoji:"🍓"},{word:"pizza",emoji:"🍕"},{word:"ko",emoji:"🐄"},{word:"gris",emoji:"🐷"},
+  {word:"får",emoji:"🐑"},{word:"björn",emoji:"🐻"},{word:"orm",emoji:"🐍"},{word:"apa",emoji:"🐒"},{word:"lejon",emoji:"🦁"},
+  {word:"mus",emoji:"🐭"},{word:"flygplan",emoji:"✈️"},{word:"paraply",emoji:"☂️"},{word:"telefon",emoji:"📱"},{word:"säng",emoji:"🛏️"},
+  {word:"dörr",emoji:"🚪"},{word:"lampa",emoji:"💡"},{word:"keps",emoji:"🧢"},{word:"klänning",emoji:"👗"},{word:"byxor",emoji:"👖"},
+  {word:"hjärta",emoji:"❤️"},{word:"moln",emoji:"☁️"},{word:"present",emoji:"🎁"},{word:"gitarr",emoji:"🎸"},{word:"tand",emoji:"🦷"},
+  {word:"näsa",emoji:"👃"},{word:"öra",emoji:"👂"},{word:"mun",emoji:"👄"},{word:"brev",emoji:"✉️"},{word:"ljus",emoji:"🕯️"}
+);
+
+/* ---------- НОВАЯ ИГРА: Lyssna & välj (доска говорит, на айпаде выбирают картинку) ---------- */
+const LISTEN_PHRASES=[
+  {say:"Jag äter en banan.",emoji:"🍌"},{say:"Det snöar ute.",emoji:"❄️"},{say:"Han cyklar till jobbet.",emoji:"🚲"},
+  {say:"Vi åker tåg.",emoji:"🚆"},{say:"Hon läser en bok.",emoji:"📖"},{say:"Det regnar idag.",emoji:"🌧️"},
+  {say:"Jag har ont i tanden.",emoji:"🦷"},{say:"Han ringer sin mamma.",emoji:"📱"},{say:"Vi köper glass.",emoji:"🍦"},
+  {say:"Katten sover.",emoji:"🐱"},{say:"Jag tar bussen.",emoji:"🚌"},{say:"Solen skiner.",emoji:"☀️"},
+  {say:"Barnen spelar fotboll.",emoji:"⚽"},{say:"Vi äter pizza.",emoji:"🍕"},{say:"Jag öppnar dörren.",emoji:"🚪"},
+  {say:"Flygplanet landar.",emoji:"✈️"},{say:"Det brinner!",emoji:"🔥"},{say:"Han dricker en kopp kaffe.",emoji:"☕"},
+  {say:"Hon köper ost.",emoji:"🧀"},{say:"Vi går till sjukhuset.",emoji:"🏥"},{say:"Jag släcker lampan.",emoji:"💡"},
+  {say:"Mormor får en present.",emoji:"🎁"},{say:"Han spelar gitarr.",emoji:"🎸"},{say:"Hästen springer.",emoji:"🐴"},
+  {say:"Ta med paraply idag.",emoji:"☂️"},{say:"Jag skriver ett brev.",emoji:"✉️"}
+];
+
+/* ---------- НОВАЯ ИГРА: Fyll i luckan ---------- */
+const GAP_SENTENCES=[
+  {s:"Jag ___ kaffe varje morgon.",a:"dricker",o:["äter","sover","läser"]},
+  {s:"Hon ___ i Göteborg.",a:"bor",o:["heter","har","kommer"]},
+  {s:"Jag ___ Ahmed.",a:"heter",o:["bor","har","går"]},
+  {s:"Han ___ ont i magen.",a:"har",o:["är","går","gör"]},
+  {s:"Jag bor ___ Sverige.",a:"i",o:["på","till","av"]},
+  {s:"Vi åker ___ Stockholm imorgon.",a:"till",o:["i","på","av"]},
+  {s:"Hon jobbar ___ ett sjukhus.",a:"på",o:["till","av","från"]},
+  {s:"Jag har bott här ___ två år.",a:"i",o:["för","på","till"]},
+  {s:"Jag har en ___ bil.",a:"röd",o:["rött","röda","rödt"]},
+  {s:"Vi har ett ___ hus.",a:"stort",o:["stor","stora","store"]},
+  {s:"Hon har två ___ katter.",a:"svarta",o:["svart","svarte","svartt"]},
+  {s:"Det är ___ bok.",a:"min",o:["mitt","mina","mig"]},
+  {s:"Det är ___ hus.",a:"mitt",o:["min","mina","mig"]},
+  {s:"Det är ___ skor.",a:"mina",o:["min","mitt","mig"]},
+  {s:"Kan du hjälpa ___?",a:"mig",o:["jag","min","mitt"]},
+  {s:"Där är Ali. Jag ser ___.",a:"honom",o:["han","hans","hon"]},
+  {s:"Det här är Sara och ___ mamma.",a:"hennes",o:["hon","henne","han"]},
+  {s:"Igår ___ jag fotboll.",a:"spelade",o:["spelar","spela","spelat"]},
+  {s:"Igår ___ vi pizza.",a:"åt",o:["äter","äta","ätit"]},
+  {s:"Förra veckan ___ hon till Malmö.",a:"åkte",o:["åker","åka","åkt"]},
+  {s:"Imorgon ___ jag gå till läkaren.",a:"ska",o:["har","var","blev"]},
+  {s:"Jag har två ___.",a:"bilar",o:["bil","bilen","bilarna"]},
+  {s:"Hon köper tre ___.",a:"äpplen",o:["äpple","äpplet","äpplena"]},
+  {s:"Var är ___? Jag hittar den inte.",a:"nyckeln",o:["nyckel","nycklar","nyckelet"]},
+  {s:"___ heter du?",a:"Vad",o:["Var","Vem","När"]},
+  {s:"___ bor du?",a:"Var",o:["Vad","Vem","Vilken"]},
+  {s:"___ mår du?",a:"Hur",o:["Vad","Var","Vem"]},
+  {s:"___ kommer bussen?",a:"När",o:["Vem","Vad","Vilken"]},
+  {s:"Jag är törstig. Jag vill ___ vatten.",a:"dricka",o:["äta","sova","läsa"]},
+  {s:"Det är kallt. Ta på dig en ___!",a:"jacka",o:["shorts","glass","solhatt"]},
+  {s:"Jag är sjuk. Jag ringer ___.",a:"vårdcentralen",o:["biblioteket","frisören","banken"]},
+  {s:"Jag vill låna en bok. Jag går till ___.",a:"biblioteket",o:["apoteket","banken","simhallen"]},
+  {s:"Jag behöver medicin. Jag går till ___.",a:"apoteket",o:["biblioteket","bageriet","skolan"]},
+  {s:"Kan du ___ fönstret? Det är varmt.",a:"öppna",o:["öppnar","öppnade","öppnat"]},
+  {s:"Jag måste ___ nu. Hej då!",a:"gå",o:["går","gick","gått"]},
+  {s:"Titta ut! Det ___ just nu.",a:"regnar",o:["regna","regnade","regnat"]},
+  {s:"Min syster är ___ än jag.",a:"äldre",o:["gammal","äldst","gamla"]},
+  {s:"Ett år har tolv ___.",a:"månader",o:["veckor","dagar","timmar"]},
+  {s:"Jag tvättar händerna med ___.",a:"tvål",o:["smör","sand","socker"]},
+  {s:"Vi ___ svenska varje dag.",a:"pratar",o:["prata","pratade","pratat"]},
+  {s:"Han har ___ ett nytt jobb.",a:"fått",o:["få","får","fick"]},
+  {s:"Jag kan inte komma, jag är ___.",a:"sjuk",o:["sjukt","sjuka","sjukare"]},
+  {s:"Huset är ___.",a:"rött",o:["röd","röda","rödt"]},
+  {s:"Lägenheten är ___.",a:"stor",o:["stort","stora","store"]},
+  {s:"Han ___ i soffan och tittar på tv.",a:"sitter",o:["sitta","satt","suttit"]}
+];
+
+/* ---------- НОВАЯ ИГРА: Vilket ord passar inte? ---------- */
+const ODD_ONE=[
+  {w:["äpple","banan","päron","stol"],odd:"stol",why:"De andra är frukter."},
+  {w:["hund","katt","häst","bil"],odd:"bil",why:"De andra är djur."},
+  {w:["röd","blå","grön","glad"],odd:"glad",why:"De andra är färger."},
+  {w:["måndag","tisdag","juli","fredag"],odd:"juli",why:"De andra är veckodagar."},
+  {w:["januari","mars","maj","söndag"],odd:"söndag",why:"De andra är månader."},
+  {w:["tröja","byxor","jacka","gaffel"],odd:"gaffel",why:"De andra är kläder."},
+  {w:["buss","tåg","cykel","säng"],odd:"säng",why:"De andra är fordon."},
+  {w:["mamma","pappa","bror","lärare"],odd:"lärare",why:"De andra är familj."},
+  {w:["hand","fot","arm","sko"],odd:"sko",why:"De andra är kroppsdelar."},
+  {w:["sked","gaffel","kniv","penna"],odd:"penna",why:"Man äter med de andra."},
+  {w:["regn","snö","sol","soffa"],odd:"soffa",why:"De andra handlar om väder."},
+  {w:["två","fem","nio","bok"],odd:"bok",why:"De andra är tal."},
+  {w:["läkare","lärare","polis","sjukhus"],odd:"sjukhus",why:"De andra är yrken."},
+  {w:["mjölk","juice","vatten","bröd"],odd:"bröd",why:"Man dricker de andra."},
+  {w:["äta","dricka","sova","glad"],odd:"glad",why:"De andra är verb."},
+  {w:["stor","liten","lång","springa"],odd:"springa",why:"De andra är adjektiv."},
+  {w:["kök","badrum","sovrum","skog"],odd:"skog",why:"De andra är rum i ett hem."},
+  {w:["sommar","vinter","höst","kväll"],odd:"kväll",why:"De andra är årstider."},
+  {w:["morgon","kväll","natt","vår"],odd:"vår",why:"De andra är tider på dygnet."},
+  {w:["apotek","bank","bibliotek","banan"],odd:"banan",why:"De andra är ställen i stan."},
+  {w:["fotboll","tennis","simning","matte"],odd:"matte",why:"De andra är sporter."},
+  {w:["matte","svenska","engelska","rast"],odd:"rast",why:"De andra är skolämnen."},
+  {w:["glad","ledsen","arg","grön"],odd:"grön",why:"De andra är känslor."},
+  {w:["kopp","glas","tallrik","katt"],odd:"katt",why:"De andra är saker i köket."},
+  {w:["gurka","tomat","morot","choklad"],odd:"choklad",why:"De andra är grönsaker."},
+  {w:["Sverige","Norge","Finland","Stockholm"],odd:"Stockholm",why:"De andra är länder."},
+  {w:["varm","kall","het","snabb"],odd:"snabb",why:"De andra handlar om temperatur."},
+  {w:["öga","öra","näsa","fot"],odd:"fot",why:"De andra sitter på huvudet."},
+  {w:["piano","gitarr","trumma","kudde"],odd:"kudde",why:"De andra är instrument."},
+  {w:["blomma","träd","gräs","sten"],odd:"sten",why:"De andra är växter."},
+  {w:["en bil","en katt","ett hus","en stol"],odd:"ett hus",why:"De andra är en-ord."},
+  {w:["springer","äter","sover","boken"],odd:"boken",why:"De andra är verb."},
+  {w:["polis","ambulans","brandbil","cykel"],odd:"cykel",why:"De andra kommer när man ringer 112."},
+  {w:["ett äpple","ett hus","en bok","ett bord"],odd:"en bok",why:"De andra är ett-ord."},
+  {w:["tolv","tjugo","hundra","tisdag"],odd:"tisdag",why:"De andra är tal."}
+];
+
+/* ---------- НОВАЯ ИГРА: En eller ett? (блиц из 8 слов) ---------- */
+const EN_ETT=[
+  ["en","bil","🚗"],["en","katt","🐱"],["en","hund","🐶"],["en","bok","📖"],["en","säng","🛏️"],["en","lampa","💡"],
+  ["en","dörr","🚪"],["en","jacka","🧥"],["en","tröja","👕"],["en","sko","👟"],["en","banan","🍌"],["en","tomat","🍅"],
+  ["en","gurka","🥒"],["en","morot","🥕"],["en","kopp","☕"],["en","sked","🥄"],["en","kniv","🔪"],["en","klocka","⏰"],
+  ["en","väska","👜"],["en","penna","✏️"],["en","dator","💻"],["en","cykel","🚲"],["en","buss","🚌"],["en","båt","⛵"],
+  ["en","blomma","🌸"],["en","fågel","🐦"],["en","fisk","🐟"],["en","häst","🐴"],["en","ko","🐄"],["en","gris","🐷"],
+  ["en","mus","🐭"],["en","groda","🐸"],["en","nyckel","🔑"],["en","telefon","📱"],["en","soffa","🛋️"],["en","ost","🧀"],
+  ["en","korv","🌭"],["en","tårta","🎂"],["en","glass","🍦"],["en","boll","⚽"],["en","stjärna","⭐"],["en","sol","☀️"],
+  ["en","orm","🐍"],["en","uggla","🦉"],["en","citron","🍋"],["en","gitarr","🎸"],["en","tand","🦷"],
+  ["ett","hus","🏠"],["ett","äpple","🍎"],["ett","ägg","🥚"],["ett","tåg","🚆"],["ett","flygplan","✈️"],["ett","träd","🌳"],
+  ["ett","bröd","🍞"],["ett","päron","🍐"],["ett","öra","👂"],["ett","öga","👁️"],["ett","får","🐑"],["ett","lejon","🦁"],
+  ["ett","bi","🐝"],["ett","moln","☁️"],["ett","berg","⛰️"],["ett","hjärta","❤️"],["ett","paraply","☂️"],["ett","pussel","🧩"],
+  ["ett","paket","🎁"],["ett","brev","✉️"],["ett","lås","🔒"],["ett","skepp","🚢"],["ett","tält","⛺"],["ett","ljus","🕯️"],
+  ["ett","piano","🎹"],["ett","barn","🧒"],["ett","glas","🥛"],["ett","kort","🃏"],
+  ["ett","finger","☝️"],["ett","ben","🦴"],["ett","sjukhus","🏥"]
+];
+
 </script>
 </body>
 </html>
