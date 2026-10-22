@@ -1,0 +1,2 @@
+text: Витя лох
+close: Close
